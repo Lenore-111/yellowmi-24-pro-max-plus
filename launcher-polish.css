@@ -1,6 +1,8 @@
 /* Companion to the Backstage orb. These styles affect only the launcher. */
 #world-phone-launcher-layer {
-  position: fixed; inset: 0; z-index: 10040;
+  /* 与手机外壳一样定位到页面主体，避开酒馆手机端根元素的变换。 */
+  position: absolute; inset: 0; width: 100%; height: 100vh; height: 100dvh; z-index: 10040;
+  box-sizing: border-box; margin: 0; padding: 0; border: 0;
   overflow: hidden; contain: layout paint; pointer-events: none;
 }
 #world-phone-launcher {

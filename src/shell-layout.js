@@ -68,9 +68,14 @@ export function mountShellLayout() {
   let idleTimer = 0;
   let keyboardInput = false;
 
-  // Clip the launcher at the viewport, including its hit area, without widening the page.
+  // 将入口及其点击区域裁切到屏幕内，避免撑宽页面。
   const launcherLayer = document.createElement('div');
   launcherLayer.id = 'world-phone-launcher-layer';
+  const initialViewport = viewportSize();
+  Object.assign(launcherLayer.style, {
+    position: 'absolute', left: '0px', top: '0px',
+    width: `${Math.round(initialViewport.width)}px`, height: `${Math.round(initialViewport.height)}px`,
+  });
   launcher.before(launcherLayer);
   launcherLayer.append(launcher);
 
@@ -95,6 +100,9 @@ export function mountShellLayout() {
 
   function positionLauncher(edge, top, tucked = false) {
     const viewport = viewportSize();
+    // 显式设置屏幕尺寸，避免根元素布局高度为零时裁掉整个入口。
+    launcherLayer.style.width = `${Math.round(viewport.width)}px`;
+    launcherLayer.style.height = `${Math.round(viewport.height)}px`;
     const width = launcher.offsetWidth;
     const height = launcher.offsetHeight;
     launcher.dataset.edge = edge;

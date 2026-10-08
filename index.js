@@ -77,7 +77,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-game-tables-style', './game-tables.css?build=alpha8');
   ensureExternalStyle('world-phone-social-polish-style', './social-polish.css?build=alpha9');
   ensureExternalStyle('world-phone-delivery-style', './delivery.css?build=delivery-v1');
-  ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=edge-tuck-v2');
+  ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=edge-tuck-v3');
   ensureExternalStyle('world-phone-experience-baseline-style', './experience-baseline.css?build=alpha9');
   phone = mountWorldPhone();
   unmountShellLayout = mountShellLayout({ phone });
@@ -96,7 +96,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.16 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[世界小手机] 0.3.0-alpha.17 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {
