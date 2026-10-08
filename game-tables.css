@@ -1,0 +1,97 @@
+/* Two distinct game tables: midnight deduction and a warm private casino. */
+#world-phone-stage .wp-werewolf-local-app { display: flex; flex-direction: column; background: #141a27; color: #efe8d7; }
+#world-phone-stage .wp-werewolf-local-app .wp-app-header { flex: 0 0 56px; background: #141a27; color: #f0e5ca; border-bottom: 1px solid #cfc29c25; }
+#world-phone-stage .wp-werewolf-local-app .wp-app-header small { color: #9ba3b8; }
+#world-phone-stage .wp-wwl-shell { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 16px 28px; margin-bottom: 20px; background: radial-gradient(ellipse at 95% 0%,#53628026,transparent 60%),#141a27; }
+#world-phone-stage .wp-wwl-hero { position: relative; flex-direction: column; align-items: flex-start; min-height: 195px; padding: 18px 0 22px; border: 0; border-radius: 0; background: transparent; overflow: hidden; }
+#world-phone-stage .wp-wwl-hero > span { position: absolute; right: 0; top: -20px; width: 118px; height: 155px; background: transparent; font: 120px/1 Georgia,serif; color: #d3bf8b; transform: rotate(-18deg); opacity: .8; }
+#world-phone-stage .wp-wwl-hero > div { z-index: 1; margin-top: 78px; }
+#world-phone-stage .wp-wwl-hero small { font-size: 9px; letter-spacing: .18em; color: #a99c7c; }
+#world-phone-stage .wp-wwl-hero b { margin: 8px 0 12px; font-size: 29px; font-family: Georgia,'Songti SC',serif; letter-spacing: .03em; }
+#world-phone-stage .wp-wwl-hero p { font-size: 12px; color: #adb3c4; }
+.wp-wwl-rule-strip { display: flex; flex-wrap: wrap; gap: 7px; margin: -3px 0 12px; }
+.wp-wwl-rule-strip span { padding: 7px 8px; border: 1px solid #a9b3d025; border-radius: 6px; color: #bac1d2; font-size: 10px; }
+#world-phone-stage .wp-wwl-field > span { font-size: 12px; color: #bdc4d5; }
+#world-phone-stage .wp-wwl-field input, #world-phone-stage .wp-wwl-field select { min-height: 45px; background: #1d2639; border-color: #8799c22b; border-radius: 10px; font-size: 13px; }
+#world-phone-stage .wp-wwl-primary { min-height: 46px; background: #d9c797; color: #1d2331; border-radius: 10px; font-size: 13px; }
+#world-phone-stage .wp-wwl-privacy { display: block; border: 0; border-top: 1px solid #b8c1d120; border-radius: 0; padding: 15px 0; background: transparent; }
+#world-phone-stage .wp-wwl-privacy summary { color: #b7bed0; font-size: 12px; cursor: pointer; }
+#world-phone-stage .wp-wwl-privacy span { display: block; padding-top: 12px; font-size: 12px; color: #949eb4; line-height: 1.7; }
+#world-phone-stage .wp-wwl-phase { align-items: flex-start; padding: 7px 0 14px; border: 0; border-bottom: 1px solid #c9bb932b; border-radius: 0; background: transparent; }
+#world-phone-stage .wp-wwl-phase b { font-size: 18px; line-height: 1.6; }
+#world-phone-stage .wp-wwl-phase small { color: #a5aec1; letter-spacing: .1em; }
+#world-phone-stage .wp-wwl-role { font-size: 11px; background: #c7ae701a; color: #dcc695; }
+.wp-wwl-phase-track { display: flex; gap: 5px; }
+.wp-wwl-phase-track span { flex: 1; padding: 7px 0; color: #717d97; border-bottom: 2px solid #303a50; font-size: 10px; text-align: center; }
+.wp-wwl-phase-track .is-current { border-color: #d8c18c; color: #ebd7a5; }
+#world-phone-stage .wp-wwl-action { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; padding: 13px; border: 1px solid #a7b6d538; border-radius: 13px; background: #1c263a; }
+#world-phone-stage .wp-wwl-action > b, #world-phone-stage .wp-wwl-action > select { grid-column: 1 / -1; font-size: 12px; }
+#world-phone-stage .wp-wwl-target { display: flex; align-items: center; gap: 8px; min-height: 43px; padding: 9px 10px; background: #2a354d; border: 1px solid transparent; border-radius: 8px; font-size: 12px; }
+#world-phone-stage .wp-wwl-target small { color: #a2aec7; font-size: 9px; white-space: nowrap; }
+#world-phone-stage .wp-wwl-target[aria-pressed=true] { border-color: #e0c994; background: #4a4539; color: #f5e5bb; }
+#world-phone-stage .wp-wwl-confirm[hidden] { display: none; }
+#world-phone-stage .wp-wwl-confirm { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid #d9c797; border-radius: 11px; background: #ebe1c7; color: #302f34; box-shadow: 0 6px 25px #0005; }
+.wp-wwl-confirm > span { flex: 1; font-size: 11px; }
+.wp-wwl-confirm button { min-height: 36px; padding: 7px 10px; background: #29354a; border: 0; border-radius: 7px; color: #f5eddb; font-size: 11px; }
+#world-phone-stage .wp-wwl-players { border: 0; border-radius: 0; background: transparent; }
+#world-phone-stage .wp-wwl-players summary { display: flex; justify-content: space-between; padding: 12px 0; font-size: 12px; color: #ced4e2; }
+.wp-wwl-players summary > span { color: #8895af; font-size: 10px; }
+.wp-wwl-seat-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+#world-phone-stage .wp-wwl-player { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 12px 3px 10px; border: 1px solid #c4ceea18; border-radius: 12px; background: #202a3e; min-width: 0; }
+.wp-wwl-seat-number { position: absolute; top: 6px; left: 7px; color: #7788a9; font-size: 9px; }
+#world-phone-stage .wp-wwl-avatar { width: 33px; height: 33px; border-radius: 50%; background: #3c4963; color: #ece2c9; }
+#world-phone-stage .wp-wwl-player-copy { width: 100%; text-align: center; gap: 3px; }
+#world-phone-stage .wp-wwl-player-copy b { font-size: 11px; }
+#world-phone-stage .wp-wwl-badges:empty { display: none; }
+#world-phone-stage .wp-wwl-player.is-dead { opacity: .48; background: #171e2d; }
+#world-phone-stage .wp-wwl-chat { padding: 13px; background: #0f1623; border: 1px solid #b3c6e420; border-radius: 13px; }
+#world-phone-stage .wp-wwl-chat-title b { font-size: 13px; }
+#world-phone-stage .wp-wwl-chat-title small { font-size: 10px; }
+#world-phone-stage .wp-wwl-message { padding: 10px; border-radius: 9px; }
+#world-phone-stage .wp-wwl-message b { font-size: 11px; color: #cbbd97; }
+#world-phone-stage .wp-wwl-message p { font-size: 12px; line-height: 1.8; color: #c8d0e2; }
+#world-phone-stage .wp-wwl-chat input { font-size: 12px; min-height: 42px; }
+#world-phone-stage .wp-wwl-waiting, #world-phone-stage .wp-wwl-thinking, #world-phone-stage .wp-wwl-spectator { font-size: 12px; line-height: 1.6; }
+#world-phone-stage .wp-wwl-abandon { font-size: 11px; color: #9ba6bc; }
+/* The wager tray stays outside the scrolling scene. */
+#world-phone-stage .wp-casino-app { display: flex; flex-direction: column; background: #14100f; }
+#world-phone-stage .wp-casino-header { flex: 0 0 56px; box-shadow: none; }
+#world-phone-stage .wp-casino-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 12px 14px 16px; gap: 12px; overscroll-behavior: contain; }
+#world-phone-stage .wp-casino-main > * { flex-shrink: 0; }
+#world-phone-stage .wp-casino-bankroll { padding: 3px 0 12px; border: 0; border-bottom: 1px solid #b99b623b; border-radius: 0; background: transparent; box-shadow: none; }
+#world-phone-stage .wp-casino-bankroll small { color: #b1a084; font-size: 10px; letter-spacing: .08em; }
+#world-phone-stage .wp-casino-bankroll strong { margin-top: 7px; color: #f4e4ba; font: 600 31px/1 Georgia,serif; text-shadow: none; }
+#world-phone-stage .wp-casino-bankroll > span { font-size: 9px; color: #9c917f; }
+#world-phone-stage .wp-casino-tabs { gap: 0; border-bottom: 1px solid #b99b623b; }
+#world-phone-stage .wp-casino-tabs button { padding: 9px 4px 12px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; box-shadow: none; }
+#world-phone-stage .wp-casino-tabs button b { font-size: 13px; }
+#world-phone-stage .wp-casino-tabs button small { font-size: 8px; margin-bottom: 6px; }
+#world-phone-stage .wp-casino-tabs button.is-active { border-bottom-color: #dcc087; color: #f2d9a6; }
+#world-phone-stage .wp-casino-machine { padding: 10px; border: 1px solid #ae8d4b44; border-radius: 18px; background: radial-gradient(ellipse at 50% 0%,#68532e24,transparent 80%),#1e1915; box-shadow: inset 0 0 25px #0c080830; }
+#world-phone-stage .wp-casino-rule { font-size: 10px; line-height: 1.6; color: #b7a889; }
+#world-phone-stage .wp-casino-stage { min-height: 170px; }
+#world-phone-stage .wp-casino-choices button { min-height: 38px; font-size: 13px; }
+#world-phone-stage .wp-casino-bet-panel { flex: 0 0 auto; margin: 0 10px max(24px, env(safe-area-inset-bottom)); padding: 12px; gap: 8px; border: 1px solid #d6c5a6; border-radius: 16px; background: #ede3cd; color: #443b2d; box-shadow: 0 -8px 28px #0004; }
+#world-phone-stage .wp-casino-wager { grid-template-columns: 1fr 30px auto 30px auto; gap: 6px; }
+#world-phone-stage .wp-casino-wager > span { font-size: 11px; color: #665a43; }
+#world-phone-stage .wp-casino-wager > b { color: #665a43; }
+#world-phone-stage .wp-casino-wager label { padding: 5px; border: 1px solid #baa985; border-radius: 7px; background: #fff9eb; }
+#world-phone-stage .wp-casino-wager input { color: #393325; width: 47px; font-size: 16px; }
+#world-phone-stage [data-casino-adjust] { height: 32px; padding: 0; border: 1px solid #c6b695; border-radius: 6px; background: transparent; color: #65563c; font-size: 13px; }
+#world-phone-stage .wp-casino-quick button { width: 39px; height: 39px; }
+#world-phone-stage .wp-casino-ticket { min-height: 15px; text-align: center; color: #756445; font-size: 10px; }
+#world-phone-stage .wp-casino-play { min-height: 45px; gap: 4px; border-radius: 10px; background: #3d4535; color: #f7ebce; box-shadow: inset 0 1px #ffffff20; }
+#world-phone-stage .wp-casino-play b { font-size: 15px; letter-spacing: .08em; }
+#world-phone-stage .wp-casino-play small { font-size: 9px; color: #cec6b2; letter-spacing: .03em; }
+#world-phone-stage .wp-casino-play.is-locked { color: #dacfac; background: #575044; }
+#world-phone-stage .wp-casino-history { border-radius: 8px; }
+#world-phone-stage .wp-casino-history summary { padding: 10px; }
+@media(max-width:360px) { #world-phone-stage .wp-casino-bet-panel { padding: 9px; gap: 6px; } #world-phone-stage .wp-casino-wager { gap: 4px; } #world-phone-stage .wp-casino-bankroll > span { max-width: 108px; white-space: normal; line-height: 1.5; } #world-phone-stage .wp-wwl-shell { padding: 12px 10px 26px; } }
+#world-phone-stage .wp-casino-app { position: absolute; height: 100%; min-height: 0; }
+#world-phone-stage .wp-casino-wager input { box-shadow: none; background: transparent; }
+#world-phone-stage .wp-werewolf-local-app .wp-app-header > button { color: #e1d3b0; }
+#world-phone-stage .wp-casino-bet-panel .wp-casino-choices { margin: 0; gap: 6px; }
+#world-phone-stage .wp-casino-bet-panel .wp-casino-choices button { background: #e1d5b9; border-color: #c9b78d; color: #6a5835; min-height: 34px; box-shadow: none; }
+#world-phone-stage .wp-casino-bet-panel .wp-casino-choices button.is-active { background: #414b3a; color: #f4e6c2; border-color: #414b3a; }
+
+#world-phone-stage .wp-casino-wager label { box-shadow: none; }

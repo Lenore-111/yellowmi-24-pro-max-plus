@@ -1,0 +1,226 @@
+.wp-app.is-appstore .wp-app-icon {
+  background: linear-gradient(145deg, #55a8ff, #176ee6);
+  color: #fff;
+}
+
+.wp-app.is-square .wp-app-icon,
+.wp-store-icon.is-square { background: linear-gradient(145deg, #ff6b7f, #ef385f); color:#fff; }
+.wp-app.is-short-video .wp-app-icon,
+.wp-store-icon.is-short-video { background: linear-gradient(145deg, #222532, #08090d); color:#fff; }
+.wp-app.is-photo-note .wp-app-icon,
+.wp-store-icon.is-photo-note { background: linear-gradient(145deg, #ffd76f, #ff7f7f); color:#fff; }
+.wp-app.is-anon-forum .wp-app-icon,
+.wp-store-icon.is-anon-forum { background: linear-gradient(145deg, #8b7cff, #5749d9); color:#fff; }
+.wp-app.is-mail .wp-app-icon,
+.wp-store-icon.is-mail { background: linear-gradient(145deg, #69baff, #2581e8); color:#fff; }
+.wp-app.is-map .wp-app-icon,
+.wp-store-icon.is-map { background: linear-gradient(145deg, #5ad69d, #1ca56f); color:#fff; }
+
+.wp-home .wp-app-grid {
+  max-height: calc(100% - 194px);
+  overflow-y: auto;
+  padding-bottom: 102px;
+  scrollbar-width: none;
+}
+
+.wp-home .wp-app-grid::-webkit-scrollbar { display:none; }
+
+.wp-store-app,
+.wp-downloaded-app {
+  background: #f4f5f8;
+}
+
+.wp-store-shell,
+.wp-download-shell {
+  height: calc(100% - 56px);
+  overflow-y: auto;
+  padding: 14px 12px 34px;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.wp-store-shell::-webkit-scrollbar,
+.wp-download-shell::-webkit-scrollbar { display:none; }
+
+.wp-store-hero {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px;
+  border-radius:20px;
+  background: linear-gradient(145deg, #1d7df0, #6bb9ff);
+  color:#fff;
+  box-shadow: 0 12px 26px rgba(40,112,210,.18);
+}
+
+.wp-store-hero-icon {
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:rgba(255,255,255,.2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.24);
+  font-size:24px;
+  font-weight:800;
+}
+
+.wp-store-hero div { display:grid; gap:3px; }
+.wp-store-hero b { font-size:14px; }
+.wp-store-hero p { margin:0; font-size:10px; line-height:1.55; color:rgba(255,255,255,.82); }
+
+.wp-store-section-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:17px 4px 8px;
+}
+
+.wp-store-section-title b { font-size:13px; }
+.wp-store-section-title span { font-size:9px; color:#969aa4; }
+
+.wp-store-list {
+  overflow:hidden;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 8px 24px rgba(27,31,43,.055);
+}
+
+.wp-store-row {
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:start;
+  padding:13px 12px;
+  border-bottom:1px solid #eef0f3;
+}
+
+.wp-store-row:last-child { border-bottom:0; }
+
+.wp-store-icon {
+  display:grid;
+  place-items:center;
+  width:50px;
+  height:50px;
+  border-radius:14px;
+  background:#eceef3;
+  color:#262a33;
+  font-size:20px;
+  font-weight:780;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);
+}
+
+.wp-store-copy {
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+
+.wp-store-copy > b { font-size:12px; }
+.wp-store-copy > small { color:#9599a3; font-size:8px; }
+.wp-store-copy > p { margin:3px 0 0; color:#6f737d; font-size:9px; line-height:1.45; }
+
+.wp-store-action {
+  align-self:center;
+  min-width:47px;
+  height:26px;
+  padding:0 10px;
+  border:0;
+  border-radius:999px;
+  background:#e9f2ff;
+  color:#1671dd;
+  font-size:9px;
+  font-weight:760;
+  cursor:pointer;
+}
+
+.wp-store-action.is-installed {
+  background:#eff0f3;
+  color:#4f5560;
+}
+
+.wp-store-action.is-downloading {
+  opacity:.7;
+  cursor:wait;
+}
+
+.wp-store-remove {
+  justify-self:start;
+  margin-top:3px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#a0a3ab;
+  font-size:8px;
+  cursor:pointer;
+}
+
+.wp-download-shell {
+  padding-top:24px;
+}
+
+.wp-download-hero {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 4px 16px;
+}
+
+.wp-download-hero .wp-store-icon {
+  width:64px;
+  height:64px;
+  border-radius:18px;
+  font-size:25px;
+}
+
+.wp-download-hero div { display:grid; gap:4px; }
+.wp-download-hero b { font-size:17px; }
+.wp-download-hero small { color:#91959f; font-size:9px; }
+
+.wp-download-shell > p {
+  margin:0;
+  padding:15px;
+  border-radius:18px;
+  background:#fff;
+  color:#666b75;
+  font-size:11px;
+  line-height:1.65;
+  box-shadow:0 8px 22px rgba(27,31,43,.05);
+}
+
+.wp-download-ready {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+  padding:13px 14px;
+  border-radius:18px;
+  background:#eef9f2;
+  color:#27804c;
+}
+
+.wp-download-ready > i {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#44c978;
+  box-shadow:0 0 0 4px rgba(68,201,120,.13);
+}
+
+.wp-download-ready span { display:grid; gap:2px; }
+.wp-download-ready b { font-size:11px; }
+.wp-download-ready small { color:#6b8e78; font-size:9px; }
+
+.wp-download-ready.is-missing {
+  background:#fff1f1;
+  color:#b75353;
+}
+
+.wp-download-ready.is-missing > i { background:#e16a6a; box-shadow:0 0 0 4px rgba(225,106,106,.12); }
+.wp-download-ready.is-missing small { color:#a37b7b; }
+
+@media (max-width: 430px) {
+  .wp-store-row { grid-template-columns:48px minmax(0,1fr) auto; gap:8px; padding:12px 10px; }
+  .wp-store-icon { width:46px; height:46px; border-radius:13px; }
+}

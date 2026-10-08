@@ -1,0 +1,33 @@
+.wp-app.is-music .wp-app-icon{background:linear-gradient(145deg,#7d6af5,#4c84ff);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.42),0 5px 12px rgba(76,98,214,.2)}
+.wp-music-app{background:#f5f6fa;color:#1f2430}
+.wp-music-body{height:calc(100% - 62px);overflow:auto;padding:14px 13px 30px;overscroll-behavior:contain}
+.wp-music-player{display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;padding:15px;border-radius:20px;background:linear-gradient(145deg,#171b31,#29244e);color:#fff;box-shadow:0 10px 26px rgba(37,36,79,.2)}
+.wp-music-cover{grid-row:1/3;width:74px;height:74px;border-radius:18px;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#aaa0ff,#5b57c9 50%,#272650);box-shadow:inset 0 1px 8px rgba(255,255,255,.25)}
+.wp-music-cover span{font-size:35px;line-height:1;text-shadow:0 3px 10px rgba(0,0,0,.2)}
+.wp-music-now{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.wp-music-now small{font-size:9px;color:#b8b9ce;letter-spacing:.08em}
+.wp-music-now b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-music-now span{font-size:10px;color:#c9cbe0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-music-progress-row{grid-column:1/-1;display:grid;grid-template-columns:34px minmax(0,1fr) 34px;align-items:center;gap:7px;font-size:8px;color:#b8bad0}
+.wp-music-progress-row input{width:100%;height:3px;accent-color:#8f85ff}
+.wp-music-progress-row span:last-child{text-align:right}
+.wp-music-controls{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:20px;padding-top:2px}
+.wp-music-controls button{width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#e7e8f3;font-size:18px}
+.wp-music-controls button:disabled{opacity:.28}
+.wp-music-controls .wp-music-play{width:48px;height:48px;background:#fff;color:#272746;font-size:19px;box-shadow:0 5px 14px rgba(0,0,0,.22)}
+.wp-music-library{margin-top:16px;border-radius:18px;background:#fff;box-shadow:0 3px 14px rgba(29,36,52,.05);overflow:hidden}
+.wp-music-library>header{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #eef0f4}
+.wp-music-library>header b{font-size:13px}.wp-music-library>header span{font-size:9px;color:#9ca2ad}
+.wp-music-list{display:grid}
+.wp-music-track{min-height:54px;display:grid;grid-template-columns:minmax(0,1fr) 38px;align-items:center;border-bottom:1px solid #f0f1f4}
+.wp-music-track:last-child{border-bottom:0}.wp-music-track.is-current{background:#f6f5ff}
+.wp-music-track-main{height:100%;min-width:0;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:5px;border:0;background:transparent;text-align:left;padding:6px 4px 6px 10px;color:#252a35}
+.wp-music-track-main>span{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#eef0f5;color:#7b8190;font-size:11px}.wp-music-track.is-current .wp-music-track-main>span{background:#7a70ec;color:#fff}
+.wp-music-track-main>div{min-width:0;display:grid;gap:2px}.wp-music-track-main b,.wp-music-track-main small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wp-music-track-main b{font-size:11px}.wp-music-track-main small{font-size:8px;color:#9aa0aa}
+.wp-music-remove{width:30px;height:30px;border:0;border-radius:50%;background:transparent;color:#a4a9b2;font-size:17px}
+.wp-music-empty{min-height:138px;display:grid;place-items:center;align-content:center;gap:6px;padding:20px;text-align:center;color:#959ba6}.wp-music-empty>span{font-size:28px}.wp-music-empty>b{font-size:12px;color:#555c68}.wp-music-empty>p{margin:0;max-width:230px;font-size:9px;line-height:1.55}
+.wp-music-add{margin-top:12px;border-radius:16px;background:#fff;box-shadow:0 3px 14px rgba(29,36,52,.04);overflow:hidden}.wp-music-add>summary{list-style:none;padding:13px 15px;font-size:11px;font-weight:700;cursor:pointer}.wp-music-add>summary::-webkit-details-marker{display:none}
+.wp-music-add-body{display:grid;gap:9px;padding:0 14px 15px;border-top:1px solid #eef0f4}.wp-music-file{margin-top:12px;min-height:38px;border-radius:11px;background:#f0efff;color:#5f57c9;display:grid;place-items:center;font-size:10px;font-weight:700;cursor:pointer}.wp-music-file input{display:none}.wp-music-add-body>small{font-size:8px;color:#9aa0aa;line-height:1.45}.wp-music-or{text-align:center;font-size:8px;color:#aaaeb7;padding:2px 0}
+.wp-music-add form{display:grid;gap:7px}.wp-music-add input{height:35px;border:1px solid #e0e3e9;border-radius:10px;padding:0 10px;background:#fafbfc;color:#252a35;font:inherit;font-size:10px}.wp-music-add form button{height:36px;border:0;border-radius:10px;background:#6f66df;color:#fff;font-size:10px;font-weight:700}.wp-music-add [data-music-error]{min-height:12px;margin:0;font-size:8px;color:#d54c4c}
+@media(max-width:520px){.wp-music-body{padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){.wp-music-controls button{transition:none}}

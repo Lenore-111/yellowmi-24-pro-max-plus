@@ -1,0 +1,115 @@
+.wp-game-app { --pg-accent: #7b5b9a; background: #f6f3f8; color: #302c35; display: flex; flex-direction: column; min-height: 0; }
+.wp-game-app.is-game-weibo { --pg-accent: #e87922; background: #f6f6f6; }
+.wp-game-app.is-game-rednote { --pg-accent: #e84055; background: #fff; }
+.wp-game-app.is-game-wechat { --pg-accent: #24845c; background: #ededed; }
+.wp-game-app.is-game-delivery { --pg-accent: #957323; background: #faf7ec; }
+.wp-game-app > .wp-app-header { flex: 0 0 56px; background: #fff; }
+.wp-game-app .wp-app-header small { color: #8c8196; font-size: 10px; }
+.wpg-main { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 12px 24px; }
+.wpg-main *, .wpg-mode-settings * { box-sizing: border-box; }
+.wpg-main h2 { font-size: 20px; margin: 0 0 10px; }
+.wpg-main h3 { font-size: 15px; margin: 0 0 10px; }
+.wpg-main p { line-height: 1.65; overflow-wrap: anywhere; white-space: pre-wrap; }
+.wpg-main button, .wpg-export button, .wpg-wx-tabs button, .wpg-nav button, .wpg-mode-settings button { min-height: 44px; border: 0; border-radius: 12px; padding: 8px 12px; background: #eee7f3; color: #5b436e; font: inherit; cursor: pointer; }
+.wpg-main button:disabled { opacity: .55; cursor: default; }
+.wpg-main button:focus-visible, .wpg-nav button:focus-visible, .wpg-mode-settings button:focus-visible { outline: 2px solid var(--pg-accent, #7b5b9a); outline-offset: 2px; }
+.wpg-main input, .wpg-main select, .wpg-main textarea { font: inherit; max-width: 100%; border: 1px solid #ddd5e4; border-radius: 10px; color: #302c35; background: #fff; padding: 10px; min-height: 44px; }
+.wpg-main textarea { resize: vertical; }
+.wpg-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); flex: 0 0 auto; gap: 2px; padding: 5px 4px calc(28px + env(safe-area-inset-bottom, 0px)); background: #fff; border-top: 1px solid #e9e4eb; }
+.wpg-nav button { background: transparent; color: #8a828e; font-size: 11px; padding: 7px 2px; border-radius: 9px; }
+.wpg-nav button[aria-current] { background: #f2edf5; color: var(--pg-accent); font-weight: 700; }
+.wpg-wx-tabs { display: flex; gap: 6px; padding: 7px 12px; background: #f7f7f7; flex: 0 0 auto; }
+.wpg-wx-tabs button { flex: 1; background: transparent; color: #7a7b7a; }
+.wpg-wx-tabs button[aria-pressed="true"] { color: #24845c; background: #e2eee6; }
+.wpg-feed-top { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 0 0 16px; }
+.wpg-feed-top h2 { font-size: 18px; margin: 0 0 5px; }
+.wpg-feed-top small { color: #948993; font-size: 11px; }
+.wpg-feed-top button { flex: 0 0 auto; font-size: 12px; color: #fff; background: var(--pg-accent); }
+.wpg-filter { display: flex; gap: 10px; align-items: center; font-size: 12px; color: #857989; margin-bottom: 12px; }
+.wpg-filter select { flex: 1; min-width: 0; }
+.wpg-post { background: #fff; border-radius: 14px; padding: 14px; margin: 0 0 12px; min-width: 0; overflow: hidden; box-shadow: 0 1px 5px #33203909; }
+.wpg-post header, .wpg-person header { display: flex; gap: 9px; align-items: center; margin-bottom: 12px; }
+.wpg-post header div, .wpg-person header div { display: grid; gap: 4px; min-width: 0; }
+.wpg-post header b, .wpg-person header b { font-size: 13px; overflow-wrap: anywhere; }
+.wpg-post header small { color: #9a929b; font-size: 10px; }
+.wpg-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; flex: 0 0 34px; background: #ece3f2; color: #795288; font-size: 16px; }
+.wpg-post p { font-size: 13px; margin: 10px 0 16px; }
+.wpg-post footer { display: flex; justify-content: space-between; gap: 4px; border-top: 1px solid #f1edf1; padding-top: 4px; }
+.wpg-post footer button { background: transparent; color: #7d737f; font-size: 11px; padding: 6px; }
+.wpg-post footer button[aria-pressed="true"] { color: var(--pg-accent); }
+.wpg-note-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; align-items: start; }
+.wpg-note-grid .wpg-post { border: 1px solid #f0e8eb; margin: 0; padding: 12px 10px; }
+.wpg-note-grid .wpg-post header { flex-wrap: wrap; gap: 6px; }
+.wpg-note-grid .wpg-post h3 { font-size: 14px; line-height: 1.5; }
+.wpg-note-grid .wpg-post p { font-size: 12px; }
+.wpg-note-grid .wpg-post footer { flex-wrap: wrap; }
+.wpg-note-grid .wpg-empty { grid-column: 1 / -1; }
+.wpg-empty { padding: 34px 14px; text-align: center; color: #958699; }
+.wpg-empty b { display: block; color: #64556e; margin-bottom: 12px; }
+.wpg-empty p { font-size: 13px; }
+.wpg-comments article, .wpg-gift-record, .wpg-person { background: #fff; border-radius: 14px; padding: 14px; margin: 10px 0; font-size: 13px; }
+.wpg-comments h3 { margin-top: 20px; }
+.wpg-reply { display: grid; gap: 7px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.wpg-reply small { color: #a092aa; font-size: 10px; }
+.wpg-reply button { justify-self: start; }
+.wpg-compose { display: flex; gap: 8px; position: sticky; bottom: -24px; padding: 10px 0; background: #f6f3f8; align-items: flex-end; }
+.wpg-compose textarea { flex: 1; min-width: 0; min-height: 46px; max-height: 160px; font-size: 13px; }
+.wpg-compose button { flex: 0 0 auto; background: var(--pg-accent); color: #fff; }
+.wpg-chat-list { background: #fff; border-radius: 14px; overflow: hidden; }
+.wpg-chat-list > button { display: flex; align-items: center; gap: 10px; width: 100%; background: #fff; color: #302c35; border-radius: 0; border-bottom: 1px solid #f1edf2; padding: 14px 12px; text-align: left; }
+.wpg-chat-list > button > span:not(.wpg-avatar) { flex: 1; display: grid; gap: 6px; min-width: 0; }
+.wpg-chat-list small { color: #9c919e; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.wpg-chat-list i { font-style: normal; color: #c4b6c7; }
+.wpg-thread-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.wpg-thread-head b { font-size: 13px; overflow-wrap: anywhere; }
+.wpg-thread-head button { font-size: 12px; }
+.wpg-relation-strip { font-size: 11px; color: #9b899f; text-align: center; margin: 12px 0; }
+.wpg-chat-event { display: flex; flex-direction: column; align-items: flex-start; margin: 16px 0; }
+.wpg-chat-event > small { font-size: 10px; align-self: center; color: #a799ad; margin-bottom: 10px; }
+.wpg-bubble { max-width: 88%; padding: 11px 13px; border-radius: 14px 14px 14px 3px; background: #fff; font-size: 13px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }
+.wpg-bubble.is-user { align-self: flex-end; background: #d4e9d8; border-radius: 14px 14px 3px 14px; }
+.wpg-main button.wpg-text-button { color: #8e799c; background: transparent; padding: 4px 0; font-size: 11px; }
+.wpg-person progress { display: block; width: 100%; height: 6px; accent-color: #7b5b9a; }
+.wpg-person details p { font-size: 12px; color: #8b7e91; }
+.wpg-person > button { margin-right: 5px; }
+.wpg-field { display: grid; gap: 7px; color: #86758e; font-size: 12px; margin: 14px 0; }
+.wpg-gift-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wpg-gift-grid article { display: grid; gap: 9px; text-align: center; border-radius: 16px; background: #fff; padding: 15px 9px; min-width: 0; }
+.wpg-gift-grid article > span { font-size: 30px; }
+.wpg-gift-grid b { font-size: 13px; }
+.wpg-gift-grid small { color: #a0827f; }
+.wpg-gift-grid button { font-size: 12px; }
+.wpg-muted { color: #998ca0; font-size: 11px; }
+.wpg-wallet-card { padding: 22px; border-radius: 22px; background: linear-gradient(135deg,#7a5c9c,#ba86a1); color: #fff; }
+.wpg-wallet-card small { font-size: 11px; opacity: .8; }
+.wpg-wallet-card strong { display: block; font-size: 38px; margin: 10px 0 20px; }
+.wpg-wallet-card div { display: flex; justify-content: space-between; font-size: 11px; }
+.wpg-wallet-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 20px; }
+.wpg-wallet-links button { background: #fff; padding: 7px 3px; font-size: 12px; }
+.wpg-coffee { background: #fff; border-radius: 18px; padding: 18px 14px; margin-bottom: 18px; }
+.wpg-coffee h2 { font-size: 18px; }
+.wpg-coffee p { font-size: 12px; color: #958391; }
+.wpg-coffee details { font-size: 12px; color: #927b70; }
+.wpg-coffee > small { display: block; font-size: 10px; color: #a3939f; line-height: 1.6; }
+.wpg-order { margin: 14px 0; padding: 14px; border-radius: 12px; background: #faf5ee; display: grid; gap: 13px; }
+.wpg-order small { color: #a18a7b; font-size: 11px; }
+.wpg-order b { font-size: 14px; }
+.wpg-ingredients { display: flex; flex-wrap: wrap; gap: 8px; }
+.wpg-ingredients label { display: flex; align-items: center; gap: 4px; background: #fff; border-radius: 9px; padding: 6px 9px; font-size: 12px; min-height: 44px; }
+.wpg-ingredients input { padding: 0; min-height: 18px; width: 18px; accent-color: #88668c; }
+.wpg-ledger > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eae1ec; font-size: 11px; }
+.wpg-ledger span { min-width: 0; overflow-wrap: anywhere; }
+.wpg-ledger b { flex: 0 0 auto; color: #7f5d8c; }
+.wpg-error, .wpg-info, .wpg-generating { border-radius: 12px; padding: 12px; font-size: 12px; line-height: 1.6; background: #fcecef; color: #ae556c; }
+.wpg-info { background: #e8f3eb; color: #4f8160; }
+.wpg-generating { background: #f0eafa; color: #84609c; }
+.wpg-mode-settings { margin: 12px; padding: 16px; background: #fff; border-radius: 16px; display: grid; gap: 10px; color: #584a61; }
+.wpg-mode-settings button { text-align: left; font-size: 12px; background: #f4eff6; }
+.wpg-mode-settings button[aria-pressed="true"] { background: #806095; color: #fff; }
+.wpg-mode-settings p { margin: 2px 0; font-size: 11px; line-height: 1.6; color: #9d8ba6; }
+.wpg-export { position: absolute; inset: 0; z-index: 150; background: #261b35aa; display: flex; align-items: center; padding: 16px; }
+.wpg-export > div { width: 100%; max-height: 90%; overflow-y: auto; background: #fff; color: #51425c; border-radius: 20px; padding: 18px; display: grid; gap: 12px; }
+.wpg-export header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wpg-export p, .wpg-export small { font-size: 11px; line-height: 1.6; }
+.wpg-export textarea { width: 100%; min-height: 150px; resize: vertical; border: 1px solid #ddd0e6; border-radius: 12px; padding: 12px; font: inherit; font-size: 12px; background: #faf7fc; color: #51425c; box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) { .wp-game-app * { scroll-behavior: auto; } }

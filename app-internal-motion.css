@@ -1,0 +1,55 @@
+#world-phone-stage .wp-native-app [class*="-shell"],
+#world-phone-stage .wp-native-app [class*="-content"],
+#world-phone-stage .wp-native-app [class*="-feed"] {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#world-phone-stage .wp-native-app[data-app-experience-motion="forward"] > :not(.wp-app-header),
+#world-phone-stage .wp-native-app[data-app-experience-motion="forward"] .wp-social-shell,
+#world-phone-stage .wp-native-app[data-app-experience-motion="forward"] .wp-utility-shell,
+#world-phone-stage .wp-native-app[data-app-experience-motion="forward"] .wp-store-shell {
+  animation: wp-internal-forward .22s cubic-bezier(.2,.8,.2,1);
+}
+
+#world-phone-stage .wp-native-app[data-app-experience-motion="back"] > :not(.wp-app-header),
+#world-phone-stage .wp-native-app[data-app-experience-motion="back"] .wp-social-shell,
+#world-phone-stage .wp-native-app[data-app-experience-motion="back"] .wp-utility-shell,
+#world-phone-stage .wp-native-app[data-app-experience-motion="back"] .wp-store-shell {
+  animation: wp-internal-back .2s cubic-bezier(.2,.8,.2,1);
+}
+
+#world-phone-stage .wp-native-app[data-app-experience-motion="tab"] > :not(.wp-app-header),
+#world-phone-stage .wp-native-app[data-app-experience-motion="search"] > :not(.wp-app-header) {
+  animation: wp-internal-fade .18s ease-out;
+}
+
+#world-phone-stage .wp-native-app.is-app-experience-feedback {
+  --wp-app-feedback: 1;
+}
+
+#world-phone-stage .wp-native-app.is-app-experience-feedback .wp-app-header {
+  filter: brightness(1.015);
+}
+
+@keyframes wp-internal-forward {
+  from { opacity: .72; transform: translateX(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wp-internal-back {
+  from { opacity: .72; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wp-internal-fade {
+  from { opacity: .58; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
+.is-system-reduce-motion #world-phone-stage .wp-native-app[data-app-experience-motion] > :not(.wp-app-header),
+.is-system-reduce-motion #world-phone-stage .wp-native-app[data-app-experience-motion] .wp-social-shell,
+.is-system-reduce-motion #world-phone-stage .wp-native-app[data-app-experience-motion] .wp-utility-shell,
+.is-system-reduce-motion #world-phone-stage .wp-native-app[data-app-experience-motion] .wp-store-shell {
+  animation: none !important;
+}

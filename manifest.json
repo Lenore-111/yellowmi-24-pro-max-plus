@@ -1,0 +1,13 @@
+{
+  "display_name": "世界小手机",
+  "loading_order": 50,
+  "requires": [],
+  "optional": [],
+  "dependencies": [],
+  "js": "index.js",
+  "css": "world-phone.css",
+  "author": "World Phone",
+  "version": "0.3.0-alpha.14",
+  "auto_update": true,
+  "minimum_client_version": "1.12.0"
+}

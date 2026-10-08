@@ -1,0 +1,273 @@
+#world-phone-stage .wp-battery {
+  --wp-battery-level: 76%;
+}
+
+#world-phone-stage .wp-battery i {
+  inset: 1px auto 1px 1px;
+  width: calc((100% - 2px) * (var(--wp-battery-level, 76%) / 100%));
+  max-width: calc(100% - 2px);
+  min-width: 0;
+  transition: width 220ms ease, background 180ms ease;
+}
+
+#world-phone-stage .wp-battery[data-level="0"] i { width: 0; }
+#world-phone-stage.is-battery-low .wp-battery { border-color: rgba(255, 205, 86, .95); }
+#world-phone-stage.is-battery-low .wp-battery i { background: #ffd25b; }
+#world-phone-stage.is-battery-charging .wp-battery { border-color: rgba(112, 240, 152, .95); }
+#world-phone-stage.is-battery-charging .wp-battery i { background: #72ef9c; }
+
+.wp-battery-percent {
+  min-width: 18px;
+  margin-right: -3px;
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: .92;
+}
+
+.wp-battery-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 88;
+  pointer-events: none;
+}
+
+.wp-battery-toast,
+.wp-battery-critical,
+.wp-battery-dead {
+  box-sizing: border-box;
+}
+
+.wp-battery-toast[hidden],
+.wp-battery-critical[hidden],
+.wp-battery-dead[hidden] { display: none !important; }
+
+.wp-battery-toast {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 38px);
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: rgba(24, 26, 33, .92);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+  backdrop-filter: blur(18px) saturate(125%);
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: wp-battery-toast-in 180ms ease both;
+}
+
+.wp-battery-toast.is-warning { background: rgba(104, 76, 20, .94); }
+.wp-battery-toast.is-danger { background: rgba(128, 42, 42, .95); }
+.wp-battery-toast.is-charging { background: rgba(26, 93, 57, .95); }
+
+.wp-battery-critical {
+  position: absolute;
+  z-index: 2;
+  top: 42px;
+  left: 12px;
+  right: 12px;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 17px;
+  background: rgba(52, 16, 20, .93);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(0,0,0,.3);
+  backdrop-filter: blur(22px) saturate(135%);
+  pointer-events: auto;
+  animation: wp-battery-critical-in 220ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.wp-battery-critical > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #df4251;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wp-battery-critical > div { min-width: 0; display: grid; gap: 2px; }
+.wp-battery-critical b { font-size: 11px; }
+.wp-battery-critical small { font-size: 9px; color: rgba(255,255,255,.72); font-variant-numeric: tabular-nums; }
+.wp-battery-critical button,
+.wp-battery-dead button,
+.wp-battery-control-card button {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.wp-battery-critical button {
+  min-height: 29px;
+  padding: 0 10px;
+  background: #fff;
+  color: #8e2932;
+  font-size: 8px;
+  font-weight: 760;
+}
+
+.wp-battery-dead {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 30px;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.wp-battery-dead > b {
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: -.03em;
+}
+
+.wp-battery-dead > small {
+  margin-top: -5px;
+  color: rgba(255,255,255,.5);
+  font-size: 10px;
+}
+
+.wp-battery-dead > button {
+  margin-top: 10px;
+  min-height: 34px;
+  padding: 0 16px;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+  font-size: 9px;
+}
+
+.wp-battery-dead-icon {
+  position: relative;
+  width: 66px;
+  height: 30px;
+  border: 2px solid rgba(255,255,255,.52);
+  border-radius: 8px;
+}
+
+.wp-battery-dead-icon::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  top: 8px;
+  width: 5px;
+  height: 10px;
+  border-radius: 0 3px 3px 0;
+  background: rgba(255,255,255,.42);
+}
+
+.wp-battery-dead-icon > i {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  bottom: 3px;
+  width: calc((100% - 6px) * (var(--wp-battery-level, 0%) / 100%));
+  border-radius: 4px;
+  background: #6be895;
+  transition: width 220ms ease;
+}
+
+.wp-battery-dead-icon > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px #000);
+}
+
+.wp-battery-dead-icon.is-charging {
+  border-color: rgba(107, 232, 149, .82);
+  box-shadow: 0 0 24px rgba(74, 215, 123, .12);
+}
+
+.wp-battery-settings-readout { cursor: default; }
+
+.wp-battery-control-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.075);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+.wp-battery-control-card > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wp-battery-control-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  font-size: 16px;
+}
+
+.wp-battery-control-card > div > div { display: grid; gap: 2px; }
+.wp-battery-control-card b { font-size: 11px; }
+.wp-battery-control-card small { font-size: 8px; opacity: .62; }
+.wp-battery-control-card button {
+  min-width: 48px;
+  min-height: 28px;
+  padding: 0 10px;
+  background: rgba(255,255,255,.14);
+  color: inherit;
+  font-size: 8px;
+}
+
+#world-phone-stage.is-battery-dead .wp-camera-hole,
+#world-phone-stage.is-battery-dead .wp-statusbar,
+#world-phone-stage.is-battery-dead .wp-gesture-bar {
+  opacity: 0 !important;
+}
+
+#world-phone-stage.is-battery-dead .wp-screen-curtain {
+  opacity: 1 !important;
+}
+
+@keyframes wp-battery-toast-in {
+  from { opacity: 0; transform: translate(-50%, -8px) scale(.98); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes wp-battery-critical-in {
+  from { opacity: 0; transform: translateY(-10px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#world-phone-stage.is-system-reduce-motion .wp-battery-toast,
+#world-phone-stage.is-system-reduce-motion .wp-battery-critical,
+#world-phone-stage.is-system-reduce-motion .wp-battery i,
+#world-phone-stage.is-system-reduce-motion .wp-battery-dead-icon > i {
+  animation: none !important;
+  transition: none !important;
+}

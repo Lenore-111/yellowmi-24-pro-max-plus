@@ -1,0 +1,76 @@
+.wp-update-notice[hidden] { display: none !important; }
+.wp-update-notice {
+  position: fixed;
+  right: 18px;
+  bottom: 168px;
+  z-index: 10060;
+  width: min(340px, calc(100vw - 28px));
+  pointer-events: none;
+}
+.wp-update-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) auto 24px;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 10px 10px 11px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 17px;
+  background: rgba(18,20,28,.94);
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.05);
+  backdrop-filter: blur(18px) saturate(130%);
+  pointer-events: auto;
+}
+.wp-update-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(145deg,#f4d984,#b88934);
+  color: #24160c;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgba(199,143,48,.24);
+}
+.wp-update-copy { display: grid; min-width: 0; gap: 2px; }
+.wp-update-copy b { font-size: 12px; line-height: 1.2; }
+.wp-update-copy small { color: rgba(255,255,255,.58); font-size: 9px; line-height: 1.35; }
+.wp-update-card button {
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,.09);
+  color: #fff;
+  cursor: pointer;
+}
+.wp-update-card [data-phone-update-action] {
+  padding: 8px 10px;
+  background: linear-gradient(135deg,#f3d478,#cb9537);
+  color: #27170b;
+  font-size: 10px;
+  font-weight: 800;
+}
+.wp-update-card [data-phone-update-action]:disabled { opacity: .6; cursor: wait; }
+.wp-update-card [data-phone-update-close] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  color: rgba(255,255,255,.55);
+  font-size: 18px;
+}
+#world-phone-launcher.has-phone-update::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0ba4d;
+  box-shadow: 0 0 0 2px rgba(18,20,26,.95), 0 0 12px rgba(240,186,77,.7);
+}
+@media (max-width: 520px) {
+  .wp-update-notice { left: 14px; right: 14px; bottom: 88px; width: auto; }
+  .wp-update-card { grid-template-columns: 32px minmax(0,1fr) auto 22px; gap: 7px; }
+}

@@ -1,0 +1,239 @@
+.wp-comm-app {
+  background: #f4f4f6;
+  color: #17191e;
+  padding-top: 34px;
+}
+
+.wp-comm-header {
+  height: 56px;
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  background: rgba(249,249,251,.96);
+}
+
+.wp-comm-header button {
+  width: 36px;
+  height: 36px;
+  margin-left: 6px;
+  border: 0;
+  background: transparent;
+  color: #1c1e24;
+  font-size: 30px;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.wp-comm-header div { display: grid; justify-items: center; gap: 1px; min-width: 0; }
+.wp-comm-header b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.wp-comm-header small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #92969f; font-size: 9px; }
+
+.wp-comm-body {
+  position: absolute;
+  top: 90px;
+  left: 0;
+  right: 0;
+  bottom: 58px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.wp-comm-body::-webkit-scrollbar { display: none; }
+.wp-comm-list { background: #fff; }
+
+.wp-comm-row {
+  width: 100%;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid #ececef;
+  background: #fff;
+  color: #17191e;
+  text-align: left;
+}
+button.wp-comm-row { cursor: pointer; }
+
+.wp-comm-avatar {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(145deg,#7788a6,#4f607d);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.wp-comm-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.wp-comm-row > div { min-width: 0; display: grid; gap: 3px; }
+.wp-comm-row b { font-size: 12px; font-weight: 600; }
+.wp-comm-row small { color: #91959d; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.wp-comm-actions { display: flex !important; align-items: center; gap: 5px; }
+.wp-comm-actions > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #9a9da4;
+  font-size: 16px;
+  cursor: pointer;
+}
+.wp-comm-actions > button.is-active { color: #e7aa22; }
+
+.wp-call-button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #28c55f !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+
+.wp-comm-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 86px 28px 32px;
+  text-align: center;
+  color: #9a9da5;
+}
+.wp-comm-empty b { color: #666a72; font-size: 13px; }
+.wp-comm-empty p { margin: 0; font-size: 10px; line-height: 1.65; }
+
+.wp-phone-dialer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 58px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  border-top: 1px solid #dedfe3;
+  background: rgba(249,249,251,.98);
+}
+.wp-phone-dialer button {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  border: 0;
+  background: transparent;
+  color: #8a8e96;
+  font-size: 16px;
+  cursor: pointer;
+}
+.wp-phone-dialer button.is-active { color: #28b85a; }
+.wp-phone-dialer small { font-size: 8px; }
+
+.wp-recent-row > span:last-child,
+.wp-sms-row > span:last-child { color: #bbbfc6; font-size: 22px; font-weight: 300; }
+
+.wp-call-result {
+  min-height: 100%;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 26%, rgba(63,196,105,.16), transparent 34%), #f8f8fa;
+}
+.wp-call-result > span {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #2ec262;
+  color: #fff;
+  font-size: 30px;
+  box-shadow: 0 12px 30px rgba(46,194,98,.25);
+}
+.wp-call-result b { margin-top: 8px; font-size: 18px; }
+.wp-call-result small { color: #969aa2; font-size: 10px; }
+.wp-call-result p { margin: 12px 0 4px; color: #70747c; font-size: 10px; line-height: 1.65; }
+.wp-call-result button { border: 0; border-radius: 999px; padding: 9px 18px; background: #fff; color: #33363c; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+.wp-keypad {
+  min-height: 100%;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 18px 34px 28px;
+  background: #fff;
+}
+.wp-keypad-display { min-height: 58px; display: grid; justify-items: center; align-content: end; gap: 4px; }
+.wp-keypad-display b { max-width: 100%; overflow-wrap: anywhere; font-size: 24px; font-weight: 500; letter-spacing: .5px; }
+.wp-keypad-display small { color: #9a9da4; font-size: 9px; }
+.wp-keypad-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px 20px; }
+.wp-keypad-grid button {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: #f0f1f3;
+  color: #1c1f24;
+  font-size: 23px;
+  cursor: pointer;
+}
+.wp-keypad-actions { display: grid; grid-template-columns: 1fr 64px 1fr; align-items: center; gap: 10px; }
+.wp-keypad-actions button { border: 0; background: transparent; color: #8d9199; font-size: 10px; }
+.wp-keypad-actions .wp-keypad-call {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #2ac35f;
+  color: #fff;
+  font-size: 24px;
+}
+.wp-keypad-actions .wp-keypad-call:disabled { opacity: .35; }
+
+.wp-sms-app .wp-comm-body { bottom: 0; background: #f7f7f9; }
+.wp-sms-compose {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: #2f80ed;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(47,128,237,.28);
+  font-size: 25px;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.wp-sms-thread { min-height: 100%; display: grid; grid-template-rows: auto 1fr auto auto; background: #f7f7f9; }
+.wp-sms-thread-head { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px; border-bottom: 1px solid #e8e8eb; background: #fff; }
+.wp-sms-thread-head .wp-comm-avatar { width: 34px; height: 34px; font-size: 12px; }
+.wp-sms-thread-head > div { display: grid; gap: 2px; }
+.wp-sms-thread-head b { font-size: 11px; }
+.wp-sms-thread-head small { color: #969aa2; font-size: 9px; }
+
+.wp-sms-history-empty { display: grid; justify-items: center; align-content: center; gap: 7px; padding: 24px 30px; color: #8f939b; text-align: center; }
+.wp-sms-history-empty > span { padding: 6px 9px; border-radius: 999px; background: #e8edf6; color: #5a6b88; font-size: 9px; }
+.wp-sms-history-empty b { color: #666a72; font-size: 12px; }
+.wp-sms-history-empty p { margin: 0; font-size: 9px; line-height: 1.6; }
+
+.wp-comm-notice { margin: 0 12px 8px; padding: 8px 10px; border-radius: 10px; background: #fff6d8; color: #7a5f14; font-size: 9px; line-height: 1.5; }
+.wp-sms-compose-box { margin: 0 10px 10px; padding: 8px; border-radius: 14px; background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+.wp-sms-compose-box textarea { width: 100%; resize: none; border: 0; outline: 0; background: transparent; color: #25282e; font: inherit; font-size: 11px; line-height: 1.5; }
+.wp-sms-compose-box > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wp-sms-compose-box small { color: #aaaeb5; font-size: 8px; }
+.wp-sms-compose-box button { border: 0; border-radius: 999px; padding: 7px 13px; background: #2f80ed; color: #fff; font-size: 10px; }
+
+@media (max-width: 420px) {
+  .wp-keypad { padding-left: 42px; padding-right: 42px; }
+  .wp-keypad-grid { gap: 10px 18px; }
+}

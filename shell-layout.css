@@ -1,0 +1,223 @@
+#world-phone-stage.wp-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  display: block;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+  overflow: visible;
+}
+
+#world-phone-stage.wp-stage .wp-device-wrap {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  pointer-events: auto;
+  transform: none;
+  transition: opacity 180ms ease;
+}
+
+#world-phone-launcher {
+  touch-action: none;
+}
+
+#world-phone-stage.wp-stage:not(.is-open) .wp-device-wrap {
+  pointer-events: none;
+}
+
+#world-phone-stage .wp-stage-close,
+#world-phone-stage .wp-shell-drag-handle {
+  pointer-events: auto;
+}
+
+#world-phone-stage .wp-stage-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  z-index: 90;
+}
+
+.wp-shell-drag-handle {
+  position: absolute;
+  z-index: 89;
+  top: -13px;
+  left: 50%;
+  width: 56px;
+  height: 22px;
+  margin-left: -28px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  background: rgba(22,24,31,.78);
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+  backdrop-filter: blur(12px);
+  cursor: grab;
+  touch-action: none;
+}
+
+.wp-shell-drag-handle:active { cursor: grabbing; }
+.wp-shell-drag-handle span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  margin: auto;
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+}
+
+/* Settings is a real vertical layout now. The old absolute body started at
+   162px and overlapped the profile card, which is why the top user block was
+   visibly clipped. */
+#world-phone-stage .wp-device-settings {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#world-phone-stage .wp-device-settings .wp-app-header {
+  flex: 0 0 56px;
+}
+
+#world-phone-stage .wp-device-settings .wp-device-profile {
+  flex: 0 0 auto;
+}
+
+#world-phone-stage .wp-device-settings .wp-device-settings-body {
+  position: relative;
+  inset: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+#world-phone-stage .wp-device-settings .wp-settings-foot {
+  position: static;
+  flex: 0 0 auto;
+  margin: 5px 0 9px;
+  padding: 0 8px;
+}
+
+@media (min-width: 701px) {
+  #world-phone-stage .wp-device-wrap {
+    max-height: calc(100dvh - 32px);
+  }
+}
+
+@media (max-width: 700px) {
+  #world-phone-stage.wp-stage {
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  #world-phone-stage .wp-device-wrap {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  #world-phone-stage .wp-device {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border-radius: 0;
+    background: #08090d;
+    box-shadow: none;
+  }
+
+  #world-phone-stage .wp-device::before,
+  #world-phone-stage .wp-side-key,
+  #world-phone-stage .wp-bottom-hardware,
+  #world-phone-stage .wp-shell-drag-handle,
+  #world-phone-stage .wp-camera-hole {
+    display: none !important;
+  }
+
+  #world-phone-stage .wp-screen-glass {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #world-phone-stage .wp-screen-glass::after {
+    border-radius: 0;
+  }
+
+  #world-phone-stage .wp-stage-close {
+    top: calc(env(safe-area-inset-top, 0px) + 40px);
+    right: calc(env(safe-area-inset-right, 0px) + 10px);
+    width: 58px;
+    height: 30px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 999px;
+    background: rgba(20,23,32,.52);
+    color: #fff;
+    font-size: 0;
+    line-height: 30px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.16);
+    backdrop-filter: blur(14px) saturate(120%);
+  }
+
+  #world-phone-stage .wp-stage-close::before {
+    content: '‹ 酒馆';
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .01em;
+  }
+
+  #world-phone-stage .wp-statusbar {
+    top: env(safe-area-inset-top, 0px);
+    height: 34px;
+    padding-left: calc(17px + env(safe-area-inset-left, 0px));
+    padding-right: calc(17px + env(safe-area-inset-right, 0px));
+  }
+
+  #world-phone-stage .wp-native-app {
+    padding-top: calc(34px + env(safe-area-inset-top, 0px));
+  }
+
+  #world-phone-stage .wp-home {
+    padding-top: calc(54px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #world-phone-stage .wp-lock-top {
+    padding-top: calc(104px + env(safe-area-inset-top, 0px));
+  }
+
+  #world-phone-stage .wp-lock-bottom {
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #world-phone-stage .wp-dock {
+    bottom: calc(34px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #world-phone-stage .wp-gesture-bar {
+    bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #world-phone-stage .wp-screen-lock {
+    top: calc(36px + env(safe-area-inset-top, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    right: auto;
+  }
+
+  #world-phone-stage .wp-lock-notifications {
+    top: calc(314px + env(safe-area-inset-top, 0px));
+  }
+
+  #world-phone-stage .wp-device-settings .wp-settings-foot {
+    margin-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+  }
+}

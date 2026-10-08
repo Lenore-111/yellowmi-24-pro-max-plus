@@ -1,0 +1,311 @@
+.wp-app.is-wallet .wp-app-icon {
+  background: linear-gradient(145deg, #635bff, #845ee8 55%, #b15fd8);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(77, 61, 190, .28), inset 0 0 0 1px rgba(255,255,255,.26);
+}
+
+.wp-wallet-app {
+  background:
+    radial-gradient(circle at 86% 2%, rgba(115, 91, 255, .13), transparent 30%),
+    linear-gradient(180deg, #f8f7fb 0%, #f1f0f6 100%);
+  color: #1b1a22;
+}
+
+.wp-wallet-header {
+  background: rgba(249, 248, 252, .9);
+}
+
+.wp-wallet-main {
+  height: calc(100% - 56px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 13px 28px;
+}
+
+.wp-wallet-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 168px;
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 85% 22%, rgba(255,255,255,.28), transparent 26%),
+    radial-gradient(circle at 8% 115%, rgba(255,180,222,.24), transparent 42%),
+    linear-gradient(135deg, #5b51e8 0%, #7659dc 47%, #9f5ccc 100%);
+  color: #fff;
+  box-shadow: 0 16px 32px rgba(70, 52, 158, .22), inset 0 1px rgba(255,255,255,.22);
+}
+
+.wp-wallet-card::after {
+  content: '';
+  position: absolute;
+  width: 135px;
+  height: 135px;
+  right: -48px;
+  bottom: -64px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(255,255,255,.04), 0 0 0 36px rgba(255,255,255,.025);
+}
+
+.wp-wallet-card-top,
+.wp-wallet-card-meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wp-wallet-card-top > span {
+  color: rgba(255,255,255,.78);
+  font-size: 10px;
+  letter-spacing: .06em;
+}
+
+.wp-wallet-card-top > b {
+  padding: 4px 7px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.92);
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+
+.wp-wallet-card > strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 24px;
+  font: 760 34px/1 ui-rounded, system-ui, sans-serif;
+  letter-spacing: -.045em;
+  text-shadow: 0 3px 14px rgba(42, 28, 105, .2);
+}
+
+.wp-wallet-card-meta {
+  margin-top: 28px;
+  color: rgba(255,255,255,.74);
+  font-size: 9px;
+  letter-spacing: .04em;
+}
+
+.wp-wallet-notice {
+  display: grid;
+  gap: 4px;
+  margin: 12px 1px 10px;
+  padding: 10px 11px;
+  border: 1px solid #e8def8;
+  border-radius: 14px;
+  background: #f7f0ff;
+}
+
+.wp-wallet-notice b {
+  color: #7152a5;
+  font-size: 10px;
+}
+
+.wp-wallet-notice span {
+  color: #887997;
+  font-size: 8.5px;
+  line-height: 1.55;
+}
+
+.wp-wallet-accounts {
+  overflow: hidden;
+  border: 1px solid #ebe9f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(35, 29, 55, .045);
+}
+
+.wp-wallet-accounts > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0eef3;
+}
+
+.wp-wallet-accounts > div:last-child { border-bottom: 0; }
+
+.wp-wallet-accounts > div > span {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 9px;
+  min-width: 0;
+}
+
+.wp-wallet-accounts i {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #eeeaff, #ddd5ff);
+  color: #6753bf;
+  font: normal 750 11px/1 system-ui;
+}
+
+.wp-wallet-accounts b {
+  align-self: end;
+  color: #27242f;
+  font-size: 11px;
+}
+
+.wp-wallet-accounts small {
+  align-self: start;
+  overflow: hidden;
+  color: #aaa3b2;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wp-wallet-accounts strong {
+  color: #2e2938;
+  font: 760 13px/1 ui-rounded, system-ui;
+  white-space: nowrap;
+}
+
+.wp-wallet-guess {
+  margin-top: 10px;
+  padding: 13px;
+  border: 1px solid #e7e3ed;
+  border-radius: 18px;
+  background: rgba(255,255,255,.86);
+}
+
+.wp-wallet-guess-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wp-wallet-guess-head > span { display: grid; gap: 2px; }
+.wp-wallet-guess-head small { color: #9c94a5; font-size: 8px; }
+.wp-wallet-guess-head b { color: #463a5c; font-size: 13px; }
+.wp-wallet-guess-head em { color: #aba3b3; font: normal 8px/1 system-ui; }
+
+.wp-wallet-guess > p {
+  margin: 9px 0 10px;
+  color: #6d6476;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.wp-wallet-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.wp-wallet-signals span {
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: #f1eef6;
+  color: #736a7d;
+  font-size: 8px;
+}
+
+.wp-wallet-controls {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr 1fr;
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.wp-wallet-controls button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 6px;
+  border: 1px solid #e2ddeb;
+  border-radius: 11px;
+  background: #f7f5fa;
+  color: #746b7d;
+  font-size: 8px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.wp-wallet-controls [data-wallet-reroll] {
+  border-color: #7562d5;
+  background: linear-gradient(145deg, #7464e0, #985ed1);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 5px 13px rgba(91, 69, 170, .18);
+}
+
+.wp-wallet-controls button:active { transform: translateY(1px); }
+
+.wp-wallet-history {
+  margin-top: 10px;
+  border: 1px solid #e9e6ed;
+  border-radius: 16px;
+  background: rgba(255,255,255,.72);
+  color: #756e7b;
+}
+
+.wp-wallet-history summary {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 11px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.wp-wallet-history summary::-webkit-details-marker { display: none; }
+.wp-wallet-history summary b { color: #6d5ac8; }
+.wp-wallet-history summary i { color: #aaa3b2; font-style: normal; transition: transform .18s ease; }
+.wp-wallet-history[open] summary i { transform: rotate(180deg); }
+.wp-wallet-history > div { border-top: 1px solid #efedf2; }
+
+.wp-wallet-history-empty {
+  padding: 14px 12px;
+  color: #aaa3b2;
+  font-size: 8.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.wp-wallet-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-bottom: 1px solid #f0eef2;
+}
+
+.wp-wallet-history-row:last-child { border-bottom: 0; }
+.wp-wallet-history-row > span { display: grid; gap: 2px; min-width: 0; }
+.wp-wallet-history-row b { overflow: hidden; color: #514a59; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.wp-wallet-history-row small { color: #aaa3b2; font-size: 7px; }
+.wp-wallet-history-row strong { font-size: 10px; white-space: nowrap; }
+.wp-wallet-history-row strong.is-plus { color: #3c9460; }
+.wp-wallet-history-row strong.is-minus { color: #bc5c70; }
+
+@media (max-width: 430px) {
+  .wp-wallet-main { padding: 12px 11px 25px; }
+  .wp-wallet-card { min-height: 158px; padding: 16px; border-radius: 22px; }
+  .wp-wallet-card > strong { margin-top: 22px; font-size: 31px; }
+  .wp-wallet-card-meta { margin-top: 25px; }
+  .wp-wallet-controls { gap: 5px; }
+  .wp-wallet-controls button { padding-inline: 4px; font-size: 7.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-wallet-controls button,
+  .wp-wallet-history summary i { transition: none !important; }
+}

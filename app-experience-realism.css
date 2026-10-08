@@ -1,0 +1,356 @@
+.wp-store-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+
+.wp-store-main {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.wp-store-main:active .wp-store-icon {
+  transform: scale(.96);
+}
+
+.wp-store-icon {
+  transition: transform .14s ease;
+}
+
+.wp-store-row-actions {
+  min-width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.wp-store-installed-note {
+  width: max-content;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #eef8f2;
+  color: #3f9363;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.wp-store-search {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: 13px;
+  background: #e8eaef;
+  color: #858a95;
+}
+
+.wp-store-search > span {
+  font-size: 13px;
+}
+
+.wp-store-search input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #242832;
+  font: inherit;
+  font-size: 10px;
+}
+
+.wp-store-search button {
+  border: 0;
+  background: transparent;
+  color: #1671dd;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.wp-store-search [data-store-search-clear] {
+  position: absolute;
+  right: 42px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  background: #c5c8cf;
+  color: white;
+  line-height: 18px;
+}
+
+.wp-store-action {
+  position: relative;
+  overflow: hidden;
+  transition: transform .14s ease, background .18s ease, color .18s ease, opacity .18s ease;
+}
+
+.wp-store-action:active:not(:disabled) {
+  transform: scale(.94);
+}
+
+.wp-store-action.is-downloading:not(.is-installing) {
+  background: linear-gradient(90deg, #d5e8ff var(--store-progress, 0%), #edf4fb var(--store-progress, 0%));
+  color: #176ecf;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.wp-store-action.is-installing {
+  background: #e7e8ec;
+  color: #777c86;
+  opacity: .82;
+  cursor: progress;
+  animation: wp-store-installing 1s ease-in-out infinite;
+}
+
+@keyframes wp-store-installing {
+  0%, 100% { opacity: .68; }
+  50% { opacity: 1; }
+}
+
+.wp-store-empty {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  min-height: 150px;
+  padding: 24px;
+  color: #9a9ea8;
+  text-align: center;
+}
+
+.wp-store-empty > span {
+  font-size: 25px;
+}
+
+.wp-store-empty b {
+  color: #555b66;
+  font-size: 11px;
+}
+
+.wp-store-empty p {
+  margin: 0;
+  font-size: 9px;
+}
+
+.wp-store-detail {
+  display: grid;
+  gap: 12px;
+  animation: wp-store-detail-in .22s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes wp-store-detail-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.wp-store-detail-back {
+  justify-self: start;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: #1671dd;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.wp-store-detail-head {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px 2px;
+}
+
+.wp-store-detail-head .wp-store-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 19px;
+  font-size: 27px;
+}
+
+.wp-store-detail-head h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.15;
+}
+
+.wp-store-detail-head p {
+  margin: 5px 0 0;
+  color: #8e939e;
+  font-size: 9px;
+}
+
+.wp-store-detail-status {
+  min-height: 14px;
+  padding: 0 5px;
+  color: #818793;
+  font-size: 9px;
+  transition: color .18s ease;
+}
+
+.wp-store-detail-card {
+  padding: 14px 15px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(27,31,43,.045);
+}
+
+.wp-store-detail-card b {
+  font-size: 11px;
+}
+
+.wp-store-detail-card p {
+  margin: 7px 0 0;
+  color: #686e79;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.wp-store-detail-card.is-data {
+  background: #f0f6ff;
+}
+
+.wp-store-detail-remove {
+  height: 34px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  color: #d75353;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.wp-store-confirm-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 52;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+
+.wp-store-confirm-layer.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wp-store-confirm-mask {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(18,20,26,.28);
+  backdrop-filter: blur(2px);
+}
+
+.wp-store-confirm-sheet {
+  position: relative;
+  width: calc(100% - 16px);
+  margin: 0 8px 10px;
+  padding: 16px 14px 12px;
+  border-radius: 22px;
+  background: rgba(250,250,252,.97);
+  box-shadow: 0 18px 50px rgba(12,16,24,.2);
+  transform: translateY(22px);
+  transition: transform .2s cubic-bezier(.2,.8,.2,1);
+}
+
+.wp-store-confirm-layer.is-open .wp-store-confirm-sheet {
+  transform: none;
+}
+
+.wp-store-confirm-sheet > .wp-store-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 9px;
+}
+
+.wp-store-confirm-sheet > div {
+  text-align: center;
+}
+
+.wp-store-confirm-sheet b {
+  font-size: 12px;
+}
+
+.wp-store-confirm-sheet p {
+  margin: 5px 5px 12px;
+  color: #7b808b;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.wp-store-confirm-sheet > button:not(.wp-store-confirm-mask) {
+  width: 100%;
+  height: 34px;
+  margin-top: 7px;
+  border: 0;
+  border-radius: 11px;
+  background: #eceef2;
+  color: #4f5560;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wp-store-confirm-sheet > button.is-danger {
+  background: #ec5a5a;
+  color: #fff;
+}
+
+.wp-store-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 58px;
+  z-index: 58;
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(29,32,39,.88);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.16);
+  font-size: 9px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(.96);
+  transition: opacity .16s ease, transform .16s ease;
+  pointer-events: none;
+}
+
+.wp-store-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+@media (max-width: 430px) {
+  .wp-store-main { grid-template-columns: 48px minmax(0, 1fr); gap: 8px; }
+  .wp-store-detail-head { grid-template-columns: 62px minmax(0,1fr) auto; gap: 10px; }
+  .wp-store-detail-head .wp-store-icon { width: 62px; height: 62px; border-radius: 17px; }
+}
+
+.is-system-reduce-motion .wp-store-detail,
+.is-system-reduce-motion .wp-store-action.is-installing {
+  animation: none !important;
+}
+
+.is-system-reduce-motion .wp-store-confirm-layer,
+.is-system-reduce-motion .wp-store-confirm-sheet,
+.is-system-reduce-motion .wp-store-toast {
+  transition: none !important;
+}

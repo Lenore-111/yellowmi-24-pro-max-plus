@@ -1,0 +1,152 @@
+/* 玲七快送: independent mobile food-delivery UI; scoped to the phone app. */
+#world-phone-stage .wp-app.is-delivery .wp-app-icon{background:linear-gradient(145deg,#ffb254,#ff6b32);color:#fff;font-size:25px}
+#world-phone-stage .wp-delivery-app{display:flex;flex-direction:column;overflow:hidden;padding-top:34px;background:#fffaf4;color:#30271f;font:13px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#world-phone-stage .wp-delivery-app button,#world-phone-stage .wp-delivery-app input,#world-phone-stage .wp-delivery-app textarea{font:inherit}
+#world-phone-stage .wp-delivery-app button{cursor:pointer}
+#world-phone-stage .wp-delivery-app button:disabled{cursor:not-allowed;opacity:.45}
+#world-phone-stage .wp-delivery-app button:focus-visible,#world-phone-stage .wp-delivery-app input:focus-visible,#world-phone-stage .wp-delivery-app textarea:focus-visible{outline:2px solid #e87735;outline-offset:2px}
+#world-phone-stage .wp-delivery-app .wpdelivery-header{flex:0 0 56px;border-bottom:1px solid #fae8d6;background:#fffcf8}
+#world-phone-stage .wp-delivery-app .wpdelivery-header div b{color:#30271f;font-size:14px}
+#world-phone-stage .wp-delivery-app .wpdelivery-header div small{color:#b38d71}
+#world-phone-stage .wp-delivery-app .wpdelivery-header-cart{font-size:20px;background:transparent;border:0}
+#world-phone-stage .wp-delivery-app .wpdelivery-shell{position:relative;display:flex;flex:1 1 auto;min-height:0;flex-direction:column;overflow:hidden}
+#world-phone-stage .wp-delivery-app .wpdelivery-scroll{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:13px 12px 22px}
+#world-phone-stage .wp-delivery-app .wpdelivery-hero{position:relative;overflow:hidden;min-height:155px;padding:18px 16px;border-radius:20px;background:linear-gradient(117deg,#ff9b4b,#ff713d 65%,#ff6657);color:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-hero>small{position:relative;z-index:1;font-size:8px;letter-spacing:.11em;color:#fff1e6}
+#world-phone-stage .wp-delivery-app .wpdelivery-hero h1{position:relative;z-index:1;margin:10px 0 7px;font-size:23px;line-height:1.29;font-weight:800;letter-spacing:-.02em}
+#world-phone-stage .wp-delivery-app .wpdelivery-hero p{position:relative;z-index:1;margin:0;font-size:11px;color:#fff1e6}
+#world-phone-stage .wp-delivery-app .wpdelivery-hero>span{position:absolute;right:3px;bottom:0;font-size:92px;line-height:1;transform:rotate(-13deg);filter:drop-shadow(0 6px 10px #a3463030)}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip{display:flex;align-items:center;gap:9px;padding:14px 3px}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip>span{font-size:21px}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip>div{flex:1;display:grid;gap:0}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip b{font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip small{color:#a28b7e;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-address-tip>i{color:#bea89b;font-size:21px;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-search{display:flex;align-items:center;gap:8px;min-height:41px;padding:0 11px;border:1px solid #f2e4d4;border-radius:13px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-search>span{font-size:20px;color:#f48b42}
+#world-phone-stage .wp-delivery-app .wpdelivery-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#30271f;font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:18px 2px 10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-title b{font-size:15px;font-weight:800}
+#world-phone-stage .wp-delivery-app .wpdelivery-title small{color:#ab9787;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-categories{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+#world-phone-stage .wp-delivery-app .wpdelivery-categories button{flex:0 0 auto;min-height:33px;padding:5px 14px;border:1px solid #f6e8db;border-radius:999px;background:#fff;color:#8c7867;font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-categories button.is-active{border-color:#ff863c;background:#fff0e4;color:#e16e2a;font-weight:750}
+#world-phone-stage .wp-delivery-app .wpdelivery-shops{display:grid;gap:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-card{display:grid;grid-template-columns:85px minmax(0,1fr) 10px;align-items:center;gap:11px;min-height:103px;padding:10px;border:1px solid #f6eadf;border-radius:16px;background:#fff;color:#32271f;text-align:left;box-shadow:0 4px 16px #70451e09}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-art{display:grid;place-items:center;width:85px;height:82px;border-radius:12px;font-size:45px}
+#world-phone-stage .wp-delivery-app .is-coral{background:linear-gradient(150deg,#ffdbb7,#ffc5ac)}
+#world-phone-stage .wp-delivery-app .is-gold{background:linear-gradient(150deg,#fff0ba,#f9d68f)}
+#world-phone-stage .wp-delivery-app .is-lilac{background:linear-gradient(150deg,#f5e2fa,#dec7f3)}
+#world-phone-stage .wp-delivery-app .is-mint{background:linear-gradient(150deg,#e0f7e8,#c0ebd8)}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-copy{display:grid;gap:4px;min-width:0}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-copy b{font-size:14px;font-weight:800}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#988576;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-copy em{font-size:10px;color:#e98141;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-card>i{font-size:16px;color:#c8b1a2;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-disclaimer{margin:15px 4px 8px;color:#b2a092;font-size:10px;line-height:1.65}
+#world-phone-stage .wp-delivery-app .wpdelivery-bottom-nav{display:grid;flex:0 0 auto;grid-template-columns:repeat(2,minmax(0,1fr));min-height:55px;border-top:1px solid #f2e4d4;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-bottom-nav button{display:grid;align-content:center;justify-items:center;gap:0;border:0;background:transparent;color:#a48f7e}
+#world-phone-stage .wp-delivery-app .wpdelivery-bottom-nav span{font-size:21px;line-height:1}
+#world-phone-stage .wp-delivery-app .wpdelivery-bottom-nav b{font-size:10px;font-weight:650}
+#world-phone-stage .wp-delivery-app .wpdelivery-bottom-nav button.is-active{color:#f17a34}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-dock{display:flex;flex:0 0 auto;align-items:center;gap:11px;min-height:57px;padding:8px 11px;border:0;background:#322a26;color:#fff;text-align:left}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-icon{position:relative;font-size:26px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-icon i{position:absolute;top:-2px;right:-7px;display:grid;place-items:center;min-width:15px;height:15px;padding:1px;border-radius:99px;background:#ff8744;font-size:10px;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-dock>span:nth-child(2){display:grid;flex:1;gap:0}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-dock b{font-size:16px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-dock small{font-size:9px;color:#d4c4b9}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-dock strong{font-size:11px;color:#ffd0aa}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-back{display:inline-flex;align-items:center;gap:4px;min-width:44px;min-height:40px;margin:0 0 8px;padding:4px 8px;border:0;border-radius:10px;background:transparent;color:#725c4c;font-weight:700;text-align:left;touch-action:manipulation}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-back:first-letter{font-size:24px;line-height:1}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-hero{display:flex;align-items:center;gap:12px;min-height:136px;padding:15px;border-radius:17px}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-hero>span{font-size:59px}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-hero small{font-size:10px;color:#836956}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-hero h1{margin:3px 0;font-size:20px}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-hero p{margin:0;font-size:10px;color:#806a5c}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-meta{display:flex;gap:8px;margin:12px 0}
+#world-phone-stage .wp-delivery-app .wpdelivery-shop-meta span{padding:5px 9px;border-radius:99px;background:#fff;color:#9d7b60;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-menu{display:grid;gap:9px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food{display:grid;grid-template-columns:67px minmax(0,1fr);align-items:center;gap:8px 10px;padding:10px 8px;border:1px solid #f2e6d9;border-radius:14px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-food-art{display:grid;place-items:center;width:67px;height:71px;border-radius:11px;font-size:35px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food>div{display:grid;min-width:0;gap:3px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food b{font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food small{color:#a18b7b;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food strong{color:#ed7433;font-size:13px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food>button{display:grid;grid-column:2;justify-self:end;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#ff873a;color:#fff;font-size:22px;touch-action:manipulation}
+#world-phone-stage .wp-delivery-app .wpdelivery-food>.wpdelivery-quantity{display:flex;grid-column:2;justify-self:end;gap:8px}
+#world-phone-stage .wp-delivery-app .wpdelivery-food>.wpdelivery-quantity button{width:40px;height:40px;touch-action:manipulation}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-title{display:grid;gap:2px;margin:4px 2px 11px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-title b{font-size:16px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-title small{font-size:10px;color:#a78e7c}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-list{display:grid;gap:7px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-item{display:grid;grid-template-columns:35px minmax(0,1fr) 102px;align-items:center;gap:5px;padding:12px 9px;border-radius:12px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-item>span{font-size:24px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-item>div:nth-child(2){display:grid;gap:3px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-item b{font-size:11px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-item small{font-size:10px;color:#a48e80}
+#world-phone-stage .wp-delivery-app .wpdelivery-quantity{display:flex;align-items:center;justify-content:flex-end;gap:5px}
+#world-phone-stage .wp-delivery-app .wpdelivery-quantity button{width:30px;height:32px;padding:0;border:1px solid #f4d3be;border-radius:8px;background:#fff5ee;color:#dd7839;font-size:17px}
+#world-phone-stage .wp-delivery-app .wpdelivery-quantity b{min-width:12px;text-align:center}
+#world-phone-stage .wp-delivery-app .wpdelivery-bill{display:grid;gap:11px;margin:14px 0;padding:16px 12px;border:1px solid #f3e5d7;border-radius:13px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-bill>div{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#9b8777}
+#world-phone-stage .wp-delivery-app .wpdelivery-bill b{color:#372920;text-align:right}
+#world-phone-stage .wp-delivery-app .wpdelivery-bill .is-total{padding-top:10px;border-top:1px dashed #e9d9cb;font-size:14px;font-weight:800;color:#392a1e}
+#world-phone-stage .wp-delivery-app .wpdelivery-bill .is-total b{color:#ed762f;font-size:17px}
+#world-phone-stage .wp-delivery-app .wpdelivery-hint{margin:5px;color:#d77d41;font-size:11px}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-checkout{display:flex;flex:0 0 auto;justify-content:space-between;align-items:center;gap:12px;min-height:64px;padding:8px 13px;background:#fff;border-top:1px solid #f1e2d6}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-checkout>span{display:grid}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-checkout small{font-size:9px;color:#9b8a7c}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-checkout b{font-size:19px;color:#e97830}
+#world-phone-stage .wp-delivery-app .wpdelivery-cart-checkout button,#world-phone-stage .wp-delivery-app .wpdelivery-submit{min-height:43px;padding:9px 21px;border:0;border-radius:12px;background:#f78639;color:#fff;font-weight:750}
+#world-phone-stage .wp-delivery-app .wpdelivery-submit{display:block;width:100%}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card{display:grid;gap:10px;margin:4px 0 12px;padding:15px 12px;border-radius:14px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card label{display:grid;gap:3px}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card label b{font-size:13px}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card label small{font-size:10px;color:#ac9180}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card input,#world-phone-stage .wp-delivery-app .wpdelivery-form-card textarea{width:100%;min-width:0;padding:10px;border:1px solid #ecdccb;border-radius:10px;background:#fffbf8;color:#30271f;font-size:12px;box-shadow:none}
+#world-phone-stage .wp-delivery-app .wpdelivery-form-card textarea{min-height:75px;resize:vertical}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:9px;width:100%;margin:0 0 9px;padding:13px 10px;border:1px solid #f2e6da;border-radius:13px;background:#fff;color:#33291f;text-align:left}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card>span:first-child{font-size:27px}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card>span:nth-child(2){display:grid;gap:3px;min-width:0}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card b{font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card small,#world-phone-stage .wp-delivery-app .wpdelivery-order-card em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:#9e8a7b;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-card strong{font-size:11px;color:#eb7d37}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-status{display:grid;justify-items:center;gap:5px;padding:17px 10px;border-radius:14px;background:#fff2e3;text-align:center}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-status>span{font-size:40px}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-status b{font-size:16px;color:#a65a29}
+#world-phone-stage .wp-delivery-app .wpdelivery-order-status p{margin:0;color:#aa8b74;font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline{display:grid;gap:18px;margin:12px 0;padding:18px 16px;border-radius:14px;background:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline>div{display:flex;gap:12px;align-items:flex-start;color:#b7a598}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline i{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid #e2d1c4;border-radius:50%;font-style:normal}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline .is-done i{border-color:#ff9b4b;background:#ff9b4b;color:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline span{display:grid;gap:3px}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline b{color:#645346;font-size:12px}
+#world-phone-stage .wp-delivery-app .wpdelivery-timeline small{font-size:10px}
+#world-phone-stage .wp-delivery-app .wpdelivery-break{max-width:57%;overflow-wrap:anywhere}
+#world-phone-stage .wp-delivery-app .wpdelivery-empty{display:grid;place-items:center;gap:9px;padding:34px 10px;text-align:center}
+#world-phone-stage .wp-delivery-app .wpdelivery-empty>span{font-size:35px}
+#world-phone-stage .wp-delivery-app .wpdelivery-empty b{font-size:14px}
+#world-phone-stage .wp-delivery-app .wpdelivery-empty p{margin:0;color:#ad998b;font-size:11px}
+#world-phone-stage .wp-delivery-app .wpdelivery-empty button{padding:9px 13px;border:0;border-radius:10px;background:#fff0e2;color:#d77838}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal-backdrop{position:absolute;inset:0;z-index:40;display:grid;place-items:center;padding:15px;background:#28201993}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal{display:grid;justify-items:center;gap:9px;width:100%;padding:21px 14px;border-radius:18px;background:#fff;text-align:center}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal>span{font-size:36px}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal h2{margin:0;font-size:16px}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal p{margin:0;font-size:11px;color:#917d6d}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal>div{display:flex;gap:8px;width:100%;margin-top:9px}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal button{flex:1;padding:10px 3px;border:1px solid #e9d7c9;border-radius:11px;background:#fff9f4;color:#9c795f}
+#world-phone-stage .wp-delivery-app .wpdelivery-modal button:last-child{border-color:#f4883c;background:#f4883c;color:#fff}
+#world-phone-stage .wp-delivery-app .wpdelivery-error{position:absolute;left:10px;right:10px;bottom:12px;z-index:50;padding:10px 13px;border-radius:11px;background:#fff0e7;color:#b8552a;box-shadow:0 5px 20px #a35a2b22;font-size:11px}
+@media(max-width:380px){
+ #world-phone-stage .wp-delivery-app .wpdelivery-hero>span{font-size:73px}
+ #world-phone-stage .wp-delivery-app .wpdelivery-shop-card{grid-template-columns:70px minmax(0,1fr) 9px;gap:8px;padding:8px}
+ #world-phone-stage .wp-delivery-app .wpdelivery-shop-art{width:70px;height:72px;font-size:38px}
+ #world-phone-stage .wp-delivery-app .wpdelivery-cart-item{grid-template-columns:26px minmax(0,1fr) 99px;gap:4px;padding:10px 6px}
+}
+@media(prefers-reduced-motion:reduce){#world-phone-stage .wp-delivery-app *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+#world-phone-stage .phone-cat-quote{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:13px;border:1px solid #f1d9bd;border-radius:14px;background:#fff6e8;color:#6d4d32}
+#world-phone-stage .phone-cat-quote>span{flex:0 0 auto;font-size:28px;line-height:1.3}
+#world-phone-stage .phone-cat-quote>div{min-width:0}
+#world-phone-stage .phone-cat-quote b{font-size:12px}
+#world-phone-stage .phone-cat-quote p{margin:4px 0 0;font-size:13px;line-height:1.6;overflow-wrap:anywhere}

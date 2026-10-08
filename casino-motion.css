@@ -1,0 +1,122 @@
+.wp-slot-reel.is-spinning {
+  box-shadow:
+    inset 0 12px 18px #5f4a2530,
+    inset 0 -12px 18px #5f4a2530,
+    inset 0 0 0 1px #fff4d428;
+}
+
+.wp-slot-reel.is-spinning span {
+  animation: none !important;
+  filter: none;
+  will-change: transform, filter, opacity;
+}
+
+.wp-slot-reel.is-locked {
+  animation: wp-reel-lock-v3 .28s cubic-bezier(.16,.88,.26,1.18);
+}
+
+.wp-slot-machine.is-final-lock .wp-slot-payline {
+  animation: wp-payline-hit .55s ease-out both;
+}
+
+@keyframes wp-reel-lock-v3 {
+  0% { transform: translateY(-4px) scaleY(1.02); }
+  58% { transform: translateY(3px) scaleY(.985); }
+  82% { transform: translateY(-1px); }
+  100% { transform: none; }
+}
+
+@keyframes wp-payline-hit {
+  0% { opacity: .35; box-shadow: 0 0 3px #cf314a66; }
+  38% { opacity: 1; box-shadow: 0 0 11px #ff405fbb; }
+  100% { opacity: .72; box-shadow: 0 0 6px #cf314a88; }
+}
+
+.wp-roulette-shell {
+  position: relative;
+}
+
+.wp-roulette-shell::before {
+  content: '';
+  position: absolute;
+  z-index: 9;
+  top: 2px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  margin-left: -7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 15px solid #e7c06b;
+  filter: drop-shadow(0 2px 2px #000a) drop-shadow(0 0 5px #d9aa4c55);
+  transform-origin: 50% 1px;
+  pointer-events: none;
+}
+
+.wp-roulette-shell.is-spinning::before {
+  animation: wp-roulette-pointer-tick .16s steps(2, end) infinite;
+}
+
+.wp-roulette-shell.is-landed::before {
+  animation: wp-roulette-pointer-land .42s cubic-bezier(.18,.82,.24,1.18);
+}
+
+.wp-roulette-wheel.is-spinning {
+  animation: none !important;
+  will-change: transform, filter;
+}
+
+.wp-roulette-wheel.is-css-spinning {
+  animation: wp-wheel-spin-v3 3.8s linear both !important;
+}
+
+.wp-roulette-ball {
+  transform-origin: 50% 69px;
+  will-change: transform, filter;
+}
+
+.wp-roulette-shell.is-spinning .wp-roulette-ball {
+  box-shadow: 0 0 7px #fff, 0 2px 5px #0009;
+}
+
+.wp-roulette-wheel.is-landed {
+  animation: wp-wheel-land-v3 .34s cubic-bezier(.2,.8,.26,1.15);
+}
+
+@keyframes wp-wheel-spin-v3 {
+  0% { transform: rotate(0deg); }
+  12% { transform: rotate(760deg); }
+  55% { transform: rotate(1840deg); }
+  80% { transform: rotate(2300deg); }
+  94% { transform: rotate(2504deg); }
+  100% { transform: rotate(2520deg); }
+}
+
+@keyframes wp-wheel-land-v3 {
+  0% { transform: rotate(4deg); }
+  48% { transform: rotate(-2deg); }
+  100% { transform: none; }
+}
+
+@keyframes wp-roulette-pointer-tick {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes wp-roulette-pointer-land {
+  0% { transform: rotate(-9deg); }
+  34% { transform: rotate(7deg); }
+  62% { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-slot-reel.is-locked,
+  .wp-slot-machine.is-final-lock .wp-slot-payline,
+  .wp-roulette-shell.is-spinning::before,
+  .wp-roulette-shell.is-landed::before,
+  .wp-roulette-wheel.is-css-spinning,
+  .wp-roulette-wheel.is-landed {
+    animation: none !important;
+  }
+}

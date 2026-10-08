@@ -1,0 +1,232 @@
+/* Social tools share one readable, touch-sized sheet system. */
+#world-phone-stage .wp-social-sheet { position: absolute; z-index: 125; inset: 13% 10px 24px; display: flex; flex-direction: column; padding: 18px; border-radius: 22px; background: #f4f6f0; color: #263c33; border: 1px solid #d6e0d7; box-shadow: 0 0 0 100vmax #0e191d99; }
+.wp-social-sheet > header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.wp-social-sheet > header button { border: 0; background: transparent; color: #536d5e; font-size: 24px; }
+.wp-social-sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wp-social-sheet label { display: block; font-size: 12px; }
+#world-phone-stage .wp-social-sheet input:not([type=checkbox]), #world-phone-stage .wp-social-sheet textarea { display: block; width: 100%; min-height: 42px; padding: 10px; margin: 8px 0; color: #2e4038; background: #fff; border: 1px solid #cdd9cf; border-radius: 10px; font: 14px/1.6 system-ui; box-shadow: none; }
+#world-phone-stage .wp-social-submit { width: 100%; min-height: 44px; background: #486a57; color: white; border: 0; border-radius: 10px; margin-top: 15px; font-size: 13px; }
+.wp-social-submit:disabled { opacity: .45; }
+.wp-social-sheet blockquote { margin: 0 0 12px; padding: 12px; border-left: 3px solid #95b19b; background: #e7ede3; font-size: 13px; line-height: 1.7; }
+.wp-social-sheet [data-social-error] { margin: 8px 0 0; font-size: 12px; color: #a2424d; }
+.wp-social-sheet [data-social-error]:empty { display: none; }
+.wp-social-sheet-empty { padding: 55px 15px; text-align: center; font-size: 13px; color: #718475; }
+.wp-group-people { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+#world-phone-stage .wp-group-people label { display: flex; align-items: center; gap: 8px; padding: 12px 8px; border: 1px solid #d4e1d5; border-radius: 9px; background: #e9efe6; cursor: pointer; }
+.wp-group-people input { accent-color: #486a57; }
+.wp-friend-request { padding: 14px 0; border-bottom: 1px solid #d9e1d6; }
+.wp-friend-request p { font-size: 13px; line-height: 1.6; }
+.wp-friend-request > div { display: flex; gap: 9px; }
+.wp-friend-request button { min-height: 38px; padding: 8px 16px; border: 1px solid #b7caba; border-radius: 8px; background: #e0ebdc; color: #385343; }
+#world-phone-stage .wp-wx-contact-tools { display: flex; gap: 10px; padding: 14px; }
+#world-phone-stage .wp-wx-contact-tools > button, #world-phone-stage .wp-social-entry { flex: 1; display: flex; align-items: center; gap: 8px; padding: 13px 10px; border: 1px solid #d5e2d4; background: #edf4e8; color: #436044; border-radius: 10px; font-size: 12px; }
+#world-phone-stage .wp-wx-contact-tools > button > span { font-size: 17px; }
+#world-phone-stage .wp-wx-moment-meta [data-social-comment] { padding: 5px 8px; background: #ecf1e8; border: 0; border-radius: 6px; font-size: 11px; color: #4c674f; }
+.wp-moment-replies { margin-top: 10px; padding: 7px 10px; background: #ecf0e8; border-radius: 7px; }
+.wp-moment-replies p { margin: 3px 0; font-size: 12px; line-height: 1.7; }
+.wp-moment-replies b { color: #536a56; }
+#world-phone-stage .wp-chat-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+#world-phone-stage .wp-chat-toolbar .wp-wxr-search { flex: 1; margin: 0; min-width: 0; }
+#world-phone-stage .wp-chat-toolbar input { min-width: 0; width: 100%; }
+#world-phone-stage [data-chat-unread] { min-height: 35px; padding: 7px 10px; border: 1px solid #c9d9c8; background: #f3f6ef; border-radius: 8px; font-size: 11px; color: #587052; }
+#world-phone-stage [data-chat-unread][aria-pressed=true] { background: #446a51; color: white; }
+.wp-chat-entry { display: flex; align-items: center; }
+.wp-chat-entry[hidden] { display: none; }
+#world-phone-stage .wp-chat-entry .wp-wx-chat-row { flex: 1; min-width: 0; }
+#world-phone-stage .wp-chat-pin { align-self: stretch; flex: 0 0 33px; padding: 0; border: 0; border-bottom: 1px solid #e8eae5; background: transparent; color: #c2c7bd; font-size: 17px; }
+#world-phone-stage .wp-chat-pin[aria-pressed=true] { color: #78914f; }
+.wp-chat-no-results { text-align: center; padding: 32px 8px; color: #88907f; font-size: 12px; }
+#world-phone-stage .wp-social-realism-app { display: flex; flex-direction: column; }
+#world-phone-stage .wp-social-realism-app .wp-app-header { flex: 0 0 56px; }
+#world-phone-stage .wp-social-shell { position: relative; inset: auto; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 28px; overscroll-behavior: contain; }
+#world-phone-stage .wp-wb-card { margin: 0 0 12px; padding: 16px; border-radius: 14px; }
+#world-phone-stage .wp-wb-main h3 { font-size: 16px; line-height: 1.5; }
+#world-phone-stage .wp-wb-main p, #world-phone-stage .wp-social-comment p { font-size: 13px; line-height: 1.8; }
+#world-phone-stage .wp-wb-author > button { color: #72826c; min-height: 35px; min-width: 35px; }
+#world-phone-stage .wp-social-detail-bar { display: flex; gap: 8px; }
+#world-phone-stage .wp-social-detail-bar button { flex: 1; min-height: 42px; font-size: 12px; }
+#world-phone-stage .wp-rn-card { border-radius: 15px; overflow: hidden; }
+#world-phone-stage .wp-rn-copy > b { font-size: 13px; line-height: 1.65; }
+#world-phone-stage .wp-social-comment > div { min-width: 0; overflow-wrap: anywhere; }
+
+#world-phone-stage:has(.wp-social-realism-app, .wp-wx-app) .wp-statusbar { color: #28392f; }
+#world-phone-stage .wp-wx-me-list > button { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 16px; border: 0; border-bottom: 1px solid #e4e9e2; background: white; color: #304032; font-size: 14px; }
+
+/* Distinct Weibo feed and RedNote note-discovery UI (Phone Bridge v2; presentation only). */
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-social-shell{background:#f2f3f5;padding:0 0 16px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:46px;background:#fff;box-shadow:0 1px 0 #e9e9ec}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs button{font-size:14px;color:#777;font-weight:600}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs button.is-active{color:#f35024}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs button.is-active::after{left:29%;right:29%;background:#f35024}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-social-search{margin:8px 10px;border-radius:9px;background:#e8e9ed}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-entry{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;margin:0 0 8px;padding:0 14px;border:0;background:#fff;color:#343434;text-align:left}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-entry b{font-size:12px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-entry span{font-size:11px;color:#f35024}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-feed{display:block;padding:0 0 14px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-card{margin:0 0 8px;padding:0;border:0;border-radius:0;box-shadow:none;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author{grid-template-columns:36px minmax(0,1fr);gap:9px;padding:12px 14px 4px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author>span{width:36px;height:36px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author b{font-size:12px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-main{padding:4px 14px 10px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-main h3{margin-bottom:5px;font-size:14px;line-height:1.5}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-main p{font-size:12px;line-height:1.65}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-main img{max-height:245px;border-radius:8px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-meta{padding:0 14px 9px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions{grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #f1f1f2}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions button{min-width:0;height:44px;color:#858585;font-size:11px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions button.is-active{color:#f35024}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions button span{font-size:15px;margin-right:4px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-section{background:#fff}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-head{display:flex;align-items:baseline;gap:9px;padding:16px 15px 11px;border-bottom:1px solid #f1f1f2}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-head b{font-size:17px;color:#262626}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-head small{font-size:10px;color:#9b9b9b}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-list{border-radius:0}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-row{min-height:65px;padding:10px 13px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-row>strong{font-size:19px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-hot-row>i{font-size:11px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-social-shell{background:#fff;padding:0;overflow-y:auto}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-social-shell:has(> .wp-rednote-shell),#world-phone-stage .wp-social-realism-app.is-rednote .wp-social-shell:has(> .wp-rn-detail){overflow:hidden}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rednote-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-topbar{position:relative;flex:0 0 auto;z-index:5;padding:10px 10px 6px;background:#fff;border-bottom:1px solid #f5f5f5}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-heading{display:flex;align-items:baseline;gap:9px;padding:1px 3px 5px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-heading b{font-size:17px;color:#1e1e1e}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-heading small{font-size:10px;color:#989898}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-social-search{margin:5px 0 4px;background:#f3f3f4;border-radius:10px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:max-content;align-content:start;gap:10px;padding:10px 10px 18px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-card{margin:0;padding:0;border:1px solid #f0f0f0;border-radius:12px;box-shadow:none;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-card>button{width:100%}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover{aspect-ratio:4/5;padding:11px;border-radius:0}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note{justify-content:space-between;background:#f7f1ec;color:#625044}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note.is-seed-1{background:#eff1f8;color:#48546b}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note.is-seed-2{background:#f8f2e7;color:#6b5941}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note.is-seed-3{background:#edf4ee;color:#4b614d}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note.is-seed-4{background:#f5ecf1;color:#6b5261}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note.is-seed-5{background:#eef3f3;color:#4c6161}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note::after{display:none}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note span,#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note b{text-shadow:none}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note b{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:5;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-copy{padding:9px 9px 4px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-copy b{font-size:12px;line-height:1.55}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-foot{padding:5px 9px 10px;grid-template-columns:20px minmax(0,1fr) 24px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav{position:relative;z-index:6;flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));min-height:56px;background:#fff;border-top:1px solid #e9e9ea;box-shadow:0 -3px 12px #00000008}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav button{display:grid;place-content:center;justify-items:center;gap:1px;min-width:0;min-height:56px;border:0;background:transparent;color:#939393}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav button span{font-size:21px;line-height:1}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav button b{font-size:10px;font-weight:600}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav button.is-active{color:#fa344e}
+@media(max-width:380px){
+ #world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid{gap:7px;padding-inline:7px}
+ #world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-cover.is-text-note b{font-size:12px}
+ #world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions button{font-size:10px}
+}
+
+/* Weibo keeps its account page and bottom navigation separate from its feed. */
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-app-header small{display:none}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-social-shell:has(>.wp-weibo-shell){overflow:hidden;padding:0}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-weibo-shell{height:100%;min-height:0;display:flex;flex-direction:column}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:0}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs{flex:0 0 auto;display:flex;justify-content:center;align-items:center;gap:26px;height:44px;color:#939393;font-size:16px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs>b{position:relative;height:44px;display:grid;place-items:center;color:#222;font-size:18px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-tabs>b::after{content:'';position:absolute;bottom:3px;left:25%;right:25%;height:3px;border-radius:2px;background:#ff8200}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-social-search{flex:0 0 auto;background:#eee;border-radius:999px;margin:8px 14px 10px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);min-height:57px;padding:4px 0;background:#fff;border-top:1px solid #e8e8e8}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-bottom-nav button{display:grid;justify-items:center;align-content:center;gap:3px;min-height:48px;border:0;background:transparent;color:#777;font-size:11px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-bottom-nav svg{width:24px;height:24px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-bottom-nav button.is-active{color:#ff8200;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile{background:#fff;padding:22px 18px 0}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-head{display:flex;align-items:center;gap:15px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-avatar{display:grid;place-items:center;width:64px;height:64px;flex-shrink:0;border-radius:50%;background:#ffe0c7;color:#c76a28;font-size:25px;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-head h2{margin:0 0 6px;font-size:22px;color:#222;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-head p{margin:0;color:#999;font-size:12px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:23px 0 20px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-stats>div{display:grid;justify-items:center;gap:5px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-stats b{font-size:20px;color:#333}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-stats span{font-size:12px;color:#888}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-tools{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #f1f1f1;padding:10px 0}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-tools button{display:grid;justify-items:center;gap:7px;padding:12px 0;border:0;background:transparent;color:#555;font-size:13px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-tools svg{width:25px;height:25px;color:#ff8200}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-tools small{color:#999;font-size:11px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-tools .is-active{color:#e87700}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-local-note{padding:3px 0 14px;color:#aaa;font-size:10px;text-align:center}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-content{margin-top:9px;background:#fff;min-height:220px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-content>h3{margin:0;padding:15px 16px;border-bottom:1px solid #f2f2f2;color:#333;font-size:14px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-profile-content .wp-social-empty{padding-top:32px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author{grid-template-columns:40px minmax(0,1fr)}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author>span{height:40px;width:40px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-author b{font-size:14px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-main p{font-size:14px;line-height:1.65}
+
+/* RedNote's reading view: independent post header, inner scrolling and actions. */
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail{display:flex;flex-direction:column;height:100%;min-height:0;padding:0;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-top{flex:0 0 auto;display:grid;grid-template-columns:32px 34px minmax(0,1fr) 32px;align-items:center;gap:8px;min-height:52px;padding:7px 10px;background:#fff;border-bottom:1px solid #f2f2f2}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-top button{height:32px;border:0;background:transparent;color:#292929;font-size:21px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#f0e4dd;color:#a05a40;font-size:13px;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-top>div{display:grid;gap:2px;min-width:0}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#242424}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-top small{font-size:10px;color:#999}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-scroll>.wp-rn-cover{width:100%;aspect-ratio:4/4.5;padding:16px;border-radius:0}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-scroll>.wp-rn-cover.is-text-note{aspect-ratio:4/3}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-copy{padding:14px 16px 18px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-copy h2{font-size:17px;font-weight:700;line-height:1.5;margin:0 0 10px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-copy p{font-size:13px;line-height:1.8;white-space:pre-wrap;color:#343434}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-scroll .wp-social-comments{padding:6px 16px 24px;border-top:6px solid #f7f7f7}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-actions{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:7px;align-items:center;min-height:58px;padding:7px 12px;border-top:1px solid #eaeaea;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-actions button{height:42px;min-width:0;padding:0;border:0;background:transparent;color:#616161;font-size:21px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-actions .wp-rn-comment-jump{height:35px;padding:0 12px;border-radius:999px;background:#f4f4f5;color:#929292;text-align:left;font-size:11px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-detail-actions button.is-active{color:#f13a51}
+
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions button{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px}
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-actions svg{width:18px;height:18px}
+
+/* Two independent columns keep varying note heights from leaving grid row gaps. */
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:10px;
+}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-column{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:10px;
+}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid>.wp-social-empty{
+  display:grid;
+  grid-column:1/-1;
+}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid .is-image-note.is-seed-1,
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid .is-image-note.is-seed-4{aspect-ratio:4/4.4}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid .is-image-note.is-seed-2,
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid .is-image-note.is-seed-5{aspect-ratio:4/5.8}
+@media(max-width:380px){
+  #world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-grid{gap:7px}
+  #world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-column{gap:7px}
+}
+
+
+/* RedNote account header reads as a creator/profile surface rather than a generic feed block. */
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile{display:flex;flex:0 0 auto;align-items:center;gap:13px;padding:18px 16px 14px;background:#fff}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile>span{display:grid;place-items:center;width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:#f3e8e5;color:#9b5b51;font-size:21px;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile>div{display:grid;min-width:0;gap:6px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#202020;font-size:17px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile small{color:#8b8b8b;font-size:11px;letter-spacing:.01em}
+
+/* RedNote profile filters keep their own visual and touch identity. */
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile-tabs{display:flex;flex:0 0 auto;justify-content:center;gap:24px;background:#fff;border-bottom:1px solid #eee;margin-bottom:10px}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile-tabs button{position:relative;min-width:64px;min-height:44px;padding:8px 12px;border:0;background:transparent;color:#888;font:inherit;touch-action:manipulation}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile-tabs button.is-active{color:#252525;font-weight:700}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile-tabs button.is-active::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px;background:#ed4960}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-profile-tabs button:focus-visible{outline:2px solid #ed4960;outline-offset:-3px}
+
+
+/* RedNote multi-image detail gallery: horizontal touch paging instead of a vertical image dump. */
+#world-phone-stage .wp-social-realism-app.is-weibo .wp-wb-bottom-nav,
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-bottom-nav { padding-bottom:calc(28px + env(safe-area-inset-bottom, 0px)); }
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery{position:relative;overflow:hidden;background:#0d0d0d}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery-track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery-track::-webkit-scrollbar{display:none}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery figure{position:relative;flex:0 0 100%;width:100%;margin:0;scroll-snap-align:start;scroll-snap-stop:always;aspect-ratio:4/5;background:#111}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery img{display:block;width:100%;height:100%;object-fit:contain;background:#111}
+#world-phone-stage .wp-social-realism-app.is-rednote .wp-rn-gallery-count{position:absolute;top:10px;right:10px;z-index:2;min-width:38px;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.58);color:#fff;font-size:11px;line-height:1.2;text-align:center;pointer-events:none}

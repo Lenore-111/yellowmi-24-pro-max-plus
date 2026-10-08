@@ -1,0 +1,636 @@
+.wp-casino-app {
+  --casino-gold: #f2c969;
+  --casino-gold-deep: #a96e25;
+  --casino-wine: #651b39;
+  --casino-ink: #08070c;
+  --casino-panel: #121018;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% -8%, #7b244947 0 20%, transparent 47%),
+    radial-gradient(circle at 100% 35%, #a4772320, transparent 35%),
+    linear-gradient(180deg, #110c18 0%, #07070b 100%);
+  color: #f6efe2;
+  isolation: isolate;
+}
+.wp-casino-app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .28;
+  background-image: repeating-linear-gradient(115deg, #ffffff05 0 1px, transparent 1px 7px);
+  mask-image: linear-gradient(#0007, transparent 58%);
+}
+.wp-casino-header {
+  background: linear-gradient(180deg, #17111d 0%, #100c14 100%) !important;
+  color: #f7edd9 !important;
+  border-bottom-color: #e5bd5c1f !important;
+  box-shadow: 0 10px 24px #0005;
+}
+.wp-casino-header button { color: #eadfcf !important; }
+.wp-casino-header small { color: #9d8e9f !important; letter-spacing: .08em; }
+.wp-casino-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d9ad51;
+  box-shadow: 0 0 9px #efc56699;
+}
+.wp-casino-main {
+  display: grid;
+  gap: 10px;
+  padding: 10px 11px 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+}
+.wp-casino-bankroll {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  border: 1px solid #efc96c22;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #361224d9, #171222e8 64%, #1c1520e8);
+  box-shadow: inset 0 1px #ffffff08, 0 9px 25px #0003;
+}
+.wp-casino-bankroll small {
+  display: block;
+  color: #bfa663;
+  font: 700 8px/1 system-ui;
+  letter-spacing: .18em;
+}
+.wp-casino-bankroll strong {
+  display: block;
+  margin-top: 2px;
+  color: #fff1ad;
+  font: 850 25px/.95 ui-rounded, system-ui;
+  letter-spacing: -.035em;
+  text-shadow: 0 0 16px #e2ae4c35;
+}
+.wp-casino-bankroll > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #9f929f;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.wp-casino-bankroll > span i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8fc27d;
+  box-shadow: 0 0 7px #8fc27d88;
+}
+.wp-casino-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.wp-casino-tabs button {
+  min-width: 0;
+  border: 1px solid #ffffff09;
+  border-radius: 13px;
+  padding: 8px 4px 9px;
+  background: linear-gradient(180deg, #ffffff0a, #ffffff04);
+  color: #aaa0ae;
+  box-shadow: inset 0 1px #ffffff06;
+}
+.wp-casino-tabs button small,
+.wp-casino-tabs button b { display: block; }
+.wp-casino-tabs button small {
+  margin-bottom: 3px;
+  color: #756a78;
+  font: 700 7px/1 system-ui;
+  letter-spacing: .09em;
+}
+.wp-casino-tabs button b { font: 700 11px/1.1 system-ui; }
+.wp-casino-tabs button.is-active {
+  border-color: #f0c6615e;
+  background: linear-gradient(180deg, #5d3b193c, #251719a8);
+  color: #f8df99;
+  box-shadow: inset 0 0 18px #d69c3020, 0 5px 14px #0003;
+}
+.wp-casino-tabs button.is-active small { color: #bd9250; }
+.wp-casino-machine {
+  position: relative;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid #ddb45d29;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0, #8e2b5731, transparent 42%),
+    linear-gradient(180deg, #151018, #0b0a0e);
+  box-shadow: inset 0 0 35px #0008, 0 12px 30px #0003;
+}
+.wp-casino-machine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 1px #ffffff08;
+}
+.wp-casino-rule {
+  margin: 0 auto 7px;
+  color: #847983;
+  font-size: 8px;
+  line-height: 1.35;
+  text-align: center;
+}
+.wp-casino-stage {
+  position: relative;
+  display: grid;
+  align-content: center;
+  min-height: 194px;
+  border-radius: 17px;
+  overflow: hidden;
+}
+.wp-casino-stage-caption {
+  min-height: 14px;
+  margin-top: 9px;
+  color: #aa9ca6;
+  font: 500 9px/1.35 system-ui;
+  letter-spacing: .02em;
+  text-align: center;
+}
+.wp-casino-stage-slots {
+  padding: 13px 10px 11px;
+  border: 1px solid #e1b75c27;
+  background:
+    radial-gradient(circle at 50% 15%, #b4346652, transparent 42%),
+    linear-gradient(180deg, #220c18 0%, #0e090e 100%);
+  box-shadow: inset 0 0 32px #0008;
+}
+.wp-casino-marquee {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: #f5d778;
+  text-shadow: 0 0 10px #e4b24666;
+}
+.wp-casino-marquee b { font: 900 10px/1 Georgia, serif; letter-spacing: .16em; }
+.wp-casino-marquee span { font-size: 8px; opacity: .8; }
+.wp-slot-machine {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid #eac6643a;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #302419, #0b0908 10%, #09080a 90%, #2f2114);
+  box-shadow: inset 0 0 0 2px #000, inset 0 0 22px #000, 0 6px 16px #0005;
+}
+.wp-slot-reel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 76px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #7d602e66;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #e8dfcc, #fff8e7 48%, #e6d7bd);
+  color: #24150d;
+  box-shadow: inset 0 8px 13px #5f4a2520, inset 0 -8px 13px #5f4a2520;
+}
+.wp-slot-reel::before,
+.wp-slot-reel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 15px;
+  pointer-events: none;
+}
+.wp-slot-reel::before { top: 0; background: linear-gradient(#45351e4d, transparent); }
+.wp-slot-reel::after { bottom: 0; background: linear-gradient(transparent, #45351e4d); }
+.wp-slot-reel span {
+  font: 900 35px/1 ui-rounded, system-ui;
+  filter: drop-shadow(0 2px 1px #fff8);
+}
+.wp-slot-reel.is-spinning span { animation: wp-slot-rattle .14s linear infinite; filter: blur(1.5px); }
+.wp-slot-reel.is-locked { animation: wp-reel-lock .18s ease-out; }
+.wp-slot-payline {
+  position: absolute;
+  z-index: 3;
+  left: 4px;
+  right: 4px;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #cb2f4a 10% 90%, transparent);
+  box-shadow: 0 0 6px #cf314a88;
+  pointer-events: none;
+}
+@keyframes wp-slot-rattle { 0% { transform: translateY(-8px); } 50% { transform: translateY(7px); } 100% { transform: translateY(-8px); } }
+@keyframes wp-reel-lock { 0% { transform: translateY(-5px); } 70% { transform: translateY(3px); } 100% { transform: none; } }
+.wp-casino-stage-roulette {
+  padding: 8px 8px 11px;
+  background:
+    radial-gradient(circle at 50% 50%, #284a35 0 25%, transparent 26%),
+    linear-gradient(180deg, #0d2018, #09100d);
+  border: 1px solid #98733b2e;
+}
+.wp-roulette-shell {
+  display: grid;
+  place-items: center;
+  min-height: 162px;
+}
+.wp-roulette-wheel {
+  position: relative;
+  width: 154px;
+  height: 154px;
+  border: 8px solid #a36b2e;
+  border-radius: 50%;
+  background: conic-gradient(
+    #8e1730 0 10deg, #161519 10deg 20deg, #8e1730 20deg 30deg, #161519 30deg 40deg,
+    #8e1730 40deg 50deg, #161519 50deg 60deg, #8e1730 60deg 70deg, #161519 70deg 80deg,
+    #8e1730 80deg 90deg, #161519 90deg 100deg, #8e1730 100deg 110deg, #161519 110deg 120deg,
+    #8e1730 120deg 130deg, #161519 130deg 140deg, #8e1730 140deg 150deg, #161519 150deg 160deg,
+    #8e1730 160deg 170deg, #161519 170deg 180deg, #8e1730 180deg 190deg, #161519 190deg 200deg,
+    #8e1730 200deg 210deg, #161519 210deg 220deg, #8e1730 220deg 230deg, #161519 230deg 240deg,
+    #8e1730 240deg 250deg, #161519 250deg 260deg, #8e1730 260deg 270deg, #161519 270deg 280deg,
+    #8e1730 280deg 290deg, #161519 290deg 300deg, #8e1730 300deg 310deg, #161519 310deg 320deg,
+    #8e1730 320deg 330deg, #161519 330deg 340deg, #8e1730 340deg 350deg, #1c713b 350deg 360deg
+  );
+  box-shadow: inset 0 0 0 5px #2a190d, inset 0 0 22px #0009, 0 10px 21px #0006, 0 0 0 1px #e8c06d55;
+}
+.wp-roulette-wheel::before {
+  content: '';
+  position: absolute;
+  inset: 23px;
+  border: 2px solid #b1844540;
+  border-radius: 50%;
+  background: radial-gradient(circle, #23170e 0 45%, #754b24 46% 49%, #0f0b08 50%);
+  box-shadow: inset 0 0 15px #000c;
+}
+.wp-roulette-wheel.is-spinning { animation: wp-wheel-spin 1.32s cubic-bezier(.12,.72,.12,1) both; }
+.wp-roulette-wheel.is-landed { animation: wp-wheel-land .22s ease-out; }
+.wp-roulette-ball {
+  position: absolute;
+  z-index: 4;
+  top: 5px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #fff7db;
+  box-shadow: 0 0 6px #fff, 0 2px 4px #0008;
+}
+.wp-roulette-hub {
+  position: absolute;
+  z-index: 5;
+  inset: 48px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border: 1px solid #d1a24d55;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 35%, #4a3421, #130e0a 65%);
+  box-shadow: inset 0 0 15px #0009, 0 4px 8px #0007;
+}
+.wp-roulette-hub small { color: #8c7452; font-size: 6px; letter-spacing: .12em; }
+.wp-roulette-hub b { color: #f5ddb0; font: 900 25px/1 Georgia, serif; }
+.wp-roulette-hub b[data-color='red'] { color: #f2a1a8; }
+.wp-roulette-hub b[data-color='black'] { color: #eee9e2; }
+.wp-roulette-hub b[data-color='green'] { color: #9ee0aa; }
+@keyframes wp-wheel-spin { from { transform: rotate(0); } to { transform: rotate(1260deg); } }
+@keyframes wp-wheel-land { 0% { transform: rotate(-7deg); } 100% { transform: none; } }
+.wp-casino-stage-dice {
+  padding: 7px 9px 11px;
+  border: 1px solid #a07d4329;
+  background:
+    radial-gradient(circle at 50% 45%, #275441, #143326 55%, #0b1e16 100%);
+  box-shadow: inset 0 0 35px #0005;
+}
+.wp-dice-table {
+  position: relative;
+  min-height: 153px;
+}
+.wp-dice-table::before {
+  content: '';
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  bottom: 13px;
+  height: 1px;
+  background: #dfc98f25;
+  box-shadow: 0 -46px #dfc98f10;
+}
+.wp-dice-cup {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 26px;
+  width: 96px;
+  height: 88px;
+  margin-left: -48px;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 12px 8px #0008);
+}
+.wp-dice-cup::before {
+  content: '';
+  position: absolute;
+  inset: 0 8px;
+  border: 1px solid #bf8d4744;
+  border-radius: 16px 16px 24px 24px;
+  background: linear-gradient(90deg, #24100f, #5d2926 42%, #2a1111 74%, #160b0b);
+  box-shadow: inset 8px 0 14px #fff08, inset -8px 0 16px #0007;
+}
+.wp-dice-cup::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: -1px;
+  height: 13px;
+  border: 2px solid #9a6a35;
+  border-radius: 50%;
+  background: #170b0a;
+  box-shadow: inset 0 2px #d4a65b33;
+}
+.wp-dice-cup span {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: -8px;
+  width: 24px;
+  height: 13px;
+  margin-left: -12px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(#8e5034, #291310);
+  box-shadow: 0 -1px #d1a06333;
+}
+.wp-dice-cup.is-shaking { animation: wp-cup-shake .18s linear infinite; }
+.wp-dice-cup.is-open { transform: translate(47px, -34px) rotate(19deg); transition: transform .32s cubic-bezier(.18,.8,.2,1); }
+.wp-die {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 76px;
+  width: 55px;
+  height: 55px;
+  margin-left: -27px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #c7b38d;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fff8e9, #d7ccb7);
+  color: #2c211b;
+  font: 900 35px/1 system-ui;
+  opacity: .22;
+  box-shadow: inset 0 1px #fff, 0 10px 16px #0005;
+}
+.wp-die.is-revealed { opacity: 1; animation: wp-die-drop .32s cubic-bezier(.2,.86,.2,1.16); }
+.wp-dice-shadow {
+  position: absolute;
+  left: 50%;
+  top: 119px;
+  width: 112px;
+  height: 14px;
+  margin-left: -56px;
+  border-radius: 50%;
+  background: #0007;
+  filter: blur(5px);
+}
+@keyframes wp-cup-shake { 0%,100% { transform: rotate(-5deg) translateX(-3px); } 50% { transform: rotate(5deg) translateX(3px); } }
+@keyframes wp-die-drop { from { transform: translateY(-16px) rotate(-14deg) scale(.8); } to { transform: none; } }
+.wp-casino-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.wp-casino-choices button {
+  min-width: 0;
+  border: 1px solid #ffffff0b;
+  border-radius: 10px;
+  padding: 7px 2px;
+  background: #ffffff08;
+  color: #bbb0b9;
+  font-size: 10px;
+}
+.wp-casino-choices button span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #a58b55;
+}
+.wp-casino-choices [data-casino-choice='red'] span { background: #bb334e; }
+.wp-casino-choices [data-casino-choice='black'] span { background: #1a1920; box-shadow: 0 0 0 1px #777; }
+.wp-casino-choices button.is-active {
+  border-color: #e3bd6552;
+  background: #d5a8481d;
+  color: #f4d58b;
+  box-shadow: inset 0 0 12px #dda63c13;
+}
+.wp-casino-result {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 9px 11px;
+  overflow: hidden;
+  border: 1px solid #dfb75e30;
+  border-radius: 11px;
+  background: #07070bcf;
+  text-align: left;
+}
+.wp-casino-result::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 0 40%, #ffffff08 50%, transparent 60%);
+  transform: translateX(-130%);
+}
+.wp-casino-machine.is-settled .wp-casino-result::before { animation: wp-result-sweep .7s ease-out; }
+.wp-casino-result small { min-width: 0; overflow: hidden; color: #8f858f; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.wp-casino-result b { color: #edc967; font: 900 14px/1 ui-rounded, system-ui; letter-spacing: .04em; white-space: nowrap; }
+.wp-casino-result.is-win { border-color: #f0c9694c; box-shadow: 0 0 18px #dba93a18; }
+.wp-casino-result.is-loss b { color: #d07987; }
+.wp-casino-result.is-error { display: block; color: #e7a1ac; font-size: 10px; text-align: center; }
+@keyframes wp-result-sweep { 0% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
+.wp-casino-bet-panel {
+  display: grid;
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid #ffffff0a;
+  border-radius: 17px;
+  background: linear-gradient(180deg, #17141d, #100e15);
+  box-shadow: inset 0 1px #ffffff07, 0 8px 20px #0002;
+}
+.wp-casino-wager {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+.wp-casino-wager > span { color: #a99ca8; font-size: 10px; }
+.wp-casino-wager > b {
+  min-width: 34px;
+  color: #827582;
+  font: 700 8px/1 system-ui;
+  text-align: right;
+}
+.wp-casino-wager label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid #d5aa5452;
+  border-radius: 12px;
+  background: #08070b;
+  box-shadow: inset 0 0 10px #000;
+}
+.wp-casino-wager label em { color: #d7ac52; font: normal 9px/1 system-ui; }
+.wp-casino-wager input {
+  width: 70px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff2c4;
+  text-align: right;
+  font: 850 16px/1 ui-rounded, system-ui;
+  appearance: textfield;
+}
+.wp-casino-wager input::-webkit-outer-spin-button,
+.wp-casino-wager input::-webkit-inner-spin-button { margin: 0; appearance: none; }
+.wp-casino-quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  justify-items: center;
+}
+.wp-casino-quick button {
+  position: relative;
+  width: 47px;
+  height: 47px;
+  padding: 0;
+  border: 3px dashed #b5863d82;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #32191a 0 44%, #151014 45% 57%, #b17a3459 58% 63%, #1b1315 64%);
+  color: #d8bb78;
+  box-shadow: inset 0 0 0 2px #050507, 0 3px 7px #0005;
+}
+.wp-casino-quick button::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid #d4ad634f;
+  border-radius: 50%;
+}
+.wp-casino-quick button span { position: relative; z-index: 1; font: 800 10px/1 system-ui; }
+.wp-casino-quick button.is-active {
+  transform: translateY(-3px) rotate(-3deg);
+  border-color: #f0ca72;
+  color: #fff0b5;
+  box-shadow: inset 0 0 0 2px #050507, 0 7px 13px #d19a3733, 0 0 0 2px #d8ab4a2c;
+}
+.wp-casino-play {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  min-height: 52px;
+  border: 1px solid #ffd98466;
+  border-radius: 15px;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, #f0cf78, #c68b31 64%, #9c5d20);
+  color: #28140a;
+  box-shadow: inset 0 1px #fff7c9aa, inset 0 -2px #7f4a23aa, 0 9px 20px #c07a2740;
+  text-shadow: 0 1px #fff3a655;
+}
+.wp-casino-play b { font: 950 16px/1 ui-rounded, system-ui; letter-spacing: .04em; }
+.wp-casino-play small { color: #5d351b; font: 750 8px/1 system-ui; letter-spacing: .12em; }
+.wp-casino-play:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 2px 4px #6f411d66, 0 4px 10px #0004; }
+.wp-casino-play:disabled { opacity: .72; }
+.wp-casino-play.is-locked { background: linear-gradient(135deg, #a88045, #5f4026); color: #e7d4b0; box-shadow: inset 0 0 0 1px #f0c46c2e, 0 0 18px #c9993e1a; }
+.wp-casino-play.is-locked small { color: #b9a27a; }
+.wp-casino-app[data-risk='raised'] .wp-casino-play { box-shadow: inset 0 1px #fff7c9aa, inset 0 -2px #7f4a23aa, 0 10px 23px #d28b3159, 0 0 17px #d7a33c20; }
+.wp-casino-app[data-risk='raised'] [data-casino-risk] { color: #c69b50; }
+.wp-casino-app[data-risk='high'] .wp-casino-play {
+  background: linear-gradient(135deg, #f3c463, #b04f2f 72%, #6f2429);
+  box-shadow: inset 0 1px #ffe7a1aa, 0 10px 26px #b5363545, 0 0 22px #d5763b30;
+}
+.wp-casino-app[data-risk='high'] [data-casino-risk] { color: #dc8875; }
+.wp-casino-app[data-risk='all-in'] .wp-casino-machine,
+.wp-casino-app[data-risk='all-in'] .wp-casino-bet-panel { border-color: #e1575952; }
+.wp-casino-app[data-risk='all-in'] .wp-casino-play {
+  border-color: #ffb27499;
+  background: linear-gradient(135deg, #ffcc69, #bd3c35 65%, #661c29);
+  color: #24100c;
+  animation: wp-all-in-pulse 1.25s ease-in-out infinite;
+}
+.wp-casino-app[data-risk='all-in'] [data-casino-risk] { color: #f17f72; font-weight: 900; letter-spacing: .05em; }
+@keyframes wp-all-in-pulse { 50% { box-shadow: inset 0 1px #fff4b3aa, 0 10px 27px #d43b4855, 0 0 28px #f09a4b3d; } }
+.wp-casino-history {
+  border: 1px solid #ffffff08;
+  border-radius: 13px;
+  background: #ffffff04;
+  color: #928793;
+}
+.wp-casino-history summary {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 9px;
+}
+.wp-casino-history summary::-webkit-details-marker { display: none; }
+.wp-casino-history summary b { color: #d6b35d; font-size: 10px; }
+.wp-casino-history summary b.is-loss { color: #c67586; }
+.wp-casino-history summary i { font-style: normal; color: #635a65; transition: transform .2s ease; }
+.wp-casino-history[open] summary i { transform: rotate(180deg); }
+.wp-casino-history-list { padding: 0 10px 6px; }
+.wp-casino-record {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 1px;
+  border-top: 1px solid #ffffff0a;
+  color: #807681;
+  font-size: 9px;
+}
+.wp-casino-record span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-casino-record b { color: #d4ad54; }
+.wp-casino-record.is-loss b { color: #bd687d; }
+.wp-casino-empty { padding: 13px 8px; border-top: 1px solid #ffffff0a; color: #716774; text-align: center; font-size: 9px; }
+.wp-casino-app.is-settled.is-win .wp-casino-machine { box-shadow: inset 0 0 35px #0008, 0 12px 30px #0003, 0 0 22px #d7a23f17; }
+.wp-casino-app.is-busy .wp-casino-tabs,
+.wp-casino-app.is-busy .wp-casino-bet-panel > :not(.wp-casino-play) { opacity: .52; }
+@media (max-width: 430px) {
+  .wp-casino-main { gap: 8px; padding: 9px 10px 21px; }
+  .wp-casino-stage { min-height: 184px; }
+  .wp-slot-reel { height: 70px; }
+  .wp-slot-reel span { font-size: 32px; }
+  .wp-roulette-wheel { width: 146px; height: 146px; }
+  .wp-roulette-hub { inset: 45px; }
+  .wp-casino-quick button { width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wp-slot-reel.is-spinning span,
+  .wp-roulette-wheel.is-spinning,
+  .wp-dice-cup.is-shaking,
+  .wp-die.is-revealed,
+  .wp-casino-app[data-risk='all-in'] .wp-casino-play,
+  .wp-casino-machine.is-settled .wp-casino-result::before { animation: none !important; }
+  .wp-casino-quick button,
+  .wp-dice-cup { transition: none !important; }
+}

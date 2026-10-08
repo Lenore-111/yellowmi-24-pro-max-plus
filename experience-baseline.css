@@ -1,0 +1,33 @@
+/* Shared physical interaction details. App-specific colors and layout stay local. */
+#world-phone-stage .wp-native-app button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#world-phone-stage .wp-native-app .wp-app-header button {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+#world-phone-stage .wp-native-app .wp-app-header small {
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+#world-phone-stage .wp-native-app :is(button, input, textarea, select):focus-visible {
+  outline: 2px solid #477fce;
+  outline-offset: 2px;
+}
+
+#world-phone-stage .wp-social-realism-app.is-rednote :is(button, input):focus-visible {
+  outline-color: #ed4960;
+}
+
+#world-phone-stage .wp-social-realism-app.is-weibo :is(button, input):focus-visible {
+  outline-color: #ff8200;
+}
+
+#world-phone-stage .wp-wx-app :is(button, input, textarea):focus-visible {
+  outline-color: #07a751;
+}

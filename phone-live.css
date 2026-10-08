@@ -1,0 +1,366 @@
+.wp-wx-moment-copy > div.wp-wx-moment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wp-wx-like {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+  margin: -3px -5px -3px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.wp-wx-like:hover,
+.wp-wx-like:focus-visible {
+  background: rgba(86, 112, 157, 0.10);
+  outline: none;
+}
+
+.wp-wx-like:active {
+  transform: scale(0.92);
+}
+
+.wp-wx-like.is-liked {
+  color: #d84d62;
+}
+
+.wp-wx-like b {
+  font-weight: 700;
+}
+
+.wp-news-app {
+  background: #f6f6f3;
+}
+
+.wp-news-feed {
+  height: calc(100% - 62px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 10px 18px;
+  scrollbar-width: none;
+}
+
+.wp-news-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.wp-news-empty {
+  margin: 48px 18px;
+  padding: 22px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  color: #777;
+  box-shadow: 0 8px 28px rgba(45, 50, 60, 0.06);
+}
+
+.wp-news-empty b {
+  display: block;
+  margin-bottom: 7px;
+  color: #2f3338;
+  font-size: 15px;
+}
+
+.wp-news-card {
+  margin-bottom: 10px;
+  padding: 15px 15px 13px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 5px 22px rgba(36, 43, 54, 0.055);
+}
+
+.wp-news-kicker,
+.wp-news-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #85898e;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.wp-news-kicker b {
+  color: #61708a;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.wp-news-card h3 {
+  margin: 8px 0 7px;
+  color: #20242a;
+  font-size: 16px;
+  line-height: 1.38;
+  letter-spacing: -0.015em;
+}
+
+.wp-news-card > p {
+  margin: 0 0 11px;
+  color: #5d626a;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.wp-news-discussion {
+  margin-top: 11px;
+  border-top: 1px solid rgba(70, 76, 86, 0.09);
+  padding-top: 9px;
+}
+
+.wp-news-discussion > summary {
+  list-style: none;
+  cursor: pointer;
+  color: #5e6e89;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wp-news-discussion > summary::-webkit-details-marker {
+  display: none;
+}
+
+.wp-news-discussion > summary::after {
+  content: '⌄';
+  font-size: 13px;
+  transition: transform 150ms ease;
+}
+
+.wp-news-discussion[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.wp-news-topics {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.wp-news-topic {
+  padding: 9px 10px;
+  border-radius: 11px;
+  background: #f5f6f8;
+}
+
+.wp-news-topic > b {
+  display: block;
+  margin-bottom: 4px;
+  color: #39465c;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.wp-news-topic > p {
+  margin: 0;
+  color: #666c75;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.wp-news-replies {
+  display: grid;
+  gap: 4px;
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(76, 83, 95, 0.14);
+}
+
+.wp-news-reply {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px;
+  color: #666b72;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.wp-news-reply b {
+  color: #53617a;
+  white-space: nowrap;
+}
+
+.wp-news-reply span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Mobile SillyTavern fixes <body> to the viewport while <html> has a transform.
+   Root-level fixed descendants then resolve against the transformed zero-height root.
+   Anchor the phone shell to SillyTavern's full-screen body instead. */
+#world-phone-launcher,
+#world-phone-stage {
+  position: absolute;
+}
+
+#world-phone-stage .wp-stage-close {
+  position: absolute;
+}
+
+.wp-home .wp-app-icon {
+  position: relative;
+}
+
+.wp-launcher-badge,
+.wp-app-badge {
+  position: absolute;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #f04444;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.88), 0 3px 8px rgba(0,0,0,.18);
+}
+
+.wp-launcher-badge { top: -4px; right: -3px; }
+.wp-app-badge { top: -5px; right: -5px; }
+
+.wp-lock-notifications {
+  position: absolute;
+  z-index: 4;
+  left: 20px;
+  right: 20px;
+  top: 314px;
+  display: grid;
+  gap: 8px;
+}
+
+.wp-lock-notification {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  background: rgba(236,239,248,.14);
+  color: #fff;
+  text-align: left;
+  backdrop-filter: blur(24px) saturate(120%);
+  box-shadow: 0 12px 26px rgba(4,7,18,.14), inset 0 1px rgba(255,255,255,.08);
+  cursor: pointer;
+}
+
+.wp-lock-notification-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(145deg,#43dc70,#0bb954);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.wp-lock-notification > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.wp-lock-notification b { font-size: 11px; font-weight: 650; }
+
+.wp-lock-notification small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255,255,255,.72);
+  font-size: 9px;
+}
+
+.wp-lock-notification i {
+  align-self: start;
+  margin-top: 2px;
+  color: rgba(255,255,255,.52);
+  font-size: 8px;
+  font-style: normal;
+}
+
+.wp-wx-compose[data-live-compose="1"] {
+  grid-template-columns: 32px minmax(0,1fr) auto;
+  gap: 6px;
+}
+
+.wp-wx-compose textarea {
+  width: 100%;
+  min-width: 0;
+  height: 35px;
+  max-height: 72px;
+  resize: none;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 6px;
+  outline: 0;
+  background: #fff;
+  color: #171717;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.025);
+}
+
+.wp-wx-compose textarea::placeholder { color: #aaa; }
+
+.wp-wx-compose .wp-wx-send {
+  width: auto;
+  min-width: 44px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: #07c160;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.wp-wx-compose .wp-wx-send:disabled { opacity: .55; }
+
+.wp-wx-compose[data-error]::before {
+  content: attr(data-error);
+  position: absolute;
+  left: 46px;
+  right: 56px;
+  bottom: 51px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: rgba(35,35,35,.88);
+  color: #fff;
+  font-size: 9px;
+  text-align: center;
+}
+
+.wp-device.is-notification-pulse {
+  animation: wp-notification-pulse 620ms cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes wp-notification-pulse {
+  0% { transform: translateY(0); }
+  28% { transform: translateY(-3px); }
+  56% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+
+@media (max-height: 720px) {
+  .wp-lock-notifications { top: 296px; }
+}
