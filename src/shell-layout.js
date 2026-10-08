@@ -66,6 +66,13 @@ export function mountShellLayout() {
   let suppressLauncherClick = false;
   let suppressTimer = 0;
   let idleTimer = 0;
+  let keyboardInput = false;
+
+  // Clip the launcher at the viewport, including its hit area, without widening the page.
+  const launcherLayer = document.createElement('div');
+  launcherLayer.id = 'world-phone-launcher-layer';
+  launcher.before(launcherLayer);
+  launcherLayer.append(launcher);
 
   stage.dataset.shellLayout = '1';
   launcher.style.setProperty('--phone-launcher-peek', `${LAUNCHER_PEEK}px`);
@@ -93,7 +100,7 @@ export function mountShellLayout() {
     launcher.dataset.edge = edge;
     launcher.classList.toggle('is-edge-tucked', tucked);
     const left = tucked
-      ? (edge === 'left' ? 0 : viewport.width - width)
+      ? (edge === 'left' ? LAUNCHER_PEEK - width : viewport.width - LAUNCHER_PEEK)
       : (edge === 'left' ? EDGE_GAP : viewport.width - width - EDGE_GAP);
     applyAbsolutePosition(launcher, left, clamp(top, EDGE_GAP, viewport.height - height - EDGE_GAP));
   }
@@ -108,16 +115,23 @@ export function mountShellLayout() {
     window.clearTimeout(idleTimer);
     if (drag || !stage.hidden) return;
     idleTimer = window.setTimeout(() => {
-      if (drag || !stage.hidden || launcher.matches(':focus-visible')) return;
+      if (drag || !stage.hidden || (keyboardInput && document.activeElement === launcher)) return;
       positionLauncher(launcher.dataset.edge || 'right', launcher.getBoundingClientRect().top, true);
     }, LAUNCHER_IDLE_MS);
   }
 
   function onLauncherEnter(event) {
-    if (event.pointerType !== 'touch' && !drag) wakeLauncher();
+    if (event.pointerType !== 'touch' && !drag) { wakeLauncher(); queueLauncherTuck(); }
   }
 
-  function onLauncherFocus() { wakeLauncher(); }
+  function onLauncherFocus() { wakeLauncher(); queueLauncherTuck(); }
+
+  function onPointerInput() { keyboardInput = false; }
+
+  function onKeyboardInput(event) {
+    keyboardInput = true;
+    if (event.target === launcher) wakeLauncher();
+  }
 
   function persist(kind, node) {
     if (!node) return;
@@ -254,6 +268,9 @@ export function mountShellLayout() {
   window.addEventListener('pointermove', moveDrag, { passive: false });
   window.addEventListener('pointerup', endDrag, { passive: false });
   window.addEventListener('pointercancel', endDrag, { passive: false });
+  window.addEventListener('lostpointercapture', endDrag);
+  window.addEventListener('pointerdown', onPointerInput, true);
+  window.addEventListener('keydown', onKeyboardInput, true);
   window.addEventListener('resize', onViewportChange);
   globalThis.visualViewport?.addEventListener?.('resize', onViewportChange);
   media?.addEventListener?.('change', onViewportChange);
@@ -300,9 +317,15 @@ export function mountShellLayout() {
     launcher.removeEventListener('blur', queueLauncherTuck);
     handle.removeEventListener('pointerdown', onDeviceDown);
     launcher.classList.remove('is-edge-tucked', 'is-launcher-dragging');
+    wakeLauncher();
+    launcherLayer.before(launcher);
+    launcherLayer.remove();
     window.removeEventListener('pointermove', moveDrag);
     window.removeEventListener('pointerup', endDrag);
     window.removeEventListener('pointercancel', endDrag);
+    window.removeEventListener('lostpointercapture', endDrag);
+    window.removeEventListener('pointerdown', onPointerInput, true);
+    window.removeEventListener('keydown', onKeyboardInput, true);
     window.removeEventListener('resize', onViewportChange);
     globalThis.visualViewport?.removeEventListener?.('resize', onViewportChange);
     media?.removeEventListener?.('change', onViewportChange);

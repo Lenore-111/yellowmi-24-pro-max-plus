@@ -42,7 +42,11 @@
 .wp-wwl-dealt-seat small{max-width:100%;font-size:9px;color:#b6b4c4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wp-wwl-card-back{display:grid;place-items:center;width:43px;height:61px;border:1px solid #caba83;border-radius:7px;background:linear-gradient(140deg,#303249,#171b2c);box-shadow:inset 0 0 0 4px #171b2c,inset 0 0 0 5px #caba834d,0 5px 12px #0003;color:#e2cf93;font-size:29px}
 .is-dealing .wp-wwl-dealt-seat .wp-wwl-card-back{animation:wpCrowDeal .55s ease-out both;animation-delay:var(--deal-delay)}
-.wp-wwl-own-card{display:grid;justify-items:center;gap:10px;padding:18px;border:1px solid #cfbd8352;border-radius:16px;background:#24273a;min-height:139px;text-align:center}
+.wp-wwl-deal-identity{display:grid;gap:12px;flex:0 0 auto}
+.wp-wwl-own-card{display:grid;justify-items:center;align-content:center;gap:10px;width:100%;box-sizing:border-box;padding:18px;border:1px solid #cfbd8352;border-radius:16px;background:#24273a;min-height:139px;text-align:center;font:inherit;color:inherit}
+button.wp-wwl-own-card{cursor:pointer;touch-action:manipulation}
+button.wp-wwl-own-card:active{background:#30344b}
+button.wp-wwl-own-card:focus-visible{outline:2px solid #e2d39d;outline-offset:3px}
 .wp-wwl-own-card small{font-size:11px;color:#c8ba94}
 .wp-wwl-own-card b{font-size:20px;color:#f0dfab}
 .wp-wwl-own-card>span:not(.wp-wwl-card-back){font-size:11px;line-height:1.6;color:#bab6ca}

@@ -24,10 +24,11 @@ export function crowDealMarkup(state) {
   const revealed = state.deal_revealed;
   return `<div class="wp-wwl-deal ${revealed ? 'is-revealed' : 'is-dealing'}">
     ${crowHostMarkup(view, { dealing: true, revealed })}
-    <div class="wp-wwl-dealt-seats" aria-label="各座位的背面身份牌">${view.players.map((player, index) => `<div class="wp-wwl-dealt-seat" style="--deal-delay:${index * 70}ms"><span class="wp-wwl-card-back" aria-hidden="true">☾</span><small>${index + 1} 号 · ${esc(player.display_name)}</small></div>`).join('')}</div>
-    <div class="wp-wwl-own-card" aria-live="polite">${revealed ? `<small>你的身份</small><b>${esc(roleLabel(view.your_role))}</b><span>其他玩家的身份仍然保密。</span>` : '<span class="wp-wwl-card-back" aria-hidden="true">☾</span><b>你的身份牌</b><span>点下面的按钮，只查看自己的身份。</span>'}</div>
-    <button type="button" class="wp-wwl-primary" ${revealed ? 'data-wwl-deal-confirm' : 'data-wwl-deal-reveal'}>${revealed ? '身份记住了，进入夜晚' : '查看我的身份'}</button>
+    <div class="wp-wwl-deal-identity" aria-live="polite">
+      ${revealed ? `<div class="wp-wwl-own-card"><small>你的身份</small><b>${esc(roleLabel(view.your_role))}</b><span>其他玩家的身份仍然保密。</span></div><button type="button" class="wp-wwl-primary" data-wwl-deal-confirm>身份记住了，进入夜晚</button>` : '<button type="button" class="wp-wwl-own-card" data-wwl-deal-reveal aria-label="查看我的身份"><span class="wp-wwl-card-back" aria-hidden="true">☾</span><b>你的身份牌</b><span>点击这张牌，查看我的身份。</span></button>'}
+    </div>
     ${state.error ? `<p class="wp-wwl-error" role="alert">${esc(state.error)}</p>` : ''}
+    <div class="wp-wwl-dealt-seats" aria-label="各座位的背面身份牌">${view.players.map((player, index) => `<div class="wp-wwl-dealt-seat" style="--deal-delay:${index * 70}ms"><span class="wp-wwl-card-back" aria-hidden="true">☾</span><small>${index + 1} 号 · ${esc(player.display_name)}</small></div>`).join('')}</div>
     <button type="button" class="wp-wwl-ghost wp-wwl-abandon" data-wwl-abandon>放弃这局</button>
   </div>`;
 }

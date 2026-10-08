@@ -1,4 +1,8 @@
 /* Companion to the Backstage orb. These styles affect only the launcher. */
+#world-phone-launcher-layer {
+  position: fixed; inset: 0; z-index: 10040;
+  overflow: hidden; contain: layout paint; pointer-events: none;
+}
 #world-phone-launcher {
   --phone-orb-bg: rgba(17, 20, 39, .97);
   --phone-orb-accent: #9f9ae7;
@@ -8,7 +12,7 @@
   padding: 0; border: 1px solid var(--phone-orb-line); border-radius: 50%;
   background: var(--phone-orb-bg); color: var(--phone-orb-accent);
   box-shadow: 0 10px 26px #080c2030, inset 0 0 12px color-mix(in srgb, var(--phone-orb-accent) 5%, transparent);
-  backdrop-filter: blur(16px); overflow: visible;
+  backdrop-filter: blur(16px); overflow: visible; pointer-events: auto;
 }
 #world-phone-launcher:hover {
   box-shadow: 0 12px 28px #080c2038, 0 0 15px color-mix(in srgb, var(--phone-orb-accent) 15%, transparent);
@@ -62,11 +66,4 @@ body:has(#world-phone-stage.is-open:not([hidden])) #world-phone-launcher > span 
 #world-phone-launcher.is-edge-tucked > b { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #world-phone-launcher { transition: none; }
-}
-
-#world-phone-launcher.is-edge-tucked[data-edge="left"] {
-  clip-path: inset(0 calc(100% - var(--phone-launcher-peek, 24px)) 0 0);
-}
-#world-phone-launcher.is-edge-tucked[data-edge="right"] {
-  clip-path: inset(0 0 0 calc(100% - var(--phone-launcher-peek, 24px)));
 }
