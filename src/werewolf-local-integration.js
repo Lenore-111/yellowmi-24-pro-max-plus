@@ -44,6 +44,7 @@ function landingMarkup(state) {
     ${crowHostMarkup(null)}<div class="wp-wwl-rule-strip"><span>狼人 · 隐藏阵营</span><span>神职 · 夜间技能</span><span>村民 · 观察与投票</span></div>
     <label class="wp-wwl-field"><span>你的名字</span><input data-wwl-name maxlength="24" value="玩家" autocomplete="off"></label>
     <label class="wp-wwl-field"><span>本局人数</span><div class="wp-wwl-total-picker"><button type="button" data-wwl-total-step="-1" aria-label="减少人数">−</button><select data-wwl-total aria-label="选择本局人数">${[6,7,8,9,10,11,12].map((n) => `<option value="${n}"${n === 6 ? ' selected' : ''}>${n} 人 · 你 + ${n - 1} 个 AI</option>`).join('')}</select><button type="button" data-wwl-total-step="1" aria-label="增加人数">＋</button></div></label>
+    <label class="wp-wwl-field"><span>对局速度</span><select data-wwl-ai-mode><option value="model">模型对局 · 连贯推理与发言</option><option value="local">本地快速 · 即时策略</option></select></label>
     <button type="button" class="wp-wwl-primary" data-wwl-new>让鸦发牌</button>
     ${state.has_game ? '<button type="button" class="wp-wwl-ghost" data-wwl-resume>继续上次对局</button>' : ''}
     <details class="wp-wwl-privacy"><summary>怎么玩？</summary><span>夜晚按身份行动，白天讨论后投票放逐。好人找出全部狼人，狼人争取人数优势。对局自动保存在本机，可随时返回手机后继续；AI 发言由可用模型代演，无模型时使用本地策略。</span></details>
@@ -79,9 +80,39 @@ function targetButtons(view, action, targets) {
   return (targets || []).map((id) => `<button type="button" class="wp-wwl-target" data-wwl-action="${esc(action)}" data-target-id="${esc(id)}" aria-pressed="false"><small>${view.players.findIndex(player => player.player_id === id) + 1} 号</small>${esc(nameOf(view, id))}</button>`).join('');
 }
 
-function seerKnowledge(view) {
-  if (!view.seer_checks?.length) return '';
-  return `<div class="wp-wwl-secret"><b>你的查验记录</b>${view.seer_checks.map((check) => `<span>${esc(nameOf(view, check.target_id))} · ${check.alignment === 'wolves' ? '狼人阵营' : '好人阵营'}</span>`).join('')}</div>`;
+function personalActionText(view, action) {
+  const target = action.target_id ? nameOf(view, action.target_id) : '旧存档未记录目标';
+  if (action.type === 'witch') return action.choice === 'save' ? `已使用解药救 ${target}` : action.choice === 'poison' ? `已使用毒药，目标是 ${target}` : '已行动，今晚不用药';
+  if (action.type === 'seer_check') return `已查验 ${target}：${action.alignment === 'wolves' ? '狼人阵营' : '好人阵营'}`;
+  if (action.type === 'wolf_kill') return `已提交狼人目标：${target}`;
+  if (action.type === 'hunter_shot') return `已开枪带走 ${target}`;
+  if (action.type === 'hunter_pass') return '已放弃开枪';
+  return '已提交行动';
+}
+
+export function personalInformationMarkup(view) {
+  const self = view.players.find(player => player.player_id === view.self_player_id);
+  const actions = view.personal_actions || [];
+  const current = actions.findLast(action => action.round_number === view.round_number && action.period !== 'day');
+  const night = view.phase.startsWith('night_');
+  const hasSkill = ['wolf', 'seer', 'witch'].includes(view.your_role);
+  let status = current ? personalActionText(view, current) : !self?.alive ? '你已出局，没有待提交的夜晚行动。' : !hasSkill ? '你的身份没有夜间主动技能，等待天亮。' : night ? '本夜尚未行动，轮到你时会显示操作按钮。' : '这轮的个人夜晚行动没有留存记录。';
+  if (!night && !hasSkill && self?.alive) status = '你的身份没有夜间主动技能。';
+  const latest = view.public_nights?.at(-1);
+  const result = latest ? `第 ${latest.round_number} 夜：${latest.deaths.length ? latest.deaths.map(id => nameOf(view, id)).join('、') + ' 出局' : '平安夜，无人出局'}` : '尚无公开的夜晚结算。';
+  return `<section class="wp-wwl-information" aria-label="对局信息">
+    <b>对局信息</b><p>${esc(result)}</p>
+    <b>你的夜晚信息 · 第 ${view.round_number} 夜</b><p>${esc(status)}</p>
+    ${view.witch ? `<p class="wp-wwl-medicine">解药：${view.witch.antidote_available ? '剩余 1 瓶' : '已用完'} · 毒药：${view.witch.poison_available ? '剩余 1 瓶' : '已用完'}</p>${view.phase === WEREWOLF_PHASES.witch && !view.submitted.witch ? `<p>今晚狼刀目标：${esc(view.witch.wolf_target ? nameOf(view, view.witch.wolf_target) : '没有确定目标')}</p>` : ''}` : ''}
+    ${actions.length ? `<details data-wwl-history><summary>我的行动记录（${actions.length}）</summary>${actions.map(action => `<p>第 ${action.round_number} ${action.period === 'day' ? '天' : '夜'} · ${esc(personalActionText(view, action))}</p>`).join('')}</details>` : ''}
+  </section>`;
+}
+
+function thinkingMarkup(state) {
+  const view = state.view;
+  const publicPhase = [WEREWOLF_PHASES.discussion, WEREWOLF_PHASES.vote].includes(view.phase);
+  const label = publicPhase && state.thinking ? `${state.thinking.display_name} 正在${view.phase === WEREWOLF_PHASES.discussion ? '发言' : '投票'}` : view.phase.startsWith('night_') ? '其他玩家正在完成夜晚行动…' : '正在处理下一步…';
+  return `<div class="wp-wwl-thinking" role="status"><i></i><span>${esc(label)}${view.phase === WEREWOLF_PHASES.discussion ? `<small>其他玩家已发言 ${view.speech_progress} / ${view.speech_total}</small>` : ''}</span>${state.ai_mode !== 'local' ? '<button type="button" class="wp-wwl-ghost" data-wwl-fast-forward>本地快速继续</button>' : ''}</div>`;
 }
 
 function phaseActionMarkup(state) {
@@ -90,7 +121,7 @@ function phaseActionMarkup(state) {
   if (view.phase === WEREWOLF_PHASES.ended) {
     return `<div class="wp-wwl-result"><b>${view.winner === 'wolves' ? '狼人阵营胜利' : '好人阵营胜利'}</b><span>${esc(view.win_reason)}</span></div>`;
   }
-  if (state.busy) return '<div class="wp-wwl-thinking"><i></i><span>AI 正在思考这一桌的下一步…</span></div>';
+  if (state.busy) return thinkingMarkup(state);
   if (view.phase === WEREWOLF_PHASES.wolves && view.your_role === 'wolf' && self?.alive && !view.submitted.wolf) {
     return `<section class="wp-wwl-action"><b>今晚狼队刀谁？</b>${targetButtons(view, 'wolf_kill', view.legal_targets.wolf_kill)}</section>`;
   }
@@ -111,17 +142,19 @@ function phaseActionMarkup(state) {
     return `<section class="wp-wwl-action"><b>放逐投票 · ${view.vote_progress}/${view.vote_total}</b>${targetButtons(view, 'vote', view.legal_targets.vote)}</section>`;
   }
   if (!self?.alive) return '<div class="wp-wwl-spectator">你已经出局，现在以观战视角看这桌继续发疯。</div>';
+  if (view.phase === WEREWOLF_PHASES.discussion) return '';
   return '<div class="wp-wwl-waiting">当前没有需要你提交的操作。</div>';
 }
 
-function discussionMarkup(state) {
+export function discussionMarkup(state) {
   const view = state.view;
   if (view.phase !== WEREWOLF_PHASES.discussion) return '';
   const self = view.players.find((player) => player.player_id === view.self_player_id);
   return `<section class="wp-wwl-chat">
-    <div class="wp-wwl-chat-title"><b>白天公聊</b><small>${self?.alive ? '你也可以发言' : '观战中'}</small></div>
+    <div class="wp-wwl-chat-title"><b>${self?.alive ? '你的发言' : '白天公聊'}</b><small>${self?.alive ? view.human_spoken ? '可继续补充发言' : '轮到你了' : '观战中'}</small></div>
+    ${self?.alive ? '<form data-wwl-chat="public"><input aria-label="你的公开发言" maxlength="500" placeholder="说说你的判断…" autocomplete="off"><button type="submit">发言</button></form>' : ''}
+    ${self?.alive && !view.human_spoken && !state.busy ? '<button type="button" class="wp-wwl-ghost" data-wwl-skip-speech>跳过我的发言，让其他玩家继续</button>' : ''}
     <div class="wp-wwl-messages">${publicMessagesMarkup(view)}</div>
-    ${self?.alive && !state.busy ? '<form data-wwl-chat="public"><input maxlength="500" placeholder="说点什么…" autocomplete="off"><button>发送</button></form>' : ''}
     ${view.day_ready_for_vote && !state.busy ? '<button type="button" class="wp-wwl-primary" data-wwl-finish-talk>进入投票</button>' : ''}
   </section>`;
 }
@@ -130,23 +163,25 @@ function wolfChatMarkup(state) {
   const view = state.view;
   const self = view.players.find((player) => player.player_id === view.self_player_id);
   if (view.phase !== WEREWOLF_PHASES.wolves || view.your_role !== 'wolf' || !self?.alive) return '';
-  return `<section class="wp-wwl-chat is-wolf"><div class="wp-wwl-chat-title"><b>狼人夜聊</b><small>只有活着的狼能看到</small></div><div class="wp-wwl-messages">${wolfMessagesMarkup(view)}</div>${!state.busy ? '<form data-wwl-chat="wolves"><input maxlength="500" placeholder="和狼队友说一句…" autocomplete="off"><button>发送</button></form>' : ''}</section>`;
+  return `<section class="wp-wwl-chat is-wolf"><div class="wp-wwl-chat-title"><b>狼人夜聊</b><small>只有活着的狼能看到</small></div><form data-wwl-chat="wolves"><input aria-label="狼人夜聊发言" maxlength="500" placeholder="和狼队友说一句…" autocomplete="off"><button type="submit">发送</button></form><div class="wp-wwl-messages">${wolfMessagesMarkup(view)}</div></section>`;
 }
 
-function gameMarkup(state) {
+export function gameMarkup(state) {
   const view = state.view;
   return `<div class="wp-wwl-game" data-game-id="${esc(view.game_id)}">
-    ${crowHostMarkup(view)}
     <section class="wp-wwl-phase"><div><small>第 ${view.round_number} 轮</small><b>${esc(phaseLabel(view.phase))}</b></div><span class="wp-wwl-role">你是 ${esc(roleLabel(view.your_role))}</span></section>
-    ${seerKnowledge(view)}
-    <nav class="wp-wwl-phase-track" aria-label="对局阶段">${[['night','夜晚行动'],['day_discussion','公开讨论'],['day_vote','放逐投票']].map(([key,label]) => `<span class="${view.phase.startsWith(key) ? 'is-current' : ''}">${label}</span>`).join('')}</nav>
     ${phaseActionMarkup(state)}
     <div class="wp-wwl-confirm" data-wwl-confirm-host hidden></div>
     ${wolfChatMarkup(state)}
     ${discussionMarkup(state)}
+    ${personalInformationMarkup(view)}
+    ${state.ai_notice ? `<p class="wp-wwl-ai-notice" role="status">${esc(state.ai_notice)}</p>` : ''}
+    <label class="wp-wwl-field"><span>对局速度</span><select data-wwl-ai-mode><option value="model"${state.ai_mode !== 'local' ? ' selected' : ''}>模型对局 · 连贯推理与发言</option><option value="local"${state.ai_mode === 'local' ? ' selected' : ''}>本地快速 · 即时策略</option></select></label>
+    ${crowHostMarkup(view)}
+    <nav class="wp-wwl-phase-track" aria-label="对局阶段">${[['night','夜晚行动'],['day_discussion','公开讨论'],['day_vote','放逐投票']].map(([key,label]) => `<span class="${view.phase.startsWith(key) ? 'is-current' : ''}">${label}</span>`).join('')}</nav>
     <details class="wp-wwl-players" open><summary>在场 ${view.players.filter(player => player.alive).length} / ${view.players.length}<span>座位一览</span></summary><div class="wp-wwl-seat-grid">${playersMarkup(view)}</div></details>
     ${view.phase !== WEREWOLF_PHASES.discussion && view.public_messages.length ? `<details class="wp-wwl-chat"><summary>回看公开发言</summary><div class="wp-wwl-messages">${publicMessagesMarkup(view)}</div></details>` : ''}
-    ${state.error ? `<p class="wp-wwl-error">${esc(state.error)}</p>` : ''}
+    ${state.error ? `<p class="wp-wwl-error" role="alert">${esc(state.error)}</p>${!state.busy && view.status === 'playing' ? '<button type="button" class="wp-wwl-ghost" data-wwl-resume>继续处理对局</button>' : ''}` : ''}
     <button type="button" class="wp-wwl-ghost wp-wwl-abandon" data-wwl-abandon>${view.phase === WEREWOLF_PHASES.ended ? '回到开局页' : '放弃这局'}</button>
   </div>`;
 }
@@ -205,6 +240,7 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     const focusedChannel = input?.closest('[data-wwl-chat]')?.dataset.wwlChat;
     const selection = input ? [input.selectionStart, input.selectionEnd] : null;
     const seatsOpen = old.querySelector('.wp-wwl-players')?.open ?? true;
+    const historyOpen = old.querySelector('[data-wwl-history]')?.open ?? false;
     if (!samePhase || state.busy) pendingAction = null;
     paintKey = key;
     abandonConfirmed = false;
@@ -212,6 +248,7 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     old.innerHTML = state.deal_pending ? crowDealMarkup(state) : state.view ? gameMarkup(state) : landingMarkup(state);
     if (samePhase) {
       old.querySelector('.wp-wwl-players')?.toggleAttribute('open', seatsOpen);
+      old.querySelector('[data-wwl-history]')?.toggleAttribute('open', historyOpen);
       for (const draft of drafts) {
         const field = old.querySelector(`[data-wwl-chat="${draft.channel}"] input`);
         if (field) { field.value = draft.value; if (focusedChannel === draft.channel) { field.focus({preventScroll:true}); if (selection) field.setSelectionRange(...selection); } }
@@ -262,11 +299,15 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     section.querySelector('[data-wwl-new]')?.addEventListener('click', () => guarded(() => controller.newGame({
       humanName: section.querySelector('[data-wwl-name]')?.value || '玩家',
       totalPlayers: Number(section.querySelector('[data-wwl-total]')?.value || 6),
+      aiMode: section.querySelector('[data-wwl-ai-mode]')?.value || 'model',
       awaitDeal: true,
     })));
     section.querySelector('[data-wwl-deal-reveal]')?.addEventListener('click', () => guarded(() => controller.revealDeal()));
     section.querySelector('[data-wwl-deal-confirm]')?.addEventListener('click', () => guarded(() => controller.confirmDeal()));
     section.querySelector('[data-wwl-resume]')?.addEventListener('click', () => guarded(() => controller.resume()));
+    section.querySelector('[data-wwl-skip-speech]')?.addEventListener('click', () => guarded(() => controller.skipSpeech()));
+    section.querySelector('[data-wwl-fast-forward]')?.addEventListener('click', () => guarded(() => controller.setAiMode('local')));
+    if (state.view) section.querySelector('[data-wwl-ai-mode]')?.addEventListener('change', event => guarded(() => controller.setAiMode(event.currentTarget.value)));
     section.querySelector('[data-wwl-abandon]')?.addEventListener('click', event => {
       if (!abandonConfirmed && state.view?.phase !== WEREWOLF_PHASES.ended) { abandonConfirmed = true; event.currentTarget.textContent = '确认结束这局？再次点击放弃'; return; }
       abandonConfirmed = false; controller.abandon(); queueRefresh();
@@ -291,7 +332,7 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
       const text = input?.value || '';
       if (!text.trim()) return;
       input.value = '';
-      guarded(() => controller.humanMessage(text));
+      guarded(() => controller.humanMessage(text, form.dataset.wwlChat));
     }));
   }
 

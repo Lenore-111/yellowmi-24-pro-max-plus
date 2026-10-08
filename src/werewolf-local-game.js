@@ -9,9 +9,10 @@ import {
   viewForPlayer,
   WEREWOLF_PHASES,
 } from './werewolf-local-engine.js';
-import { decideLocalWerewolfAi, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js';
+import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js';
 
 export const LOCAL_WEREWOLF_STORAGE_KEY = 'world_phone_werewolf_local_v1';
+export const LOCAL_WEREWOLF_AI_TIMEOUT_MS = 30000;
 
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -133,7 +134,7 @@ function rememberAiDecision(game, request, decision) {
 }
 
 export class LocalWerewolfGameController {
-  constructor({ decideAi = decideLocalWerewolfAi } = {}) {
+  constructor({ decideAi = decideLocalWerewolfAi, aiTimeoutMs = LOCAL_WEREWOLF_AI_TIMEOUT_MS } = {}) {
     this.decideAi = decideAi;
     this.game = loadLocalWerewolfGame();
     if (this.game) {
@@ -144,6 +145,13 @@ export class LocalWerewolfGameController {
     this.busy = false;
     this.error = '';
     this.destroyed = false;
+    this.aiTimeoutMs = Math.max(1, Number(aiTimeoutMs) || LOCAL_WEREWOLF_AI_TIMEOUT_MS);
+    this.thinking = null;
+    this.aiNotice = '';
+    this.modelInFlight = null;
+    this.cancelAi = null;
+    this.loopId = null;
+    this.localBatch = false;
   }
 
   getState() {
@@ -151,6 +159,9 @@ export class LocalWerewolfGameController {
       has_game: Boolean(this.game),
       busy: this.busy,
       error: this.error,
+      ai_mode: this.game?.ai_mode === 'local' ? 'local' : 'model',
+      thinking: clone(this.thinking),
+      ai_notice: this.aiNotice,
       deal_pending: Boolean(this.game?.dealer_pending),
       deal_revealed: Boolean(this.game?.dealer_revealed),
       game: clone(this.game),
@@ -177,10 +188,16 @@ export class LocalWerewolfGameController {
   }
 
   async newGame(options = {}) {
+    this.cancelAi?.();
+    this.loopId = null;
+    this.busy = false;
+    this.thinking = null;
+    this.aiNotice = '';
     this.error = '';
     this.game = createLocalWerewolfGame(options);
     this.game.ai_memory = {};
     this.game.ai_public_history = { votes: [] };
+    this.game.ai_mode = options.aiMode === 'local' ? 'local' : 'model';
     this.game.dealer_pending = Boolean(options.awaitDeal);
     this.game.dealer_revealed = false;
     this.persist();
@@ -199,6 +216,11 @@ export class LocalWerewolfGameController {
 
   abandon() {
     this.game = null;
+    this.cancelAi?.();
+    this.loopId = null;
+    this.busy = false;
+    this.thinking = null;
+    this.aiNotice = '';
     this.error = '';
     clearLocalWerewolfGame();
     this.emit();
@@ -233,19 +255,74 @@ export class LocalWerewolfGameController {
     return this.getState();
   }
 
-  async humanMessage(text) {
+  async humanMessage(text, requestedChannel) {
     if (!this.game) throw new Error('游戏尚未开始');
     if (this.game.dealer_pending) throw new Error('先查看身份牌，再进入夜晚');
     const view = viewForPlayer(this.game, this.game.human_player_id);
-    const channel = view.phase === WEREWOLF_PHASES.wolves && view.your_role === 'wolf' ? 'wolves' : 'public';
+    const channel = requestedChannel || (view.phase === WEREWOLF_PHASES.wolves && view.your_role === 'wolf' ? 'wolves' : 'public');
     appendGameMessage(this.game, this.game.human_player_id, channel, text);
     this.persist();
+    if (channel === 'public') await this.runAiLoop();
     return this.getState();
+  }
+
+  async skipSpeech() {
+    if (!this.game || this.game.dealer_pending) throw new Error('先查看身份牌，再进入对局');
+    const view = viewForPlayer(this.game, this.game.human_player_id);
+    const human = this.game.players.find(player => player.player_id === this.game.human_player_id);
+    if (view.phase !== WEREWOLF_PHASES.discussion || !human?.alive) throw new Error('当前不能跳过发言');
+    this.game.day.human_spoken = true;
+    this.persist();
+    await this.runAiLoop();
+    return this.getState();
+  }
+
+  setAiMode(mode) {
+    if (!this.game) throw new Error('游戏尚未开始');
+    if (!['local', 'model'].includes(mode)) throw new Error('对局速度选项无效');
+    this.game.ai_mode = mode;
+    if (mode === 'local') this.cancelAi?.();
+    this.persist();
+    return this.getState();
+  }
+
+  async requestAi(game, request) {
+    this.thinking = { action: request.action, display_name: request.display_name };
+    this.emit();
+    if (game.ai_mode === 'local' || this.localBatch || this.modelInFlight) {
+      if (this.modelInFlight && game.ai_mode !== 'local') this.aiNotice = '上一条模型请求仍未结束，本次流程使用本地策略继续。';
+      return fallbackLocalWerewolfAiDecision(request);
+    }
+    const task = Promise.resolve().then(() => this.decideAi(request));
+    this.modelInFlight = task;
+    const clearPending = () => { if (this.modelInFlight === task) this.modelInFlight = null; };
+    task.then(clearPending, clearPending);
+    return new Promise(resolve => {
+      let done = false;
+      let timer;
+      const finish = decision => {
+        if (done) return;
+        done = true;
+        globalThis.clearTimeout(timer);
+        if (this.cancelAi === cancel) this.cancelAi = null;
+        resolve(decision);
+      };
+      const useLocal = notice => {
+        if (done) return;
+        if (this.game === game) { this.localBatch = true; this.aiNotice = notice; }
+        finish(fallbackLocalWerewolfAiDecision(request));
+      };
+      const cancel = () => useLocal('已切换本地快速模式。模型稍后返回的结果不会加入对局。');
+      this.cancelAi = cancel;
+      timer = globalThis.setTimeout(() => useLocal('模型等待超时，本次流程使用本地策略继续。'), this.aiTimeoutMs);
+      task.then(finish, () => useLocal('模型调用失败，本次流程使用本地策略继续。'));
+    });
   }
 
   async finishDiscussion() {
     if (!this.game) throw new Error('游戏尚未开始');
     if (this.game.dealer_pending) throw new Error('先查看身份牌，再进入夜晚');
+    if (this.busy || !this.game.day.ready_for_vote) throw new Error('请等其他玩家完成发言，再进入投票');
     beginVote(this.game);
     this.persist();
     await this.runAiLoop();
@@ -255,11 +332,16 @@ export class LocalWerewolfGameController {
   async runAiLoop() {
     if (!this.game || this.game.dealer_pending || this.busy || this.destroyed) return this.getState();
     this.busy = true;
+    const runningGame = this.game;
+    const loopId = Symbol('werewolf-loop');
+    this.loopId = loopId;
+    this.localBatch = false;
+    this.aiNotice = '';
     this.error = '';
     this.emit();
     try {
       let guard = 0;
-      while (this.game && this.game.status === 'playing' && guard < 80) {
+      while (this.game === runningGame && this.loopId === loopId && !this.destroyed && this.game.status === 'playing' && guard < 80) {
         guard += 1;
         const game = this.game;
         ensureAiMemory(game);
@@ -273,7 +355,8 @@ export class LocalWerewolfGameController {
           if (pendingAi.length) {
             const player = pendingAi[0];
             const request = aiRequest(game, player.player_id, 'wolf_kill');
-            const decision = await this.decideAi(request);
+            const decision = await this.requestAi(game, request);
+            if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
             rememberAiDecision(game, request, decision);
             if (decision.text) appendGameMessage(game, player.player_id, 'wolves', decision.text);
             submitWerewolfAction(game, player.player_id, { type: 'wolf_kill', target_id: decision.target_id });
@@ -289,7 +372,8 @@ export class LocalWerewolfGameController {
           if (!seer) continue;
           if (seer.kind === 'human') break;
           const request = aiRequest(game, seer.player_id, 'seer_check');
-          const decision = await this.decideAi(request);
+          const decision = await this.requestAi(game, request);
+          if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
           rememberAiDecision(game, request, decision);
           submitWerewolfAction(game, seer.player_id, { type: 'seer_check', target_id: decision.target_id });
           this.persist();
@@ -301,7 +385,8 @@ export class LocalWerewolfGameController {
           if (!witch) continue;
           if (witch.kind === 'human') break;
           const request = aiRequest(game, witch.player_id, 'witch');
-          const decision = await this.decideAi(request);
+          const decision = await this.requestAi(game, request);
+          if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
           rememberAiDecision(game, request, decision);
           submitWerewolfAction(game, witch.player_id, { type: 'witch', choice: decision.choice, target_id: decision.target_id || '' });
           this.persist();
@@ -314,7 +399,8 @@ export class LocalWerewolfGameController {
           if (!hunter) throw new Error('猎人状态损坏');
           if (hunter.kind === 'human') break;
           const request = aiRequest(game, hunterId, 'hunter_shot');
-          const decision = await this.decideAi(request);
+          const decision = await this.requestAi(game, request);
+          if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
           rememberAiDecision(game, request, decision);
           const target = decision.target_id;
           submitWerewolfAction(game, hunterId, target && legalTargets(game, hunterId, 'hunter_shot').includes(target)
@@ -325,6 +411,7 @@ export class LocalWerewolfGameController {
         }
 
         if (game.phase === WEREWOLF_PHASES.discussion) {
+          if (human?.alive && !viewForPlayer(game, humanId).human_spoken) break;
           const nextSpeaker = livingPlayers(game).find((player) => player.kind === 'ai' && !game.day.ai_spoken[player.player_id]);
           if (!nextSpeaker) {
             game.day.ready_for_vote = true;
@@ -332,7 +419,8 @@ export class LocalWerewolfGameController {
             break;
           }
           const request = aiRequest(game, nextSpeaker.player_id, 'day_speak');
-          const decision = await this.decideAi(request);
+          const decision = await this.requestAi(game, request);
+          if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
           rememberAiDecision(game, request, decision);
           appendGameMessage(game, nextSpeaker.player_id, 'public', decision.text || '我这一轮先听听其他人的看法。');
           markAiSpoken(game, nextSpeaker.player_id);
@@ -344,7 +432,8 @@ export class LocalWerewolfGameController {
           const nextVoter = livingPlayers(game).find((player) => player.kind === 'ai' && !Object.hasOwn(game.day.votes, player.player_id));
           if (nextVoter) {
             const request = aiRequest(game, nextVoter.player_id, 'vote');
-            const decision = await this.decideAi(request);
+            const decision = await this.requestAi(game, request);
+            if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
             rememberAiDecision(game, request, decision);
             const action = { type: 'vote', target_id: decision.target_id };
             const voteSnapshot = pendingVoteHistory(game, nextVoter.player_id, action);
@@ -361,17 +450,24 @@ export class LocalWerewolfGameController {
       }
       if (guard >= 80) throw new Error('AI 自动流程超过安全步数，已停止以避免死循环');
     } catch (error) {
-      this.error = String(error?.message || error);
+      if (this.loopId === loopId) this.error = String(error?.message || error);
     } finally {
-      this.busy = false;
-      if (this.game) saveLocalWerewolfGame(this.game);
-      this.emit();
+      if (this.loopId === loopId) {
+        this.loopId = null;
+        this.busy = false;
+        this.thinking = null;
+        if (this.game) saveLocalWerewolfGame(this.game);
+        this.emit();
+      }
     }
     return this.getState();
   }
 
   destroy() {
     this.destroyed = true;
+    this.cancelAi?.();
+    this.loopId = null;
+    this.busy = false;
     this.listeners.clear();
   }
 }

@@ -141,6 +141,8 @@ export function buildLocalWerewolfAiPrompt(request) {
     players,
     seer_checks: view.seer_checks || [],
     witch: view.witch || null,
+    personal_actions: view.personal_actions || [],
+    public_nights: view.public_nights || [],
     legal_targets: request.legal_targets || [],
     public_messages: compactMessages(view.public_messages, view.players),
     wolf_messages: request.action === 'wolf_kill' ? compactMessages(view.wolf_messages, view.players) : [],
@@ -154,6 +156,7 @@ export function buildLocalWerewolfAiPrompt(request) {
     '你和真人遵守完全相同的规则。只能依据下面 GAME_VIEW 中对你可见的信息推理；没有出现的身份和信息一律未知。',
     '先在内部完成：整理新增信息→检查自己上一轮立场→对照历史票型和前后发言→更新嫌疑/可信度→结合自己的阵营目标选择策略→再生成最终动作或公开发言。',
     '不要输出逐步思维过程、长篇分析或隐藏推理。memory 只保存短小的结论摘要和连续性记录，供你下一次行动继续使用。',
+    '为保持桌游节奏，公开发言控制在六十至一百二十字，摘要字段各不超过四十字，嫌疑与公开声称各保留最相关的三项。夜间只给简短动作和必要摘要。',
     '你可以撒谎、伪装、怀疑别人，但不能声称读取后台、角色卡、世界书、酒馆聊天或未展示的隐藏身份。',
     'previous_memory 是你的私有判断与计划，不是真相，更不是已经公开发生的事件；新证据足够时应修改，不要为了“保持一致”硬圆错误。',
     '白天公开发言中，凡是“某人刚才/昨天说过、投过、做过什么”这类具体公开历史，只能以 public_messages 与 vote_history 为事实来源。那里没有出现的公开行为，就不能为了配合私有计划而编造成已经发生。',
@@ -210,7 +213,7 @@ export async function decideLocalWerewolfAi(request) {
   const generator = ctx?.generateRaw;
   if (typeof generator !== 'function') return fallback;
   try {
-    const raw = await generator({ prompt: buildLocalWerewolfAiPrompt(request), systemPrompt: '' });
+    const raw = await generator({ prompt: buildLocalWerewolfAiPrompt(request), systemPrompt: '', responseLength: request.action === 'day_speak' ? 768 : 512 });
     const parsed = extractJson(raw);
     if (!parsed) return fallback;
     const memory = sanitizeLocalWerewolfAiMemory(parsed.memory, request);

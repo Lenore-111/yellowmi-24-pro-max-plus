@@ -56,7 +56,33 @@ function newNight() {
 }
 
 function newDay() {
-  return { votes: {}, lynched: '', resolved: false, ai_spoken: {}, ready_for_vote: false };
+  return { votes: {}, lynched: '', resolved: false, ai_spoken: {}, human_spoken: false, ready_for_vote: false };
+}
+
+function recordPersonalAction(game, playerId, action) {
+  if (!Array.isArray(game.personal_actions)) game.personal_actions = [];
+  game.personal_actions.push({ player_id: playerId, round_number: game.round_number, period: 'night', ...action });
+}
+
+function personalActions(game, viewerId) {
+  const actions = (game.personal_actions || []).filter(item => item.player_id === viewerId).map(item => ({
+    round_number: item.round_number, type: item.type, target_id: item.target_id || '',
+    choice: item.choice || '', alignment: item.alignment || '', period: item.period || 'night',
+  }));
+  // 旧存档可恢复当前夜晚及查验记录，已经丢失的往夜目标不作推断。
+  const addMissing = action => { if (!actions.some(item => item.round_number === action.round_number && item.type === action.type)) actions.push(action); };
+  if (game.roles[viewerId] === 'wolf' && Object.hasOwn(game.night.wolf_votes, viewerId)) addMissing({ type: 'wolf_kill', round_number: game.round_number, target_id: game.night.wolf_votes[viewerId] });
+  if (game.roles[viewerId] === 'seer') for (const check of game.seer_checks.filter(item => item.player_id === viewerId)) addMissing({ type: 'seer_check', round_number: check.round_number, target_id: check.target_id, alignment: check.alignment });
+  if (game.roles[viewerId] === 'witch' && game.night.witch_done && game.night.witch_choice) addMissing({ type: 'witch', round_number: game.round_number, choice: game.night.witch_choice, target_id: game.night.witch_choice === 'save' ? game.night.wolf_target : game.night.witch_poison_target });
+  return actions.sort((a, b) => a.round_number - b.round_number);
+}
+
+function publicNightResults(game) {
+  const results = game.events.filter(item => item.type === 'night_result').map(item => ({ round_number: item.round_number, deaths: [...item.deaths] }));
+  if (game.night.resolved && !results.some(item => item.round_number === game.round_number)) {
+    results.push({ round_number: game.round_number, deaths: game.events.filter(item => item.type === 'death' && item.round_number === game.round_number && ['wolves', 'witch_poison'].includes(item.cause)).map(item => item.player_id) });
+  }
+  return results;
 }
 
 function playerById(game, playerId) {
@@ -156,6 +182,7 @@ function resolveNight(game) {
   if (wolfTarget && kill(game, wolfTarget, 'wolves')) deaths.push(wolfTarget);
   if (game.night.witch_poison_target && kill(game, game.night.witch_poison_target, 'witch_poison')) deaths.push(game.night.witch_poison_target);
   game.night.resolved = true;
+  game.events.push({ event_id: randomId('event'), type: 'night_result', round_number: game.round_number, deaths: [...deaths] });
   if (queueHunterIfNeeded(game, deaths)) return;
   if (applyWinner(game)) return;
   enterDiscussion(game);
@@ -183,6 +210,7 @@ export function createLocalWerewolfGame({ humanName = '你', totalPlayers = 6, a
     win_reason: '',
     witch: { antidote_available: true, poison_available: true },
     seer_checks: [],
+    personal_actions: [],
     night: newNight(),
     day: newDay(),
     hunter: { pending_player_id: '', acted: false, source_phase: '' },
@@ -229,6 +257,7 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     if (Object.hasOwn(game.night.wolf_votes, playerId)) throw new Error('本夜已经提交过狼人目标');
     if (!legalTargets(game, playerId, 'wolf_kill').includes(target_id)) throw new Error('狼人目标不合法');
     game.night.wolf_votes[playerId] = target_id;
+    recordPersonalAction(game, playerId, { type, target_id });
     const wolves = livingRolePlayers(game, 'wolf');
     if (wolves.every((wolf) => Object.hasOwn(game.night.wolf_votes, wolf.player_id))) {
       game.night.wolf_target = majorityChoice(game.night.wolf_votes);
@@ -241,6 +270,7 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     if (game.night.seer_done) throw new Error('本夜已经查验过');
     if (!legalTargets(game, playerId, 'seer_check').includes(target_id)) throw new Error('查验目标不合法');
     game.seer_checks.push({ player_id: playerId, target_id, alignment: teamForRole(game.roles[target_id]), round_number: game.round_number });
+    recordPersonalAction(game, playerId, { type, target_id, alignment: teamForRole(game.roles[target_id]) });
     game.night.seer_done = true;
     game.phase = WEREWOLF_PHASES.witch;
     advanceNightPastMissingRoles(game);
@@ -261,6 +291,7 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     }
     game.night.witch_choice = choice;
     game.night.witch_done = true;
+    recordPersonalAction(game, playerId, { type, choice, target_id: choice === 'save' ? game.night.wolf_target : choice === 'poison' ? target_id : '' });
     resolveNight(game);
   } else if (type === 'vote') {
     assertAlive(game, playerId);
@@ -283,8 +314,9 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     if (game.phase !== WEREWOLF_PHASES.hunter || game.hunter.pending_player_id !== playerId || game.hunter.acted) throw new Error('当前不能发动猎人技能');
     if (type === 'hunter_shot') {
       if (!legalTargets(game, playerId, 'hunter_shot').includes(target_id)) throw new Error('猎人目标不合法');
+      recordPersonalAction(game, playerId, { type, target_id, period: game.hunter.source_phase });
       kill(game, target_id, 'hunter');
-    }
+    } else recordPersonalAction(game, playerId, { type, period: game.hunter.source_phase });
     game.hunter.acted = true;
     if (applyWinner(game)) return touch(game);
     if (game.hunter.source_phase === 'day') startNextNight(game);
@@ -309,6 +341,7 @@ export function appendGameMessage(game, playerId, channel, value) {
   if (channel === 'public') {
     if (game.phase !== WEREWOLF_PHASES.discussion || !player.alive) throw new Error('当前不能在公聊发言');
     game.public_messages.push({ message_id: randomId('message'), player_id: playerId, text, round_number: game.round_number, created_at: new Date().toISOString() });
+    if (player.kind === 'human') game.day.human_spoken = true;
     if (game.public_messages.length > 300) game.public_messages.splice(0, game.public_messages.length - 300);
   } else if (channel === 'wolves') {
     if (game.phase !== WEREWOLF_PHASES.wolves || !player.alive || game.roles[playerId] !== 'wolf') throw new Error('当前不能在狼人夜聊发言');
@@ -353,9 +386,11 @@ export function viewForPlayer(game, viewerId) {
     win_reason: game.win_reason,
     self_player_id: viewerId,
     your_role: role,
-    players: game.players.map((player) => ({ ...player, role: visibleRoles[player.player_id] || '' })),
+    players: game.players.map((player) => ({ ...player, role: visibleRoles[player.player_id] || '', death_cause: revealAll || player.player_id === viewerId ? player.death_cause : '' })),
     visible_roles: visibleRoles,
     seer_checks: seerChecks,
+    personal_actions: personalActions(game, viewerId),
+    public_nights: publicNightResults(game),
     witch: role === 'witch' ? { ...game.witch, wolf_target: game.night.wolf_target } : null,
     hunter_pending: game.hunter.pending_player_id === viewerId && !game.hunter.acted,
     submitted: {
@@ -365,6 +400,9 @@ export function viewForPlayer(game, viewerId) {
       vote: Object.hasOwn(game.day.votes, viewerId),
     },
     day_ready_for_vote: Boolean(game.day.ready_for_vote),
+    human_spoken: Boolean(game.day.human_spoken || game.day.ready_for_vote || game.public_messages.some(item => item.player_id === game.human_player_id && item.round_number === game.round_number)),
+    speech_progress: Object.keys(game.day.ai_spoken).length,
+    speech_total: livingPlayers(game).filter(player => player.kind === 'ai').length,
     vote_progress: game.phase === WEREWOLF_PHASES.vote ? Object.keys(game.day.votes).length : 0,
     vote_total: game.phase === WEREWOLF_PHASES.vote ? livingPlayers(game).length : 0,
     public_messages: game.public_messages.map((message) => ({ ...message })),
