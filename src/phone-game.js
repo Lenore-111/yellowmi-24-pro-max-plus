@@ -1,6 +1,9 @@
 import { DELIVERY_COLA } from './delivery-data.js';
 import { casinoBranchKey } from './casino.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
+import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js';
+
+export { phoneGameActorPronoun } from './phone-game-actors.js';
 
 export const PHONE_GAME_KEY = 'world_phone_game_v1';
 export const PHONE_GAME_GIFTS = Object.freeze([
@@ -64,24 +67,14 @@ export function setPhoneGameMode(mode) {
   persist(scope, { ...readStore(scope), mode });
 }
 function collectActors(ctx) {
-  const cards = ctx?.groupId ? (ctx.groups?.find(group => String(group.id) === String(ctx.groupId))?.members || [])
-    .map(avatar => ctx.characters?.find(card => card.avatar === avatar)).filter(Boolean) : [ctx?.characters?.[ctx?.characterId]].filter(Boolean);
-  const actors = cards.map((card, index) => ({
-    id: `card:${card.avatar || card.name || index}`, name: clean(card.name || card.data?.name, 80),
-    profile: clean([card.description || card.data?.description, card.personality || card.data?.personality, card.scenario || card.data?.scenario].filter(Boolean).join('\n'), 7000),
-  }));
-  for (const person of readWorldBackstage().contacts || []) {
-    if (actors.some(actor => actor.name === person.name)) continue;
-    actors.push({ id: `world:${person.id}`, name: clean(person.name, 80), profile: clean(JSON.stringify(person.raw || {}), 3500) });
-  }
-  return actors.filter(actor => actor.name).slice(0, 12);
+  return collectPhoneGameActors(ctx, readWorldBackstage().contacts || []);
 }
 function createState(scope) {
   const ctx = scope.ctx;
   const power = ctx?.powerUserSettings || {};
   const persona = ctx?.chatMetadata?.persona || Object.keys(power.personas || {}).find(key => power.personas[key] === ctx?.name1) || power.default_persona;
   return {
-    version: 1, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
+    version: 2, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
     actors: collectActors(ctx),
     origin: clean((ctx?.chat || []).filter(message => !message.is_system).slice(-6).map(message => `${message.is_user ? ctx?.name1 || '你' : message.name || ctx?.name2 || '角色'}：${message.mes || ''}`).join('\n'), 7000),
     tick: 0, balance: 100, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
@@ -90,7 +83,7 @@ function createState(scope) {
 export function normalizePhoneGameState(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const actors = (Array.isArray(source.actors) ? source.actors : []).filter(actor => actor && clean(actor.id) && clean(actor.name)).slice(0, 12)
-    .map(actor => ({ id: clean(actor.id, 180), name: clean(actor.name, 80), profile: clean(actor.profile, 7000) }));
+    .map(actor => ({ id: clean(actor.id, 180), name: clean(actor.name, 80), profile: clean(actor.profile, 7000), pronoun: inferPhoneGamePronoun(actor, clean(actor.profile, 7000)) }));
   const actorIds = new Set(actors.map(actor => actor.id));
   const events = (Array.isArray(source.events) ? source.events : []).filter(event => event && actorIds.has(event.actorId)).slice(-160)
     .map(event => ({ id: clean(event.id, 100), actorId: event.actorId, kind: ['chat', 'comment', 'gift'].includes(event.kind) ? event.kind : 'chat',
@@ -109,16 +102,45 @@ export function normalizePhoneGameState(raw) {
   const shift = source.shift && Array.isArray(source.shift.orders) && source.shift.orders.length === 3
     && source.shift.orders.every(recipe => PHONE_GAME_RECIPES.some(item => item.id === recipe))
     ? { id: clean(source.shift.id, 100), orders: [...source.shift.orders], index: integer(source.shift.index, 0, 3), correct: integer(source.shift.correct, 0, 3), claimed: Boolean(source.shift.claimed) } : null;
-  return { version: 1, user: clean(source.user || '你', 80), userProfile: clean(source.userProfile, 4000), actors,
+  return { version: 2, user: clean(source.user || '你', 80), userProfile: clean(source.userProfile, 4000), actors,
     origin: clean(source.origin, 7000), tick: integer(source.tick), balance: integer(source.balance), earned: integer(source.earned), spent: integer(source.spent),
     ledger: (Array.isArray(source.ledger) ? source.ledger : []).slice(-50).map(item => ({ id: clean(item.id, 100), text: clean(item.text, 160), amount: integer(item.amount, -1000000, 1000000), tick: integer(item.tick) })),
-    posts, events, relations, shift };
+    posts, events, relations, shift,
+    actorArchive: Array.isArray(source.actorArchive) ? clone(source.actorArchive) : [] };
+}
+function reconcileActors(raw, ctx) {
+  const source = clone(raw);
+  const known = collectActors(ctx);
+  const actors = Array.isArray(source.actors) ? source.actors : [];
+  const excluded = actors.filter(actor => actor && isPhoneGameScenarioActor(actor, ctx));
+  const excludedIds = new Set(excluded.map(actor => actor.id));
+  const actorArchive = Array.isArray(source.actorArchive) ? source.actorArchive : [];
+  const events = Array.isArray(source.events) ? source.events : [];
+  const posts = Array.isArray(source.posts) ? source.posts : [];
+  for (const actor of excluded) {
+    actorArchive.push({ actor, events: events.filter(event => event?.actorId === actor.id),
+      posts: posts.filter(post => post?.actorId === actor.id), relation: source.relations?.[actor.id] || {} });
+  }
+  const active = actors.filter(actor => actor && !excludedIds.has(actor.id)).map(actor => {
+    const current = known.find(item => item.id === actor.id || item.name === actor.name);
+    return current ? { ...actor, name: current.name, pronoun: current.pronoun,
+      profile: current.profile || actor.profile } : actor;
+  });
+  for (const actor of known) {
+    if (active.length >= 12) break;
+    if (!active.some(item => item.id === actor.id || item.name === actor.name)) active.push(actor);
+  }
+  return { ...source, actors: active, actorArchive };
 }
 export function readPhoneGameState(scope = capturePhoneGameScope()) {
   requireScope(scope);
   const store = readStore(scope);
   const raw = Object.hasOwn(store.saves || {}, scope.key) ? store.saves[scope.key] : null;
-  if (raw) return clone(normalizePhoneGameState(raw));
+  if (raw) {
+    const state = normalizePhoneGameState(reconcileActors(raw, scope.ctx));
+    if (JSON.stringify(state) !== JSON.stringify(raw)) persist(scope, { ...store, saves: { ...store.saves, [scope.key]: state } });
+    return clone(state);
+  }
   const state = normalizePhoneGameState(createState(scope));
   persist(scope, { ...store, saves: { ...store.saves, [scope.key]: state } });
   return clone(state);
@@ -138,6 +160,12 @@ function actorIn(state, actorId) {
 }
 export function phoneGameClock(state) { return `第 ${1 + Math.floor(state.tick / 24)} 天 · ${String(8 + Math.floor((state.tick % 24) / 2)).padStart(2, '0')}:${state.tick % 2 ? '30' : '00'}`; }
 export function phoneGameRelationLabel(value) { return value >= 75 ? '亲近' : value >= 40 ? '熟悉' : value >= 15 ? '渐渐熟络' : '初识'; }
+export function phoneGameEventDisplayText(state, event) {
+  const gift = event.kind === 'gift' && PHONE_GAME_GIFTS.find(item => item.id === event.giftId);
+  if (!gift) return event.text;
+  const actor = state.actors.find(item => item.id === event.actorId);
+  return `送给${phoneGameActorPronoun(actor)}${gift.name}${event.note ? `。附言：${event.note}` : ''}`;
+}
 export function togglePhoneGameLike(postId, scope = capturePhoneGameScope()) {
   return commit(scope, state => { const post = state.posts.find(post => post.id === postId); if (post) post.liked = !post.liked; });
 }
@@ -146,7 +174,7 @@ export function queuePhoneGameInteraction({ actorId, kind = 'chat', text = '', p
   const next = commit(scope, state => {
     const actor = actorIn(state, actorId);
     if (!['chat', 'comment', 'gift'].includes(kind)) throw new Error('未知互动');
-    if (state.events.some(event => event.actorId === actorId && event.status === 'pending')) throw new Error('她还有一条待回应的互动，先点“重试回应”。');
+    if (state.events.some(event => event.actorId === actorId && event.status === 'pending')) throw new Error(`${phoneGameActorPronoun(actor)}还有一条待回应的互动，先点“重试回应”。`);
     if (kind === 'comment' && !state.posts.some(post => post.id === postId && post.actorId === actorId)) throw new Error('原帖已不存在');
     let body = clean(text, 1200);
     if (kind === 'gift') {
@@ -156,7 +184,7 @@ export function queuePhoneGameInteraction({ actorId, kind = 'chat', text = '', p
       state.balance -= gift.price; state.spent += gift.price;
       state.relations[actorId].giftCounts[gift.id] += 1;
       state.ledger.push({ id: id(), text: `送给${actor.name}：${gift.name}`, amount: -gift.price, tick: state.tick });
-      body = `送给你${gift.name}${clean(note, 200) ? `。附言：${clean(note, 200)}` : ''}`;
+      body = `送给${phoneGameActorPronoun(actor)}${gift.name}${clean(note, 200) ? `。附言：${clean(note, 200)}` : ''}`;
     }
     if (!body) throw new Error('先写点什么');
     state.tick += 1; eventId = id();

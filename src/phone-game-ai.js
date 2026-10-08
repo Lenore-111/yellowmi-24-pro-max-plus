@@ -48,7 +48,7 @@ function parseResponse(raw) {
 }
 
 export async function generatePhoneGameContent(request, scope = capturePhoneGameScope()) {
-  if (generating) throw new Error('手机里还有一次生成进行中，等她回应后再继续。');
+  if (generating) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
   if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('请回到原聊天的独立游戏模式继续。');
   const generator = scope.ctx?.generateRaw;
   if (typeof generator !== 'function') throw new Error('请先连接酒馆模型。手机互动已保存，连接后可以重试。');

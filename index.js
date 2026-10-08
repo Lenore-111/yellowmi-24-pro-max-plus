@@ -96,7 +96,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.14 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[世界小手机] 0.3.0-alpha.15 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {
