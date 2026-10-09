@@ -5,11 +5,12 @@ import {
   legalTargets,
   livingPlayers,
   markAiSpoken,
+  restoreLocalWerewolfRecords,
   submitWerewolfAction,
   viewForPlayer,
   WEREWOLF_PHASES,
-} from './werewolf-local-engine.js';
-import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js';
+} from './werewolf-local-engine.js?v=0.3.0-alpha.20';
+import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.20';
 
 export const LOCAL_WEREWOLF_STORAGE_KEY = 'world_phone_werewolf_local_v1';
 export const LOCAL_WEREWOLF_AI_TIMEOUT_MS = 30000;
@@ -80,6 +81,7 @@ export function loadLocalWerewolfGame() {
     if (!validSavedGame(parsed)) return null;
     ensureAiMemory(parsed);
     ensureAiPublicHistory(parsed);
+    restoreLocalWerewolfRecords(parsed);
     return parsed;
   } catch {
     return null;

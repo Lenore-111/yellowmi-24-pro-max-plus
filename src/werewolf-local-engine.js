@@ -71,18 +71,50 @@ function personalActions(game, viewerId) {
   }));
   // 旧存档可恢复当前夜晚及查验记录，已经丢失的往夜目标不作推断。
   const addMissing = action => { if (!actions.some(item => item.round_number === action.round_number && item.type === action.type)) actions.push(action); };
-  if (game.roles[viewerId] === 'wolf' && Object.hasOwn(game.night.wolf_votes, viewerId)) addMissing({ type: 'wolf_kill', round_number: game.round_number, target_id: game.night.wolf_votes[viewerId] });
+  if (game.roles[viewerId] === 'wolf' && Object.hasOwn(game.night.wolf_votes, viewerId)) {
+    addMissing({ type: 'wolf_kill', round_number: game.round_number, target_id: game.night.wolf_votes[viewerId] });
+    if (game.phase !== WEREWOLF_PHASES.wolves || game.night.resolved) addMissing({ type: 'wolf_target', round_number: game.round_number, target_id: game.night.wolf_target });
+  }
   if (game.roles[viewerId] === 'seer') for (const check of game.seer_checks.filter(item => item.player_id === viewerId)) addMissing({ type: 'seer_check', round_number: check.round_number, target_id: check.target_id, alignment: check.alignment });
   if (game.roles[viewerId] === 'witch' && game.night.witch_done && game.night.witch_choice) addMissing({ type: 'witch', round_number: game.round_number, choice: game.night.witch_choice, target_id: game.night.witch_choice === 'save' ? game.night.wolf_target : game.night.witch_poison_target });
-  return actions.sort((a, b) => a.round_number - b.round_number);
+  const settledNights = new Set(publicNightResults(game).map(item => item.round_number));
+  // 只有旧记录保存了当夜所有活狼的选择时，才能恢复最终票决，不能把个人选刀当作狼队结果。
+  if (game.roles[viewerId] === 'wolf') for (const action of actions.filter(item => item.type === 'wolf_kill' && settledNights.has(item.round_number))) {
+    const wolves = game.players.filter(player => game.roles[player.player_id] === 'wolf' && (player.alive || player.died_round >= action.round_number));
+    const votes = Object.fromEntries((game.personal_actions || []).filter(item => item.type === 'wolf_kill' && item.round_number === action.round_number).map(item => [item.player_id, item.target_id]));
+    if (wolves.length && wolves.every(player => Object.hasOwn(votes, player.player_id))) addMissing({ type: 'wolf_target', round_number: action.round_number, target_id: majorityChoice(votes) });
+  }
+  return actions.sort((a, b) => a.round_number - b.round_number).map(action => action.type === 'wolf_target' ? {
+    ...action,
+    outcome: !settledNights.has(action.round_number) ? 'pending' : !action.target_id ? 'no_target' : game.events.some(event => event.type === 'death' && event.round_number === action.round_number && event.player_id === action.target_id && event.cause === 'wolves') ? 'killed' : 'not_killed',
+  } : action);
 }
 
 function publicNightResults(game) {
-  const results = game.events.filter(item => item.type === 'night_result').map(item => ({ round_number: item.round_number, deaths: [...item.deaths] }));
-  if (game.night.resolved && !results.some(item => item.round_number === game.round_number)) {
-    results.push({ round_number: game.round_number, deaths: game.events.filter(item => item.type === 'death' && item.round_number === game.round_number && ['wolves', 'witch_poison'].includes(item.cause)).map(item => item.player_id) });
+  const results = new Map(game.events.filter(item => item.type === 'night_result').map(item => [item.round_number, new Set(item.deaths)]));
+  const lastSettledNight = game.night.resolved ? game.round_number : game.round_number - 1;
+  for (let round = 1; round <= lastSettledNight; round += 1) {
+    const deaths = results.get(round) || new Set();
+    for (const event of game.events) {
+      if (event.type === 'death' && event.round_number === round && (event.period === 'night' || ['wolves', 'witch_poison'].includes(event.cause) || (round === game.round_number && event.cause === 'hunter' && game.hunter.source_phase === 'night'))) deaths.add(event.player_id);
+    }
+    results.set(round, deaths);
   }
-  return results;
+  return [...results].sort(([a], [b]) => a - b).map(([round_number, deaths]) => ({ round_number, deaths: game.players.filter(player => deaths.has(player.player_id)).map(player => player.player_id) }));
+}
+
+export function restoreLocalWerewolfRecords(game) {
+  if (!game) return game;
+  if (!Array.isArray(game.personal_actions)) game.personal_actions = [];
+  for (const player of game.players) for (const action of personalActions(game, player.player_id)) {
+    if (game.personal_actions.some(item => item.player_id === player.player_id && item.round_number === action.round_number && item.type === action.type)) continue;
+    const { outcome, ...record } = action;
+    game.personal_actions.push({ ...record, period: record.period || 'night', player_id: player.player_id });
+  }
+  for (const report of publicNightResults(game)) {
+    if (!game.events.some(item => item.type === 'night_result' && item.round_number === report.round_number)) game.events.push({ event_id: randomId('event'), type: 'night_result', ...report });
+  }
+  return game;
 }
 
 function playerById(game, playerId) {
@@ -133,7 +165,8 @@ function kill(game, playerId, cause) {
   player.alive = false;
   player.death_cause = cause;
   player.died_round = game.round_number;
-  game.events.push({ event_id: randomId('event'), type: 'death', player_id: playerId, cause, round_number: game.round_number });
+  const period = ['wolves', 'witch_poison'].includes(cause) ? 'night' : cause === 'hunter' ? game.hunter.source_phase : 'day';
+  game.events.push({ event_id: randomId('event'), type: 'death', player_id: playerId, cause, period, round_number: game.round_number });
   return true;
 }
 
@@ -261,6 +294,7 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     const wolves = livingRolePlayers(game, 'wolf');
     if (wolves.every((wolf) => Object.hasOwn(game.night.wolf_votes, wolf.player_id))) {
       game.night.wolf_target = majorityChoice(game.night.wolf_votes);
+      for (const wolf of wolves) recordPersonalAction(game, wolf.player_id, { type: 'wolf_target', target_id: game.night.wolf_target });
       game.phase = WEREWOLF_PHASES.seer;
       advanceNightPastMissingRoles(game);
     }

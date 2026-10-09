@@ -1,6 +1,6 @@
-import { LocalWerewolfGameController } from './werewolf-local-game.js';
-import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js';
-import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js';
+import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.20';
+import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.20';
+import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.20';
 
 const APP_ID = 'werewolf-local';
 
@@ -80,11 +80,17 @@ function targetButtons(view, action, targets) {
   return (targets || []).map((id) => `<button type="button" class="wp-wwl-target" data-wwl-action="${esc(action)}" data-target-id="${esc(id)}" aria-pressed="false"><small>${view.players.findIndex(player => player.player_id === id) + 1} 号</small>${esc(nameOf(view, id))}</button>`).join('');
 }
 
+function nightPlayerLabel(view, playerId) {
+  const index = view.players.findIndex(player => player.player_id === playerId);
+  return index >= 0 ? `${index + 1} 号 · ${view.players[index].display_name}${playerId === view.self_player_id ? '（你）' : ''}` : '旧存档未记录目标';
+}
+
 function personalActionText(view, action) {
-  const target = action.target_id ? nameOf(view, action.target_id) : '旧存档未记录目标';
-  if (action.type === 'witch') return action.choice === 'save' ? `已使用解药救 ${target}` : action.choice === 'poison' ? `已使用毒药，目标是 ${target}` : '已行动，今晚不用药';
-  if (action.type === 'seer_check') return `已查验 ${target}：${action.alignment === 'wolves' ? '狼人阵营' : '好人阵营'}`;
-  if (action.type === 'wolf_kill') return `已提交狼人目标：${target}`;
+  const target = action.target_id ? nightPlayerLabel(view, action.target_id) : '旧存档未记录目标';
+  if (action.type === 'witch') return action.choice === 'save' ? `已使用解药救了 ${target}` : action.choice === 'poison' ? `已使用毒药毒杀 ${target}` : '已行动，今晚不用药';
+  if (action.type === 'seer_check') return `已查验 ${target}：${action.alignment === 'wolves' ? '狼人阵营' : action.alignment === 'village' ? '好人阵营' : '旧存档未记录查验结果'}`;
+  if (action.type === 'wolf_kill') return `你选择的刀口：${target}`;
+  if (action.type === 'wolf_target') return !action.target_id ? '狼队未确定击杀目标，本夜没有狼刀。' : `狼队最终刀口：${target}。${action.outcome === 'killed' ? '已被狼刀杀死。' : action.outcome === 'not_killed' ? '未被狼刀杀死。' : '等待夜晚结算。'}`;
   if (action.type === 'hunter_shot') return `已开枪带走 ${target}`;
   if (action.type === 'hunter_pass') return '已放弃开枪';
   return '已提交行动';
@@ -93,18 +99,22 @@ function personalActionText(view, action) {
 export function personalInformationMarkup(view) {
   const self = view.players.find(player => player.player_id === view.self_player_id);
   const actions = view.personal_actions || [];
-  const current = actions.findLast(action => action.round_number === view.round_number && action.period !== 'day');
+  const current = actions.filter(action => action.round_number === view.round_number && action.period !== 'day');
   const night = view.phase.startsWith('night_');
   const hasSkill = ['wolf', 'seer', 'witch'].includes(view.your_role);
-  let status = current ? personalActionText(view, current) : !self?.alive ? '你已出局，没有待提交的夜晚行动。' : !hasSkill ? '你的身份没有夜间主动技能，等待天亮。' : night ? '本夜尚未行动，轮到你时会显示操作按钮。' : '这轮的个人夜晚行动没有留存记录。';
+  let status = !self?.alive ? '你已出局，没有待提交的夜晚行动。' : !hasSkill ? '你的身份没有夜间主动技能，等待天亮。' : night ? '本夜尚未行动，轮到你时会显示操作按钮。' : '旧存档未记录这轮的个人夜晚行动。';
   if (!night && !hasSkill && self?.alive) status = '你的身份没有夜间主动技能。';
   const latest = view.public_nights?.at(-1);
-  const result = latest ? `第 ${latest.round_number} 夜：${latest.deaths.length ? latest.deaths.map(id => nameOf(view, id)).join('、') + ' 出局' : '平安夜，无人出局'}` : '尚无公开的夜晚结算。';
-  return `<section class="wp-wwl-information" aria-label="对局信息">
-    <b>对局信息</b><p>${esc(result)}</p>
-    <b>你的夜晚信息 · 第 ${view.round_number} 夜</b><p>${esc(status)}</p>
-    ${view.witch ? `<p class="wp-wwl-medicine">解药：${view.witch.antidote_available ? '剩余 1 瓶' : '已用完'} · 毒药：${view.witch.poison_available ? '剩余 1 瓶' : '已用完'}</p>${view.phase === WEREWOLF_PHASES.witch && !view.submitted.witch ? `<p>今晚狼刀目标：${esc(view.witch.wolf_target ? nameOf(view, view.witch.wolf_target) : '没有确定目标')}</p>` : ''}` : ''}
-    ${actions.length ? `<details data-wwl-history><summary>我的行动记录（${actions.length}）</summary>${actions.map(action => `<p>第 ${action.round_number} ${action.period === 'day' ? '天' : '夜'} · ${esc(personalActionText(view, action))}</p>`).join('')}</details>` : ''}
+  const resultText = report => report.deaths.length ? `死亡：${report.deaths.map(id => nightPlayerLabel(view, id)).join('、')}` : '平安夜，无人死亡。';
+  const actionRows = items => items.map(action => `<p>${esc(personalActionText(view, action))}</p>`).join('');
+  const previous = latest && latest.round_number !== view.round_number ? actions.filter(action => action.round_number === latest.round_number && action.period !== 'day') : [];
+  return `<section class="wp-wwl-information" aria-label="夜晚信息">
+    <b>夜晚信息</b>
+    <div class="wp-wwl-night-report"><b>${latest ? `第 ${latest.round_number} 夜 · 公开结果` : '公开结果'}</b><p>${esc(latest ? resultText(latest) : '本夜尚未结算，天亮后公布死亡名单。')}</p></div>
+    ${previous.length ? `<div class="wp-wwl-night-report is-private"><b>第 ${latest.round_number} 夜 · 你的行动</b>${actionRows(previous)}</div>` : ''}
+    <div class="wp-wwl-night-report is-private"><b>第 ${view.round_number} 夜 · 你的行动</b>${current.length ? actionRows(current) : `<p>${esc(status)}</p>`}</div>
+    ${view.witch ? `<p class="wp-wwl-medicine">解药：${view.witch.antidote_available ? '剩余 1 瓶' : '已用完'} · 毒药：${view.witch.poison_available ? '剩余 1 瓶' : '已用完'}</p>${view.phase === WEREWOLF_PHASES.witch && !view.submitted.witch ? `<p>今晚狼刀目标：${esc(view.witch.wolf_target ? nightPlayerLabel(view, view.witch.wolf_target) : '没有确定目标')}</p>` : ''}` : ''}
+    ${actions.length || view.public_nights?.length ? `<details data-wwl-history><summary>夜晚与行动记录</summary>${(view.public_nights || []).map(report => `<p>第 ${report.round_number} 夜 · ${esc(resultText(report))}</p>`).join('')}${actions.map(action => `<p>第 ${action.round_number} ${action.period === 'day' ? '天' : '夜'} · ${esc(personalActionText(view, action))}</p>`).join('')}</details>` : ''}
   </section>`;
 }
 
@@ -170,11 +180,11 @@ export function gameMarkup(state) {
   const view = state.view;
   return `<div class="wp-wwl-game" data-game-id="${esc(view.game_id)}">
     <section class="wp-wwl-phase"><div><small>第 ${view.round_number} 轮</small><b>${esc(phaseLabel(view.phase))}</b></div><span class="wp-wwl-role">你是 ${esc(roleLabel(view.your_role))}</span></section>
+    ${personalInformationMarkup(view)}
     ${phaseActionMarkup(state)}
     <div class="wp-wwl-confirm" data-wwl-confirm-host hidden></div>
     ${wolfChatMarkup(state)}
     ${discussionMarkup(state)}
-    ${personalInformationMarkup(view)}
     ${state.ai_notice ? `<p class="wp-wwl-ai-notice" role="status">${esc(state.ai_notice)}</p>` : ''}
     <label class="wp-wwl-field"><span>对局速度</span><select data-wwl-ai-mode><option value="model"${state.ai_mode !== 'local' ? ' selected' : ''}>模型对局 · 连贯推理与发言</option><option value="local"${state.ai_mode === 'local' ? ' selected' : ''}>本地快速 · 即时策略</option></select></label>
     ${crowHostMarkup(view)}
