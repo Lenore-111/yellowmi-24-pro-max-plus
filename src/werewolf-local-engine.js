@@ -331,7 +331,7 @@ export function submitWerewolfAction(game, playerId, { type, target_id = '', cho
     assertAlive(game, playerId);
     if (game.phase !== WEREWOLF_PHASES.vote) throw new Error('当前不是投票阶段');
     if (Object.hasOwn(game.day.votes, playerId)) throw new Error('本日已经投过票');
-    if (!legalTargets(game, playerId, 'vote').includes(target_id)) throw new Error('投票目标不合法');
+    if (choice === 'abstain' ? target_id !== '' : choice || !legalTargets(game, playerId, 'vote').includes(target_id)) throw new Error('投票目标不合法');
     game.day.votes[playerId] = target_id;
     const alive = livingPlayers(game);
     if (alive.every((player) => Object.hasOwn(game.day.votes, player.player_id))) {
@@ -433,6 +433,7 @@ export function viewForPlayer(game, viewerId) {
       witch: role === 'witch' && game.night.witch_done,
       vote: Object.hasOwn(game.day.votes, viewerId),
     },
+    your_vote: game.phase === WEREWOLF_PHASES.vote && Object.hasOwn(game.day.votes, viewerId) ? { target_id: game.day.votes[viewerId], abstained: game.day.votes[viewerId] === '' } : null,
     day_ready_for_vote: Boolean(game.day.ready_for_vote),
     human_spoken: Boolean(game.day.human_spoken || game.day.ready_for_vote || game.public_messages.some(item => item.player_id === game.human_player_id && item.round_number === game.round_number)),
     speech_progress: Object.keys(game.day.ai_spoken).length,

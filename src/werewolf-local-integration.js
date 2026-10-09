@@ -1,6 +1,6 @@
-import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.20';
-import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.20';
-import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.20';
+import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.21';
+import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.21';
+import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.21';
 
 const APP_ID = 'werewolf-local';
 
@@ -125,13 +125,20 @@ function thinkingMarkup(state) {
   return `<div class="wp-wwl-thinking" role="status"><i></i><span>${esc(label)}${view.phase === WEREWOLF_PHASES.discussion ? `<small>其他玩家已发言 ${view.speech_progress} / ${view.speech_total}</small>` : ''}</span>${state.ai_mode !== 'local' ? '<button type="button" class="wp-wwl-ghost" data-wwl-fast-forward>本地快速继续</button>' : ''}</div>`;
 }
 
+export function actionConfirmationMarkup(view, action) {
+  if (!action) return '';
+  const abstaining = action.type === 'vote' && action.choice === 'abstain';
+  return `<span>已选择 <b>${esc(abstaining ? '弃票' : nameOf(view, action.target_id))}</b></span><button type="button" data-wwl-confirm>确认${abstaining ? '弃票' : action.type === 'vote' ? '投票' : '行动'}</button><button type="button" data-wwl-cancel aria-label="取消选择">×</button>`;
+}
+
 function phaseActionMarkup(state) {
   const view = state.view;
   const self = view.players.find((player) => player.player_id === view.self_player_id);
   if (view.phase === WEREWOLF_PHASES.ended) {
     return `<div class="wp-wwl-result"><b>${view.winner === 'wolves' ? '狼人阵营胜利' : '好人阵营胜利'}</b><span>${esc(view.win_reason)}</span></div>`;
   }
-  if (state.busy) return thinkingMarkup(state);
+  const voteStatus = view.phase === WEREWOLF_PHASES.vote && view.your_vote ? `<div class="wp-wwl-waiting">${esc(view.your_vote.abstained ? '你已弃票，等待其他玩家投票。' : `你已投给 ${nameOf(view, view.your_vote.target_id)}，等待其他玩家投票。`)}</div>` : '';
+  if (state.busy) return voteStatus + thinkingMarkup(state);
   if (view.phase === WEREWOLF_PHASES.wolves && view.your_role === 'wolf' && self?.alive && !view.submitted.wolf) {
     return `<section class="wp-wwl-action"><b>今晚狼队刀谁？</b>${targetButtons(view, 'wolf_kill', view.legal_targets.wolf_kill)}</section>`;
   }
@@ -149,8 +156,9 @@ function phaseActionMarkup(state) {
     return `<section class="wp-wwl-action"><b>猎人最后一枪</b>${targetButtons(view, 'hunter_shot', view.legal_targets.hunter_shot)}<button type="button" class="wp-wwl-ghost" data-wwl-action="hunter_pass">不开枪</button></section>`;
   }
   if (view.phase === WEREWOLF_PHASES.vote && self?.alive && !view.submitted.vote) {
-    return `<section class="wp-wwl-action"><b>放逐投票 · ${view.vote_progress}/${view.vote_total}</b>${targetButtons(view, 'vote', view.legal_targets.vote)}</section>`;
+    return `<section class="wp-wwl-action"><b>放逐投票 · ${view.vote_progress}/${view.vote_total}</b>${targetButtons(view, 'vote', view.legal_targets.vote)}<button type="button" class="wp-wwl-target wp-wwl-abstain" data-wwl-action="vote" data-vote-choice="abstain" data-target-id="" aria-pressed="false">弃票 · 不投任何人</button></section>`;
   }
+  if (voteStatus) return voteStatus;
   if (!self?.alive) return '<div class="wp-wwl-spectator">你已经出局，现在以观战视角看这桌继续发疯。</div>';
   if (view.phase === WEREWOLF_PHASES.discussion) return '';
   return '<div class="wp-wwl-waiting">当前没有需要你提交的操作。</div>';
@@ -273,9 +281,9 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     const host = section.querySelector('[data-wwl-confirm-host]');
     if (!host) return;
     host.hidden = !pendingAction;
-    section.querySelectorAll('[data-wwl-action]').forEach(button => button.setAttribute('aria-pressed', String(Boolean(pendingAction && button.dataset.targetId === pendingAction.target_id && button.dataset.wwlAction === pendingAction.type))));
+    section.querySelectorAll('[data-wwl-action]').forEach(button => button.setAttribute('aria-pressed', String(Boolean(pendingAction && button.dataset.targetId === pendingAction.target_id && button.dataset.wwlAction === pendingAction.type && (button.dataset.voteChoice || '') === (pendingAction.choice || '')))));
     if (!pendingAction) { host.replaceChildren(); return; }
-    host.innerHTML = `<span>已选择 <b>${esc(nameOf(controller.getState().view, pendingAction.target_id))}</b></span><button type="button" data-wwl-confirm>确认${pendingAction.type === 'vote' ? '投票' : '行动'}</button><button type="button" data-wwl-cancel aria-label="取消选择">×</button>`;
+    host.innerHTML = actionConfirmationMarkup(controller.getState().view, pendingAction);
     host.querySelector('[data-wwl-cancel]').onclick = () => { pendingAction = null; showPending(section); };
     host.querySelector('[data-wwl-confirm]').onclick = () => {
       const action = pendingAction; pendingAction = null; showPending(section);
@@ -327,7 +335,7 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
       if (state.busy) return;
       const type = button.dataset.wwlAction;
       if (type === 'hunter_pass') { guarded(() => controller.humanAction({ type })); return; }
-      pendingAction = { type, target_id: button.dataset.targetId || '' };
+      pendingAction = { type, target_id: button.dataset.targetId || '', choice: type === 'vote' ? button.dataset.voteChoice || '' : '' };
       showPending(section);
       section.querySelector('[data-wwl-confirm-host]')?.scrollIntoView({block:'nearest'});
     }));

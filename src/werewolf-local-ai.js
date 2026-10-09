@@ -34,7 +34,7 @@ function compactVoteHistory(history, players) {
   const allowed = new Set((players || []).map((player) => player.player_id));
   return (Array.isArray(history) ? history : []).slice(-8).map((item) => ({
     round_number: Number(item?.round_number || 0),
-    votes: Object.fromEntries(Object.entries(item?.votes || {}).filter(([voter, target]) => allowed.has(voter) && allowed.has(String(target)))),
+    votes: Object.fromEntries(Object.entries(item?.votes || {}).filter(([voter, target]) => allowed.has(voter) && (target === '' || allowed.has(String(target))))),
     lynched: allowed.has(String(item?.lynched || '')) ? String(item.lynched) : '',
   }));
 }
@@ -114,6 +114,7 @@ function responseInstruction(action) {
   if (action === 'day_speak') return `请只输出 JSON：{${memory},"text":"一段像真人桌游发言的中文，简洁具体，必须与自己的既有立场和当前新信息相容"}`;
   if (action === 'witch') return `请只输出 JSON：{${memory},"choice":"save|poison|pass","target_id":"poison 时必须是合法 player_id，否则空字符串"}`;
   if (action === 'wolf_kill') return `请只输出 JSON：{${memory},"target_id":"合法 player_id","text":"可选，一句只给狼队友看的夜聊"}`;
+  if (action === 'vote') return `请只输出 JSON：{${memory},"choice":"vote|abstain","target_id":"vote 时必须是合法 player_id，abstain 时为空字符串"}`;
   return `请只输出 JSON：{${memory},"target_id":"合法 player_id"}`;
 }
 
@@ -144,6 +145,7 @@ export function buildLocalWerewolfAiPrompt(request) {
     personal_actions: view.personal_actions || [],
     public_nights: view.public_nights || [],
     legal_targets: request.legal_targets || [],
+    can_abstain: request.action === 'vote',
     public_messages: compactMessages(view.public_messages, view.players),
     wolf_messages: request.action === 'wolf_kill' ? compactMessages(view.wolf_messages, view.players) : [],
     vote_history: compactVoteHistory(view.vote_history, view.players),
@@ -162,7 +164,7 @@ export function buildLocalWerewolfAiPrompt(request) {
     '白天公开发言中，凡是“某人刚才/昨天说过、投过、做过什么”这类具体公开历史，只能以 public_messages 与 vote_history 为事实来源。那里没有出现的公开行为，就不能为了配合私有计划而编造成已经发生。',
     '你自己的真实身份信息（例如个人查验、药况）可以按策略选择是否主动公开；但私有信息只能作为你的决策依据，不能伪装成别人已经公开做过的行为。personal_actions 中 wolf_kill 只是你选择的刀口，wolf_target 才是狼队最终刀口；只有 outcome 为 killed 时该目标才确实被狼刀杀死，not_killed 不代表你知道是谁救了他。',
     'wolf_messages 只会在狼人夜间选刀时提供；白天不会提供原始狼聊。即使 previous_memory 记着狼队内部计划，也必须把“计划”与“已经发生的公开行为”严格区分。',
-    'vote_history 只包含已经结算并公开的历史票型，可以用于检查跟票、改票与立场变化；不要假装看到尚未结算的当前票。',
+    'vote_history 只包含已经结算并公开的历史票型，可以用于检查跟票、改票与立场变化；票型里空字符串表示已弃票，不是未投票。不要假装看到尚未结算的当前票。放逐投票允许弃票：choice 为 abstain，target_id 为空；其他夜间选人动作不允许用空目标跳过。',
     '你的输出只是候选行为，最终合法性由本地规则代码裁决。',
     `身份策略：\n${roleStrategy(view.your_role)}`,
     `GAME_VIEW=${JSON.stringify(safe)}`,
@@ -229,6 +231,8 @@ export async function decideLocalWerewolfAi(request) {
       return { choice, target_id: choice === 'poison' ? target : '', memory: { ...memory, last_action: 'witch', last_target_id: choice === 'poison' ? target : '' } };
     }
     const target = String(parsed.target_id || '');
+    if (request.action === 'vote' && parsed.choice === 'abstain') return target ? fallback : { choice: 'abstain', target_id: '', memory: { ...memory, last_action: 'vote', last_target_id: '' } };
+    if (request.action === 'vote' && parsed.choice && parsed.choice !== 'vote') return fallback;
     if (!request.legal_targets?.includes(target)) return fallback;
     const result = { target_id: target, memory: { ...memory, last_action: request.action, last_target_id: target } };
     if (request.action === 'wolf_kill') {

@@ -4,7 +4,7 @@ import { mountPhoneInteractions } from './src/phone-interactions.js';
 import { mountNativeCommunicationApps } from './src/native-communication-apps.js';
 import { mountWorldPhoneUpdateManager } from './src/update-manager.js';
 import { mountAppStoreIntegration } from './src/app-store-integration.js';
-import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.20';
+import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.21';
 import { mountSocialRealism } from './src/social-realism.js';
 import { mountUtilityRealism } from './src/utility-realism.js';
 import { mountDeviceRealism } from './src/device-realism.js';
@@ -62,7 +62,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-app-experience-realism-style', './app-experience-realism.css?build=app-experience-v1');
   ensureExternalStyle('world-phone-app-internal-motion-style', './app-internal-motion.css?build=app-experience-v1');
   ensureExternalStyle('world-phone-update-style', './update.css?build=update-v1');
-  ensureExternalStyle('world-phone-werewolf-local-style', './werewolf-local.css?build=werewolf-experience-v6');
+  ensureExternalStyle('world-phone-werewolf-local-style', './werewolf-local.css?build=werewolf-experience-v7');
   ensureExternalStyle('world-phone-social-realism-style', './social-realism.css?build=social-realism-v1');
   ensureExternalStyle('world-phone-themes-style', './phone-themes.css?build=multi-app-icons-v4');
   ensureExternalStyle('world-phone-utility-realism-style', './utility-realism.css?build=utility-realism-v2');
@@ -96,7 +96,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.20 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[世界小手机] 0.3.0-alpha.21 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {

@@ -1,4 +1,4 @@
-import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.20';
+import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.21';
 
 export const CROW_DM_IMAGE = new URL('../assets/werewolf/crow-dm.png?v=pixel-1', import.meta.url).href;
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -9,7 +9,7 @@ export function crowHostMarkup(view, { dealing = false, revealed = false } = {})
     night_seer: '预言家请睁眼。今晚，你想查验谁？',
     night_witch: '女巫请睁眼。救人、用毒，还是留药到下一夜？',
     day_discussion: '天亮了。请依次发言，我只主持，不替任何人站队。',
-    day_vote: '讨论结束，请投出你的一票。确认前还可以换人。',
+    day_vote: '讨论结束，请投出你的一票，也可以弃票。确认前还可以改选。',
     hunter_shot: '猎人，请决定是否开枪。最后一枪，也可以选择放下。',
     ended: view?.winner === 'wolves' ? '狼人阵营获胜。这一桌的身份，现在可以公开了。' : '好人阵营获胜。这一桌的身份，现在可以公开了。',
   };

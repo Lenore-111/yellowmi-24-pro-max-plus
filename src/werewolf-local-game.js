@@ -9,8 +9,8 @@ import {
   submitWerewolfAction,
   viewForPlayer,
   WEREWOLF_PHASES,
-} from './werewolf-local-engine.js?v=0.3.0-alpha.20';
-import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.20';
+} from './werewolf-local-engine.js?v=0.3.0-alpha.21';
+import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.21';
 
 export const LOCAL_WEREWOLF_STORAGE_KEY = 'world_phone_werewolf_local_v1';
 export const LOCAL_WEREWOLF_AI_TIMEOUT_MS = 30000;
@@ -57,7 +57,7 @@ function pendingVoteHistory(game, playerId, action) {
   if (Object.hasOwn(game.day.votes, playerId)) return null;
   const alive = livingPlayers(game);
   if (Object.keys(game.day.votes).length !== alive.length - 1) return null;
-  const votes = { ...game.day.votes, [playerId]: action.target_id };
+  const votes = { ...game.day.votes, [playerId]: action.choice === 'abstain' ? '' : action.target_id };
   return {
     round_number: game.round_number,
     votes,
@@ -130,7 +130,7 @@ function rememberAiDecision(game, request, decision) {
     ...memory,
     updated_round: game.round_number,
     last_action: memory.last_action || request.action,
-    last_target_id: memory.last_target_id || String(decision?.target_id || ''),
+    last_target_id: request.action === 'vote' && decision?.choice === 'abstain' ? '' : memory.last_target_id || String(decision?.target_id || ''),
     last_public_text: memory.last_public_text || (request.action === 'day_speak' ? String(decision?.text || '').slice(0, 220) : ''),
   };
 }
@@ -437,7 +437,7 @@ export class LocalWerewolfGameController {
             const decision = await this.requestAi(game, request);
             if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
             rememberAiDecision(game, request, decision);
-            const action = { type: 'vote', target_id: decision.target_id };
+            const action = { type: 'vote', target_id: decision.target_id || '', choice: decision.choice === 'abstain' ? 'abstain' : '' };
             const voteSnapshot = pendingVoteHistory(game, nextVoter.player_id, action);
             submitWerewolfAction(game, nextVoter.player_id, action);
             recordVoteHistory(game, voteSnapshot);
