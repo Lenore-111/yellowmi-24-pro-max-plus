@@ -1,6 +1,6 @@
-import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.21';
-import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.21';
-import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.21';
+import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.22';
+import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.22';
+import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.22';
 
 const APP_ID = 'werewolf-local';
 
@@ -67,7 +67,7 @@ function playersMarkup(view) {
 function publicMessagesMarkup(view) {
   const messages = view.public_messages.slice(-80);
   if (!messages.length) return '<div class="wp-wwl-empty">白天还没人开口。</div>';
-  return messages.map((message) => `<div class="wp-wwl-message" data-message-id="${esc(message.message_id)}"><b>${esc(nameOf(view, message.player_id))}</b><p>${esc(message.text)}</p></div>`).join('');
+  return messages.map((message) => `<div class="wp-wwl-message" data-message-id="${esc(message.message_id)}"><div class="wp-wwl-message-meta"><b>${view.players.findIndex(player => player.player_id === message.player_id) + 1} 号 · ${esc(nameOf(view, message.player_id))}</b><small>第 ${esc(message.round_number)} 轮</small></div><p>${esc(message.text)}</p></div>`).join('');
 }
 
 function wolfMessagesMarkup(view) {
@@ -172,7 +172,7 @@ export function discussionMarkup(state) {
     <div class="wp-wwl-chat-title"><b>${self?.alive ? '你的发言' : '白天公聊'}</b><small>${self?.alive ? view.human_spoken ? '可继续补充发言' : '轮到你了' : '观战中'}</small></div>
     ${self?.alive ? '<form data-wwl-chat="public"><input aria-label="你的公开发言" maxlength="500" placeholder="说说你的判断…" autocomplete="off"><button type="submit">发言</button></form>' : ''}
     ${self?.alive && !view.human_spoken && !state.busy ? '<button type="button" class="wp-wwl-ghost" data-wwl-skip-speech>跳过我的发言，让其他玩家继续</button>' : ''}
-    <div class="wp-wwl-messages">${publicMessagesMarkup(view)}</div>
+    <div class="wp-wwl-messages" data-wwl-scroll="public">${publicMessagesMarkup(view)}</div>
     ${view.day_ready_for_vote && !state.busy ? '<button type="button" class="wp-wwl-primary" data-wwl-finish-talk>进入投票</button>' : ''}
   </section>`;
 }
@@ -181,7 +181,7 @@ function wolfChatMarkup(state) {
   const view = state.view;
   const self = view.players.find((player) => player.player_id === view.self_player_id);
   if (view.phase !== WEREWOLF_PHASES.wolves || view.your_role !== 'wolf' || !self?.alive) return '';
-  return `<section class="wp-wwl-chat is-wolf"><div class="wp-wwl-chat-title"><b>狼人夜聊</b><small>只有活着的狼能看到</small></div><form data-wwl-chat="wolves"><input aria-label="狼人夜聊发言" maxlength="500" placeholder="和狼队友说一句…" autocomplete="off"><button type="submit">发送</button></form><div class="wp-wwl-messages">${wolfMessagesMarkup(view)}</div></section>`;
+  return `<section class="wp-wwl-chat is-wolf"><div class="wp-wwl-chat-title"><b>狼人夜聊</b><small>只有活着的狼能看到</small></div><form data-wwl-chat="wolves"><input aria-label="狼人夜聊发言" maxlength="500" placeholder="和狼队友说一句…" autocomplete="off"><button type="submit">发送</button></form><div class="wp-wwl-messages" data-wwl-scroll="wolves">${wolfMessagesMarkup(view)}</div></section>`;
 }
 
 export function gameMarkup(state) {
@@ -198,7 +198,7 @@ export function gameMarkup(state) {
     ${crowHostMarkup(view)}
     <nav class="wp-wwl-phase-track" aria-label="对局阶段">${[['night','夜晚行动'],['day_discussion','公开讨论'],['day_vote','放逐投票']].map(([key,label]) => `<span class="${view.phase.startsWith(key) ? 'is-current' : ''}">${label}</span>`).join('')}</nav>
     <details class="wp-wwl-players" open><summary>在场 ${view.players.filter(player => player.alive).length} / ${view.players.length}<span>座位一览</span></summary><div class="wp-wwl-seat-grid">${playersMarkup(view)}</div></details>
-    ${view.phase !== WEREWOLF_PHASES.discussion && view.public_messages.length ? `<details class="wp-wwl-chat"><summary>回看公开发言</summary><div class="wp-wwl-messages">${publicMessagesMarkup(view)}</div></details>` : ''}
+    ${view.phase !== WEREWOLF_PHASES.discussion && view.public_messages.length ? `<details class="wp-wwl-chat" data-wwl-public-history><summary>回看公开发言</summary><div class="wp-wwl-messages" data-wwl-scroll="public">${publicMessagesMarkup(view)}</div></details>` : ''}
     ${state.error ? `<p class="wp-wwl-error" role="alert">${esc(state.error)}</p>${!state.busy && view.status === 'playing' ? '<button type="button" class="wp-wwl-ghost" data-wwl-resume>继续处理对局</button>' : ''}` : ''}
     <button type="button" class="wp-wwl-ghost wp-wwl-abandon" data-wwl-abandon>${view.phase === WEREWOLF_PHASES.ended ? '回到开局页' : '放弃这局'}</button>
   </div>`;
@@ -212,6 +212,8 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
   const controller = new LocalWerewolfGameController();
   let pendingAction = null;
   let paintKey = '';
+  let paintedShell = null;
+  let renderedState = '';
   let abandonConfirmed = false;
 
   function syncHome() {
@@ -250,31 +252,45 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     headerCopy(section, state.deal_pending ? '乌鸦发牌 · 收好你的身份' : state.view ? `${phaseLabel(state.view.phase)} · 本地对局` : '乌鸦主持 · 本地对局');
     const old = section.querySelector('.wp-placeholder-card, .wp-wwl-shell');
     if (!old) return;
+    const stateKey = JSON.stringify({ ...state, game: undefined });
+    if (old === paintedShell && stateKey === renderedState) return;
     const key = state.view ? `${state.view.game_id}:${state.view.round_number}:${state.view.phase}` : 'landing';
     const samePhase = key === paintKey;
     const scrollTop = samePhase ? old.scrollTop : 0;
+    const messageScroll = samePhase ? [...old.querySelectorAll('[data-wwl-scroll]')].map(node => ({
+      channel: node.dataset.wwlScroll, top: node.scrollTop,
+      atBottom: node.scrollHeight > node.clientHeight && node.scrollHeight - node.clientHeight - node.scrollTop <= 4,
+    })) : [];
     const input = old.querySelector('input:focus');
     const drafts = [...old.querySelectorAll('[data-wwl-chat]')].map(form => ({channel:form.dataset.wwlChat, value:form.querySelector('input')?.value || ''}));
     const focusedChannel = input?.closest('[data-wwl-chat]')?.dataset.wwlChat;
     const selection = input ? [input.selectionStart, input.selectionEnd] : null;
     const seatsOpen = old.querySelector('.wp-wwl-players')?.open ?? true;
     const historyOpen = old.querySelector('[data-wwl-history]')?.open ?? false;
+    const publicHistoryOpen = old.querySelector('[data-wwl-public-history]')?.open ?? false;
     if (!samePhase || state.busy) pendingAction = null;
     paintKey = key;
+    paintedShell = old;
+    renderedState = stateKey;
     abandonConfirmed = false;
     old.className = 'wp-wwl-shell';
     old.innerHTML = state.deal_pending ? crowDealMarkup(state) : state.view ? gameMarkup(state) : landingMarkup(state);
     if (samePhase) {
       old.querySelector('.wp-wwl-players')?.toggleAttribute('open', seatsOpen);
       old.querySelector('[data-wwl-history]')?.toggleAttribute('open', historyOpen);
+      old.querySelector('[data-wwl-public-history]')?.toggleAttribute('open', publicHistoryOpen);
       for (const draft of drafts) {
         const field = old.querySelector(`[data-wwl-chat="${draft.channel}"] input`);
         if (field) { field.value = draft.value; if (focusedChannel === draft.channel) { field.focus({preventScroll:true}); if (selection) field.setSelectionRange(...selection); } }
       }
     }
-    old.scrollTop = scrollTop;
     bind(section, state);
     showPending(section);
+    for (const position of messageScroll) {
+      const node = old.querySelector(`[data-wwl-scroll="${position.channel}"]`);
+      if (node) node.scrollTop = position.atBottom ? Math.max(0, node.scrollHeight - node.clientHeight) : position.top;
+    }
+    old.scrollTop = scrollTop;
   }
 
   function showPending(section) {

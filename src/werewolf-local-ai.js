@@ -1,3 +1,5 @@
+import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.22';
+
 function stableIndex(seed, length) {
   if (!length) return -1;
   let hash = 2166136261;
@@ -22,9 +24,11 @@ function cleanText(value, max = 160) {
 
 function compactMessages(messages, players) {
   const names = new Map((players || []).map((player) => [player.player_id, player.display_name]));
+  const seats = new Map((players || []).map((player, index) => [player.player_id, index + 1]));
   return (messages || []).slice(-48).map((message) => ({
     speaker_id: message.player_id,
     speaker: names.get(message.player_id) || '未知玩家',
+    seat_number: seats.get(message.player_id) || 0,
     round_number: message.round_number,
     text: message.text,
   }));
@@ -51,8 +55,10 @@ function roleStrategy(role) {
   }
   if (role === 'seer') {
     return [
+      '你的真实身份整局都是预言家，白天不会变成村民或闭眼牌。是否跳身份是策略选择，不是忘记身份。',
       '只有 seer_checks 中属于你的查验才是额外确定信息。',
       '决定是否公开跳预言家时，要权衡生存、查验价值和当前局势；未公开的信息可以暂时隐藏。',
+      '如果 own_public_messages 表明你已经公开跳过预言家或报过查验，后续发言必须接续这个公开身份和历史查验；新增查验要注明第几夜、目标座位和阵营，不能当作第一天重新发言。',
       '不能把未来查验、未查验身份或后台角色当成已知事实。',
     ].join('\n');
   }
@@ -109,6 +115,13 @@ export function sanitizeLocalWerewolfAiMemory(value, request = {}) {
   };
 }
 
+export function mergeLocalWerewolfAiMemory(value, request = {}) {
+  const previous = sanitizeLocalWerewolfAiMemory(request.memory, request);
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const changes = Object.fromEntries(Object.keys(previous).filter(key => Object.hasOwn(source, key) && source[key] != null).map(key => [key, source[key]]));
+  return sanitizeLocalWerewolfAiMemory({ ...previous, ...changes }, request);
+}
+
 function responseInstruction(action) {
   const memory = '"memory":{"stance":"当前结论摘要","next_plan":"下一步策略摘要","public_story":"公开立场/伪装口径；非狼人也可留空","suspects":[{"player_id":"player_id","score":0到100,"note":"极短结论"}],"trusted":["player_id"],"claims":[{"player_id":"player_id","claim":"其公开声称的关键信息"}]}' ;
   if (action === 'day_speak') return `请只输出 JSON：{${memory},"text":"一段像真人桌游发言的中文，简洁具体，必须与自己的既有立场和当前新信息相容"}`;
@@ -139,6 +152,7 @@ export function buildLocalWerewolfAiPrompt(request) {
     your_seat_number: yourSeatNumber,
     your_display_name: request.display_name,
     your_role: view.your_role,
+    your_role_label: roleLabel(view.your_role),
     players,
     seer_checks: view.seer_checks || [],
     witch: view.witch || null,
@@ -147,12 +161,14 @@ export function buildLocalWerewolfAiPrompt(request) {
     legal_targets: request.legal_targets || [],
     can_abstain: request.action === 'vote',
     public_messages: compactMessages(view.public_messages, view.players),
+    own_public_messages: compactMessages((view.public_messages || []).filter(message => message.player_id === request.player_id), view.players).slice(-24),
     wolf_messages: request.action === 'wolf_kill' ? compactMessages(view.wolf_messages, view.players) : [],
     vote_history: compactVoteHistory(view.vote_history, view.players),
     previous_memory: previousMemory,
   };
   return [
     `你是单机狼人杀中的 AI 玩家“${request.display_name}”，固定 player_id 是 ${request.player_id}${yourSeatNumber ? `，固定座位是 ${yourSeatNumber} 号` : ''}。`,
+    `不可更改的本人事实：你的真实身份是${roleLabel(view.your_role)}，现在是第 ${view.round_number} 轮。身份由本局规则记录提供，不由你的 memory 或公开伪装决定，跨轮次不会重置。`,
     'GAME_VIEW.your_player_id、your_seat_number 与 your_display_name 永远指向你自己；整局座位不会变化。别人点名这个座位时就是在点名你，不能用“我不是 X 号”来否认自己的座位。',
     '目标：像一个有连续记忆、会根据新信息调整判断的真人玩家，而不是每轮重新开始。',
     '你和真人遵守完全相同的规则。只能依据下面 GAME_VIEW 中对你可见的信息推理；没有出现的身份和信息一律未知。',
@@ -161,15 +177,39 @@ export function buildLocalWerewolfAiPrompt(request) {
     '为保持桌游节奏，公开发言控制在六十至一百二十字，摘要字段各不超过四十字，嫌疑与公开声称各保留最相关的三项。夜间只给简短动作和必要摘要。',
     '你可以撒谎、伪装、怀疑别人，但不能声称读取后台、角色卡、世界书、酒馆聊天或未展示的隐藏身份。',
     'previous_memory 是你的私有判断与计划，不是真相，更不是已经公开发生的事件；新证据足够时应修改，不要为了“保持一致”硬圆错误。',
-    '白天公开发言中，凡是“某人刚才/昨天说过、投过、做过什么”这类具体公开历史，只能以 public_messages 与 vote_history 为事实来源。那里没有出现的公开行为，就不能为了配合私有计划而编造成已经发生。',
+    'own_public_messages 是你实际说过的公开原话，必须接着自己的历史发言说话；夜间查验、投票或省略 memory 字段不能抹掉你之前的发言。它与 memory 摘要冲突时，以原话和本人的规则记录为准。',
+    '白天公开发言中，凡是“某人刚才/昨天说过、投过、做过什么”这类具体公开历史，只能以 public_messages、own_public_messages 与 vote_history 为事实来源。那里没有出现的公开行为，就不能为了配合私有计划而编造成已经发生。',
     '你自己的真实身份信息（例如个人查验、药况）可以按策略选择是否主动公开；但私有信息只能作为你的决策依据，不能伪装成别人已经公开做过的行为。personal_actions 中 wolf_kill 只是你选择的刀口，wolf_target 才是狼队最终刀口；只有 outcome 为 killed 时该目标才确实被狼刀杀死，not_killed 不代表你知道是谁救了他。',
     'wolf_messages 只会在狼人夜间选刀时提供；白天不会提供原始狼聊。即使 previous_memory 记着狼队内部计划，也必须把“计划”与“已经发生的公开行为”严格区分。',
     'vote_history 只包含已经结算并公开的历史票型，可以用于检查跟票、改票与立场变化；票型里空字符串表示已弃票，不是未投票。不要假装看到尚未结算的当前票。放逐投票允许弃票：choice 为 abstain，target_id 为空；其他夜间选人动作不允许用空目标跳过。',
     '你的输出只是候选行为，最终合法性由本地规则代码裁决。',
     `身份策略：\n${roleStrategy(view.your_role)}`,
     `GAME_VIEW=${JSON.stringify(safe)}`,
+    `提交前检查：你仍是 ${yourSeatNumber} 号${roleLabel(view.your_role)}；对照自己的历史原话、全部本人查验和行动记录。允许有理由地改变判断，不能无故忘记已公开身份、已报查验或自己上一轮发言。`,
     responseInstruction(request.action),
   ].join('\n');
+}
+
+function playerLabel(request, playerId) {
+  const players = request.view?.players || [];
+  const index = players.findIndex(player => player.player_id === playerId);
+  return index < 0 ? '未记录的玩家' : `${index + 1}号（${players[index].display_name}）`;
+}
+
+function fallbackPublicSpeech(request) {
+  const view = request.view || {};
+  const own = (view.public_messages || []).filter(message => message.player_id === request.player_id);
+  const previous = own.at(-1)?.text || request.memory?.last_public_text || '';
+  const round = Number(view.round_number || 1);
+  const opening = `${playerLabel(request, request.player_id)}，第${round}轮。`;
+  if (view.your_role === 'seer') {
+    const checks = (view.seer_checks || []).filter(check => !check.player_id || check.player_id === request.player_id);
+    const results = checks.slice(-3).map(check => `第${check.round_number}夜查验${playerLabel(request, check.target_id)}是${check.alignment === 'wolves' ? '狼人阵营' : check.alignment === 'village' ? '好人阵营' : '未记录的阵营'}`).join('；');
+    return `${opening}我是预言家。${results || '目前没有已记录的查验结果'}。${own.length ? '继续接着我之前的发言，' : ''}${checks.some(check => check.alignment === 'wolves' && view.players?.some(player => player.player_id === check.target_id && player.alive)) ? '优先投出仍在场的已查验狼人。' : '查验只说明阵营，未查验的人仍要结合发言和票型判断。'}`;
+  }
+  const stance = view.your_role === 'villager' ? cleanText(request.memory?.stance, 70) : '';
+  const continuation = previous ? `${previous.startsWith(`${playerLabel(request, request.player_id)}，第`) ? '延续我上轮的公开判断。' : `我之前说过“${cleanText(previous, 90)}”。`}${stance ? `目前判断：${stance}。` : ''}这轮会结合新发言和票型继续判断。` : '我先结合大家的发言找矛盾，不把未确认的身份当作事实。';
+  return `${opening}${view.your_role === 'villager' ? '我是村民，没有夜间查验能力。' : view.your_role === 'wolf' ? '' : '我会结合自己掌握的信息判断。'}${continuation}`;
 }
 
 function fallbackMemory(request, action, targetId = '', publicText = '') {
@@ -186,16 +226,14 @@ function fallbackMemory(request, action, targetId = '', publicText = '') {
 
 export function fallbackLocalWerewolfAiDecision(request) {
   const targets = Array.isArray(request.legal_targets) ? request.legal_targets : [];
-  const target = targets[stableIndex(`${request.request_id}:${request.action}`, targets.length)] || '';
+  const checks = request.view?.your_role === 'seer' ? request.view.seer_checks || [] : [];
+  const checkedWolves = checks.filter(check => check.alignment === 'wolves').map(check => check.target_id).filter(id => targets.includes(id));
+  const unchecked = request.action === 'seer_check' ? targets.filter(id => !checks.some(check => check.target_id === id)) : [];
+  const candidates = request.action === 'vote' && checkedWolves.length ? checkedWolves : unchecked.length ? unchecked : targets;
+  const target = candidates[stableIndex(`${request.request_id}:${request.action}`, candidates.length)] || '';
   if (request.action === 'day_speak') {
-    const lines = [
-      '我先不急着站死边，想看一下前后发言有没有互相对不上。',
-      '现在信息还少，我更在意谁在很早的时候就把结论说得太满。',
-      '我先记一下前面的立场，后面如果有人突然改口我会重点看理由。',
-      '我暂时没有铁踩，先把发言和票型对起来再收范围。',
-    ];
-    const text = lines[stableIndex(request.request_id, lines.length)];
-    return { text, memory: fallbackMemory(request, 'day_speak', '', text) };
+    const text = fallbackPublicSpeech(request);
+    return { text, source: 'local', memory: fallbackMemory(request, 'day_speak', '', text) };
   }
   if (request.action === 'witch') {
     if (request.view?.witch?.wolf_target && request.view?.witch?.antidote_available) return { choice: 'save', target_id: '', memory: fallbackMemory(request, 'witch') };
@@ -218,7 +256,7 @@ export async function decideLocalWerewolfAi(request) {
     const raw = await generator({ prompt: buildLocalWerewolfAiPrompt(request), systemPrompt: '', responseLength: request.action === 'day_speak' ? 768 : 512 });
     const parsed = extractJson(raw);
     if (!parsed) return fallback;
-    const memory = sanitizeLocalWerewolfAiMemory(parsed.memory, request);
+    const memory = mergeLocalWerewolfAiMemory(parsed.memory, request);
     if (request.action === 'day_speak') {
       const text = cleanText(parsed.text, 320);
       return text ? { text, memory: { ...memory, last_action: 'day_speak', last_public_text: text } } : fallback;

@@ -9,8 +9,8 @@ import {
   submitWerewolfAction,
   viewForPlayer,
   WEREWOLF_PHASES,
-} from './werewolf-local-engine.js?v=0.3.0-alpha.21';
-import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, sanitizeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.21';
+} from './werewolf-local-engine.js?v=0.3.0-alpha.22';
+import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, mergeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.22';
 
 export const LOCAL_WEREWOLF_STORAGE_KEY = 'world_phone_werewolf_local_v1';
 export const LOCAL_WEREWOLF_AI_TIMEOUT_MS = 30000;
@@ -125,13 +125,14 @@ function aiRequest(game, playerId, action) {
 }
 
 function rememberAiDecision(game, request, decision) {
-  const memory = sanitizeLocalWerewolfAiMemory(decision?.memory, request);
+  const memory = mergeLocalWerewolfAiMemory(decision?.memory, request);
+  const previousPublicText = request.view.public_messages.filter(message => message.player_id === request.player_id).at(-1)?.text || request.memory.last_public_text || '';
   ensureAiMemory(game)[request.player_id] = {
     ...memory,
     updated_round: game.round_number,
-    last_action: memory.last_action || request.action,
-    last_target_id: request.action === 'vote' && decision?.choice === 'abstain' ? '' : memory.last_target_id || String(decision?.target_id || ''),
-    last_public_text: memory.last_public_text || (request.action === 'day_speak' ? String(decision?.text || '').slice(0, 220) : ''),
+    last_action: request.action,
+    last_target_id: request.action === 'day_speak' ? memory.last_target_id : String(decision?.target_id || ''),
+    last_public_text: String(request.action === 'day_speak' ? decision?.text || '我这一轮先听听其他人的看法。' : previousPublicText).slice(0, 220),
   };
 }
 
@@ -423,6 +424,7 @@ export class LocalWerewolfGameController {
           const request = aiRequest(game, nextSpeaker.player_id, 'day_speak');
           const decision = await this.requestAi(game, request);
           if (this.game !== game || this.loopId !== loopId || this.destroyed) break;
+          if (decision.source === 'local' && game.ai_mode !== 'local' && !this.aiNotice) this.aiNotice = '本次发言使用本地策略，仍依据本人身份、查验与历史发言。';
           rememberAiDecision(game, request, decision);
           appendGameMessage(game, nextSpeaker.player_id, 'public', decision.text || '我这一轮先听听其他人的看法。');
           markAiSpoken(game, nextSpeaker.player_id);
