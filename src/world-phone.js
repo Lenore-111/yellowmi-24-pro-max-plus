@@ -669,6 +669,16 @@ export function mountWorldPhone() {
   let snapshot = readWorldBackstage();
   const chatScope = () => { const ctx = globalThis.SillyTavern?.getContext?.(); return ctx?.chatMetadata ?? ctx?.chat_metadata ?? null; };
   let scope = chatScope();
+  const worldScopeKey = () => {
+    const ctx = globalThis.SillyTavern?.getContext?.();
+    return JSON.stringify([
+      ctx?.chatId ?? ctx?.getCurrentChatId?.() ?? '',
+      ctx?.characterId ?? '',
+      ctx?.groupId ?? '',
+      readWorldBackstage().branchKey,
+    ]);
+  };
+  let scopeKey = worldScopeKey();
   let gameScope = capturePhoneGameScope().key;
   let composing = false;
   let pendingRefresh = false;
@@ -780,9 +790,11 @@ export function mountWorldPhone() {
     const nextGameScope = capturePhoneGameScope().key;
     if (nextGameScope !== gameScope && screen.querySelector('[data-phone-game-app]')) current = 'home';
     gameScope = nextGameScope;
-    const sameScope = nextScope === scope;
-    if (nextScope !== scope) {
+    const nextScopeKey = worldScopeKey();
+    const sameScope = nextScope === scope && nextScopeKey === scopeKey;
+    if (!sameScope) {
       scope = nextScope;
+      scopeKey = nextScopeKey;
       wechatRoute.conversationId = '';
       wechatRoute.tab = 'chats';
       composing = false;
