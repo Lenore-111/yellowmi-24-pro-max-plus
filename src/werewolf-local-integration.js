@@ -1,6 +1,6 @@
-import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.22';
-import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.22';
-import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.22';
+import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.23';
+import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.23';
+import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.23';
 
 const APP_ID = 'werewolf-local';
 
@@ -35,8 +35,8 @@ function headerCopy(section, subtitle) {
   if (!header) return;
   const title = header.querySelector('div > b');
   const sub = header.querySelector('div > small');
-  if (title) title.textContent = '狼人杀';
-  if (sub) sub.textContent = subtitle;
+  if (title && title.textContent !== '狼人杀') title.textContent = '狼人杀';
+  if (sub && sub.textContent !== subtitle) sub.textContent = subtitle;
 }
 
 function landingMarkup(state) {
@@ -223,6 +223,10 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
   }
 
   function routeThroughShell() {
+    if (typeof phone?.openApp === 'function') {
+      phone.openApp(APP_ID);
+      return true;
+    }
     const home = document.querySelector('#world-phone-stage .wp-home');
     const bridge = home?.querySelector('[data-app="settings"]') || home?.querySelector('[data-app]:not([data-werewolf-local-managed="1"])');
     if (!bridge) return false;
@@ -244,16 +248,18 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
   }
 
   function paint() {
+    // The shell route also covers Home gestures, recent apps and direct navigation.
+    if (typeof phone?.current === 'function') active = phone.current() === `app:${APP_ID}`;
     if (!active || destroyed) return;
     const section = document.querySelector('#world-phone-stage .wp-native-app');
     if (!section) return;
-    section.classList.add('wp-werewolf-local-app');
-    const state = controller.getState();
-    headerCopy(section, state.deal_pending ? '乌鸦发牌 · 收好你的身份' : state.view ? `${phaseLabel(state.view.phase)} · 本地对局` : '乌鸦主持 · 本地对局');
     const old = section.querySelector('.wp-placeholder-card, .wp-wwl-shell');
     if (!old) return;
+    const state = controller.getState();
     const stateKey = JSON.stringify({ ...state, game: undefined });
     if (old === paintedShell && stateKey === renderedState) return;
+    section.classList.add('wp-werewolf-local-app');
+    headerCopy(section, state.deal_pending ? '乌鸦发牌 · 收好你的身份' : state.view ? `${phaseLabel(state.view.phase)} · 本地对局` : '乌鸦主持 · 本地对局');
     const key = state.view ? `${state.view.game_id}:${state.view.round_number}:${state.view.phase}` : 'landing';
     const samePhase = key === paintKey;
     const scrollTop = samePhase ? old.scrollTop : 0;
@@ -391,7 +397,7 @@ export function mountLocalWerewolfIntegration({ phone } = {}) {
     });
     if (needsRefresh) queueRefresh();
   });
-  const observerRoot = document.querySelector('#world-phone-stage');
+  const observerRoot = document.querySelector('#world-phone-stage [data-screen]') || document.querySelector('#world-phone-stage');
   if (observerRoot) observer.observe(observerRoot, { childList: true, subtree: true });
   queueRefresh();
 

@@ -185,7 +185,7 @@ function browserMarkup(snapshot, state) {
   return page ? browserPageMarkup(page, state) : browserHome(snapshot, state);
 }
 
-export function mountUtilityRealism() {
+export function mountUtilityRealism({ phone } = {}) {
   let destroyed = false;
   let active = '';
   let snapshot = readWorldBackstage();
@@ -196,6 +196,8 @@ export function mountUtilityRealism() {
   let notice = '';
   let importing = false;
   let localRevision = 0;
+  let paintedShell = null;
+  let renderedMarkup = '';
   function applyWallpaper() {
     for (const [target, selector] of [['home', '.wp-home'], ['lock', '.wp-lockscreen']]) {
       const node = document.querySelector(`#world-phone-stage ${selector}`);
@@ -252,21 +254,35 @@ export function mountUtilityRealism() {
     saveState(state);
   }
 
+  function syncRoute() {
+    if (typeof phone?.current === 'function') {
+      const appId = phone.current().replace(/^app:/, '');
+      active = UTILITY_APPS.has(appId) ? appId : '';
+    }
+  }
+
   function paint(preserveScroll = false) {
     syncScope();
+    syncRoute();
     if (destroyed || !active) return;
     const section = document.querySelector('#world-phone-stage .wp-native-app');
     if (!section) return;
+    const body = section.querySelector('.wp-placeholder-card, .wp-utility-shell');
+    if (!body) return;
+    const markup = active === 'gallery' ? galleryMarkup(snapshot, state.gallery, localItems, notice, importing) : browserMarkup(snapshot, state.browser);
+    if (preserveScroll && body === paintedShell && markup === renderedMarkup) return;
     section.classList.add('wp-utility-realism-app', `is-${active}`);
     const title = section.querySelector('.wp-app-header div > b');
     const subtitle = section.querySelector('.wp-app-header div > small');
-    if (title) title.textContent = active === 'gallery' ? '相册' : '浏览器';
-    if (subtitle) subtitle.textContent = active === 'gallery' ? '本机照片与世界图片' : '世界公开网络';
-    const body = section.querySelector('.wp-placeholder-card, .wp-utility-shell');
-    if (!body) return;
+    const nextTitle = active === 'gallery' ? '相册' : '浏览器';
+    const nextSubtitle = active === 'gallery' ? '本机照片与世界图片' : '世界公开网络';
+    if (title && title.textContent !== nextTitle) title.textContent = nextTitle;
+    if (subtitle && subtitle.textContent !== nextSubtitle) subtitle.textContent = nextSubtitle;
     const previousScrollTop = preserveScroll ? body.scrollTop : 0;
     body.className = 'wp-utility-shell';
-    body.innerHTML = active === 'gallery' ? galleryMarkup(snapshot, state.gallery, localItems, notice, importing) : browserMarkup(snapshot, state.browser);
+    paintedShell = body;
+    renderedMarkup = markup;
+    body.innerHTML = markup;
     if (preserveScroll) body.scrollTop = previousScrollTop;
     body.querySelector('[data-utility-browser-search] input')?.addEventListener('input', (event) => {
       state.browser.query = String(event.target.value || '').slice(0, 100);
@@ -408,11 +424,13 @@ export function mountUtilityRealism() {
   const stage = document.querySelector('#world-phone-stage');
   const observer = new MutationObserver((records) => {
     applyWallpaper();
+    syncRoute();
     if (!active) return;
     const replaced = records.some((record) => !record.target?.closest?.('.wp-utility-realism-app'));
     if (replaced) queuePaint();
   });
-  if (stage) observer.observe(stage, { childList: true, subtree: true });
+  const observerRoot = document.querySelector('#world-phone-stage [data-screen]') || stage;
+  if (observerRoot) observer.observe(observerRoot, { childList: true, subtree: true });
   const unsubscribe = subscribeWorldBackstage((next) => { snapshot = next; window.setTimeout(queuePaint, 0); });
 
   return () => {

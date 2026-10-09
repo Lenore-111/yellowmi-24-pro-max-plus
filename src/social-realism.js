@@ -279,8 +279,8 @@ function headerCopy(section, title, subtitle) {
   if (!header) return;
   const titleNode = header.querySelector('div > b');
   const subNode = header.querySelector('div > small');
-  if (titleNode) titleNode.textContent = title;
-  if (subNode) subNode.textContent = subtitle;
+  if (titleNode && titleNode.textContent !== title) titleNode.textContent = title;
+  if (subNode && subNode.textContent !== subtitle) subNode.textContent = subtitle;
 }
 
 function emptyMarkup(title, body) {
@@ -508,6 +508,8 @@ export function mountSocialRealism({ phone } = {}) {
   let active = '';
   let routing = false;
   let refreshQueued = false;
+  let paintedShell = null;
+  let renderedMarkup = '';
   let snapshot = readWorldBackstage();
   let state = loadState();
   let scope = socialScope();
@@ -524,6 +526,10 @@ export function mountSocialRealism({ phone } = {}) {
   }
 
   function routeThroughShell(appId) {
+    if (typeof phone?.openApp === 'function') {
+      phone.openApp(appId);
+      return true;
+    }
     const home = document.querySelector('#world-phone-stage .wp-home');
     const bridge = home?.querySelector('[data-app="settings"]') || home?.querySelector('[data-app]:not([data-social-realism-managed="1"])');
     if (!bridge) return false;
@@ -553,13 +559,19 @@ export function mountSocialRealism({ phone } = {}) {
   if (destroyed) return;
   if (readPhoneGameMode() === 'game') { active = ''; return; }
   enhanceWeChat(snapshot);
+  if (typeof phone?.current === 'function') {
+    const appId = phone.current().replace(/^app:/, '');
+    active = Object.hasOwn(APPS, appId) ? appId : '';
+  }
   if (!active) return;
   const section = document.querySelector('#world-phone-stage .wp-native-app');
   if (!section) return;
-  section.classList.add('wp-social-realism-app', `is-${active}`);
-  headerCopy(section, active === 'weibo' ? (state.weibo.detailId ? '微博正文' : { home: '微博', hot: '发现', me: '我' }[state.weibo.tab]) : '小红书', active === 'weibo' ? '' : snapshot.connected ? 'SIM 已插入 · 世界公开网络' : '未插入世界背面 SIM');
   const old = section.querySelector('.wp-placeholder-card, .wp-social-shell');
   if (!old) return;
+  const markup = active === 'weibo' ? renderWeiboMarkup(snapshot, state.weibo) : renderRedNoteMarkup(snapshot, state.rednote);
+  section.classList.add('wp-social-realism-app', `is-${active}`);
+  headerCopy(section, active === 'weibo' ? (state.weibo.detailId ? '微博正文' : { home: '微博', hot: '发现', me: '我' }[state.weibo.tab]) : '小红书', active === 'weibo' ? '' : snapshot.connected ? 'SIM 已插入 · 世界公开网络' : '未插入世界背面 SIM');
+  if (preserveScroll && old === paintedShell && markup === renderedMarkup) return;
   const focused = old.querySelector('[data-social-search] input:focus');
   const selection = focused ? [focused.selectionStart, focused.selectionEnd] : null;
   const previousScrollTop = Number.isFinite(options.scrollTop)
@@ -567,7 +579,9 @@ export function mountSocialRealism({ phone } = {}) {
   const oldGallery = old.querySelector('.wp-rn-gallery-track');
   const galleryOffset = preserveScroll && oldGallery?.clientWidth ? oldGallery.scrollLeft / oldGallery.clientWidth : 0;
   old.className = 'wp-social-shell';
-  old.innerHTML = active === 'weibo' ? renderWeiboMarkup(snapshot, state.weibo) : renderRedNoteMarkup(snapshot, state.rednote);
+  paintedShell = old;
+  renderedMarkup = markup;
+  old.innerHTML = markup;
   const nextScroller = feedScroller(old);
   if (nextScroller) nextScroller.scrollTop = previousScrollTop;
   const nextGallery = old.querySelector('.wp-rn-gallery-track');
@@ -716,7 +730,7 @@ function mutate(mutator, options = {}) {
   const observer = new MutationObserver((records) => {
     if (mutationNeedsRefresh(records)) queueRefresh();
   });
-  const observerRoot = document.querySelector('#world-phone-stage');
+  const observerRoot = document.querySelector('#world-phone-stage [data-screen]') || document.querySelector('#world-phone-stage');
   if (observerRoot) observer.observe(observerRoot, { childList: true, subtree: true });
   const unsubscribe = subscribeWorldBackstage((next) => { snapshot = next; window.setTimeout(queueRefresh, 0); });
   const poll = window.setInterval(() => {

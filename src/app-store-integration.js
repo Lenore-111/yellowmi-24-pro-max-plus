@@ -41,8 +41,8 @@ function headerCopy(section, title, subtitle) {
   if (!header) return;
   const titleNode = header.querySelector('div > b');
   const subtitleNode = header.querySelector('div > small');
-  if (titleNode) titleNode.textContent = title;
-  if (subtitleNode) subtitleNode.textContent = subtitle;
+  if (titleNode && titleNode.textContent !== title) titleNode.textContent = title;
+  if (subtitleNode && subtitleNode.textContent !== subtitle) subtitleNode.textContent = subtitle;
 }
 
 function installedSet() {
@@ -92,6 +92,10 @@ export function mountAppStoreIntegration({ phone } = {}) {
   }
 
   function routeThroughShell(appId) {
+    if (typeof phone?.openApp === 'function') {
+      phone.openApp(appId);
+      return true;
+    }
     const home = document.querySelector('#world-phone-stage .wp-home');
     const bridge = home?.querySelector('[data-app="settings"]')
       || home?.querySelector('[data-app]:not([data-store-managed="1"])');
@@ -323,13 +327,14 @@ export function mountAppStoreIntegration({ phone } = {}) {
   }
 
   function paintStore(section, force = false) {
+    if (typeof phone?.current === 'function' && phone.current() !== `app:${STORE_APP_ID}`) return;
     if (!section) return;
+    const old = section.querySelector('.wp-placeholder-card, .wp-store-shell');
+    if (!old) return;
     section.classList.add('wp-store-app');
     const detail = storeDetailId ? getCatalogApp(storeDetailId) : null;
     headerCopy(section, detail ? detail.name : '应用商店', detail ? 'APP STORE · App 详情' : 'APP STORE · 本机安装');
 
-    const old = section.querySelector('.wp-placeholder-card, .wp-store-shell');
-    if (!old) return;
     // Theme changes must not rebuild a skin editor or erase its save feedback.
     const signature = `${readInstalledApps().map((app) => app.id).join('|')}::${storeQuery}::${detail?.id || ''}::${storeMode}::${storeMode === 'themes' ? '' : JSON.stringify(readPhoneTheme())}`;
     if (!force && old.classList.contains('wp-store-shell') && old.dataset.signature === signature) {
@@ -446,15 +451,19 @@ export function mountAppStoreIntegration({ phone } = {}) {
   }
 
   function paintDownloadedApp(section, appId) {
+    if (typeof phone?.current === 'function' && phone.current() !== `app:${appId}`) return;
     if (!section) return;
     const app = getCatalogApp(appId);
     if (!app) return;
+    const old = section.querySelector('.wp-placeholder-card, .wp-download-shell');
+    if (!old) return;
     const installed = isAppInstalled(app.id);
     section.classList.add('wp-downloaded-app');
     headerCopy(section, app.name, `${app.category} · ${installed ? '已安装' : '未安装'}`);
-    const old = section.querySelector('.wp-placeholder-card, .wp-download-shell');
-    if (!old) return;
+    const signature = `${app.id}:${installed}`;
+    if (old.classList.contains('wp-download-shell') && old.dataset.signature === signature) return;
     old.className = 'wp-download-shell';
+    old.dataset.signature = signature;
     old.innerHTML = `
       <div class="wp-download-hero">
         <span class="wp-store-icon ${escapeHtml(app.tone)}">${escapeHtml(app.icon)}</span>
@@ -470,6 +479,10 @@ export function mountAppStoreIntegration({ phone } = {}) {
   }
 
   function enhanceManagedRoute() {
+    if (typeof phone?.current === 'function') {
+      const appId = phone.current().replace(/^app:/, '');
+      activeManagedApp = appId === STORE_APP_ID || getCatalogApp(appId) ? appId : '';
+    }
     if (!activeManagedApp) return;
     const section = document.querySelector('#world-phone-stage .wp-native-app');
     if (!section) return;
@@ -505,7 +518,8 @@ export function mountAppStoreIntegration({ phone } = {}) {
   window.addEventListener(THEME_CHANGE_EVENT, queueRefresh);
   document.addEventListener('click', clickHandler, true);
   const observer = new MutationObserver(queueRefresh);
-  observer.observe(document.body, { childList: true, subtree: true });
+  const observerRoot = document.querySelector('#world-phone-stage [data-screen]') || document.querySelector('#world-phone-stage');
+  if (observerRoot) observer.observe(observerRoot, { childList: true, subtree: true });
   queueRefresh();
 
   return () => {

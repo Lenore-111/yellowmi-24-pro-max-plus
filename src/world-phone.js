@@ -670,10 +670,14 @@ export function mountWorldPhone() {
   let gameScope = capturePhoneGameScope().key;
   let composing = false;
   let pendingRefresh = false;
+  let statusMarkup = '';
 
   function paintStatusbar() {
     const now = presentationTime(snapshot);
-    statusbar.innerHTML = `<span class="wp-status-time">${escapeHtml(now.time)}</span><span class="wp-status-icons">${signalBars(snapshot.connected)}<span class="wp-wifi">⌁</span><span class="wp-battery"><i></i></span></span>`;
+    const markup = `<span class="wp-status-time">${escapeHtml(now.time)}</span><span class="wp-status-icons">${signalBars(snapshot.connected)}<span class="wp-wifi">⌁</span><span class="wp-battery"><i></i></span></span>`;
+    if (markup === statusMarkup) return;
+    statusMarkup = markup;
+    statusbar.innerHTML = markup;
   }
 
   function showLock() {
