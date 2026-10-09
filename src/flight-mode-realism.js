@@ -128,7 +128,7 @@ export function mountFlightModeRealism({ phone } = {}) {
   }
 
   apply();
-  console.info(`[世界小手机] SIM state: ${text(networkModeLabel(snapshot))}`);
+  console.info(`[Echo 手机] SIM state: ${text(networkModeLabel(snapshot))}`);
 
   return () => {
     observer.disconnect();

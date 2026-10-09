@@ -89,7 +89,7 @@ function ensureNotice() {
   notice.innerHTML = `
     <div class="wp-update-card" role="status" aria-live="polite">
       <span class="wp-update-mark">↻</span>
-      <span class="wp-update-copy"><b>世界小手机有更新</b><small>点一下就能手动更新，不会自动安装。</small></span>
+      <span class="wp-update-copy"><b>Echo 手机有更新</b><small>点一下就能手动更新，不会自动安装。</small></span>
       <button type="button" data-phone-update-action>更新</button>
       <button type="button" data-phone-update-close aria-label="稍后提醒">×</button>
     </div>`;
@@ -124,11 +124,11 @@ async function runUpdateFromNotice() {
     action.textContent = '刷新酒馆';
     action.disabled = false;
     action.dataset.refresh = '1';
-    notice.querySelector('.wp-update-copy b').textContent = '世界小手机已更新';
+    notice.querySelector('.wp-update-copy b').textContent = 'Echo 手机已更新';
     notice.querySelector('.wp-update-copy small').textContent = '刷新页面后载入新版本。';
     setLauncherUpdateBadge(false);
   } catch (error) {
-    console.error('[世界小手机] 更新失败:', error);
+    console.error('[Echo 手机] 更新失败:', error);
     action.textContent = '重试更新';
     action.disabled = false;
     notice.querySelector('.wp-update-copy small').textContent = '更新失败，请重试；不会改动现有手机数据。';
@@ -169,7 +169,7 @@ export async function checkAndNotifyWorldPhoneUpdate({ force = false } = {}) {
     if (status.available) showNotice();
     return status;
   } catch (error) {
-    console.warn('[世界小手机] 更新检查失败:', error);
+    console.warn('[Echo 手机] 更新检查失败:', error);
     return null;
   }
 }

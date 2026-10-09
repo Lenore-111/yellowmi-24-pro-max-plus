@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 // Run the actual module bodies with an isolated SillyTavern host, controllable
 // model promises and virtual time. No browser or model credentials are needed.
-const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js"];
+const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js","src/phone-game-app-ui.js"];
 const sources = Object.fromEntries(await Promise.all(paths.map(async path =>
   [path, await readFile(new URL('../' + path, import.meta.url), 'utf8')])));
 
@@ -55,7 +55,8 @@ function createHarness(sources) {
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,...game},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
-  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...game,...ai}, ['renderPhoneGameApp']);
+  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
+  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...appUi,...game,...ai}, ['renderPhoneGameApp']);
   const deferred = () => { let resolve,reject; const promise = new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject}; };
   function model(cooperative = true) {
     const task = deferred();

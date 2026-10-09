@@ -10,7 +10,7 @@ function renderDeliveryApp(screen,{goHome}={}){
  const section=screen.querySelector(".wp-delivery-app");
  function save(){state=sanitizeDeliveryState(state);writeSocialBucket(DELIVERY_KEY,state)}
  function paint(){
-  const title={home:"玲七快送",merchant:"商家菜单",cart:"购物车",checkout:"确认订单",orders:"我的订单",order:"订单详情"}[ui.view]||"玲七快送";
+  const title={home:"Echo快送",merchant:"商家菜单",cart:"购物车",checkout:"确认订单",orders:"我的订单",order:"订单详情"}[ui.view]||"Echo快送";
   section.innerHTML=`<header class="wp-app-header wpdelivery-header"><button type="button" data-dback aria-label="返回">‹</button><div><b>${title}</b><small>本机演示 · 不扣钱包</small></div><button type="button" class="wpdelivery-header-cart" data-dgo="cart" aria-label="查看购物车">🛍️</button></header><div class="wpdelivery-shell">${deliveryView(ui,state)}</div>${ui.error?`<div class="wpdelivery-error" role="alert">${deliveryEsc(ui.error)}</div>`:""}`;
  }
  function navigate(next){ui.view=next;ui.error="";paint()}

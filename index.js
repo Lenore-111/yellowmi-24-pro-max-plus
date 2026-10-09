@@ -79,6 +79,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-delivery-style', './delivery.css?build=delivery-v1');
   ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=edge-tuck-v3');
   ensureExternalStyle('world-phone-experience-baseline-style', './experience-baseline.css?build=alpha9');
+  ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
   phone = mountWorldPhone();
   unmountShellLayout = mountShellLayout({ phone });
   unmountAppStore = mountAppStoreIntegration({ phone });
@@ -96,7 +97,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.27 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[Echo 手机] 0.3.0-alpha.27 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {
@@ -107,7 +108,7 @@ function bindAppReadyRefresh() {
 
   const onAppReady = () => {
     initWorldPhone();
-    loadCustomThemes().catch(error=>console.warn('[世界小手机] 皮肤恢复失败：',error));
+    loadCustomThemes().catch(error=>console.warn('[Echo 手机] 皮肤恢复失败：',error));
     phone?.refresh?.();
   };
   context.eventSource.on(eventTypes.APP_READY, onAppReady);
@@ -127,7 +128,7 @@ function scheduleInit() {
 
     bindAppReadyRefresh();
   } catch (error) {
-    console.error('[世界小手机] activation failed:', error);
+    console.error('[Echo 手机] activation failed:', error);
   }
 }
 

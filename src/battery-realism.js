@@ -116,7 +116,7 @@ function paintDead(stage, state) {
   if (!dead) return;
   panel.innerHTML = state.charging
     ? `<div class="wp-battery-dead-icon is-charging"><i style="width:${level}%"></i><span>⚡</span></div><b>${level}%</b><small>${level >= BOOT_LEVEL ? '电量已足够，按电源键开机' : `正在充电 · ${BOOT_LEVEL}% 后可开机`}</small><button type="button" data-battery-charge-toggle>拔掉充电器</button>`
-    : '<div class="wp-battery-dead-icon"><i style="width:0%"></i></div><b>电量耗尽</b><small>世界小手机已关机</small><button type="button" data-battery-dead-charge>连接充电器</button>';
+    : '<div class="wp-battery-dead-icon"><i style="width:0%"></i></div><b>电量耗尽</b><small>Echo 手机已关机</small><button type="button" data-battery-dead-charge>连接充电器</button>';
 }
 
 function paintSettings(stage, state) {
@@ -133,7 +133,7 @@ function paintSettings(stage, state) {
   const signature = `${level}|${state.charging ? 1 : 0}`;
   if (group.dataset.signature === signature) return;
   group.dataset.signature = signature;
-  group.innerHTML = `<header>电池</header><div class="wp-device-row wp-battery-settings-readout"><span>▰</span><div><b>剩余电量</b><small>${state.charging ? '已接入充电器' : level <= 20 ? '建议尽快充电' : '按小手机实际使用缓慢消耗'}</small></div><strong>${level}%</strong></div><button type="button" class="wp-device-row" data-battery-charge-toggle><span>⚡</span><div><b>${state.charging ? '断开充电器' : '连接充电器'}</b><small>只控制世界小手机的虚拟供电</small></div><strong>${state.charging ? '充电中' : '未连接'}</strong><i>›</i></button>`;
+  group.innerHTML = `<header>电池</header><div class="wp-device-row wp-battery-settings-readout"><span>▰</span><div><b>剩余电量</b><small>${state.charging ? '已接入充电器' : level <= 20 ? '建议尽快充电' : '按小手机实际使用缓慢消耗'}</small></div><strong>${level}%</strong></div><button type="button" class="wp-device-row" data-battery-charge-toggle><span>⚡</span><div><b>${state.charging ? '断开充电器' : '连接充电器'}</b><small>只控制Echo 手机的虚拟供电</small></div><strong>${state.charging ? '充电中' : '未连接'}</strong><i>›</i></button>`;
 }
 
 function paintControl(stage, state) {

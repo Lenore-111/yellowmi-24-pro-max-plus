@@ -3,6 +3,13 @@
   align-items: stretch;
 }
 
+/* Respond to the actual phone width, rather than the host desktop width. */
+@container phone-screen (max-width: 300px) {
+  #world-phone-stage .wp-store-row { grid-template-columns: minmax(0, 1fr); }
+  #world-phone-stage .wp-store-row-actions { align-items: flex-start; padding-left: 62px; }
+  #world-phone-stage .wp-store-copy { overflow-wrap: anywhere; }
+}
+
 .wp-store-main {
   min-width: 0;
   display: grid;
