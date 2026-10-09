@@ -1,6 +1,6 @@
 import { roleLabel } from './werewolf-local-engine.js';
 
-export const CROW_DM_IMAGE = new URL('../assets/werewolf/crow-dm.png', import.meta.url).href;
+export const CROW_DM_IMAGE = new URL('../assets/werewolf/crow-dm.png?v=pixel-1', import.meta.url).href;
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
 export function crowHostMarkup(view, { dealing = false, revealed = false } = {}) {
@@ -16,7 +16,7 @@ export function crowHostMarkup(view, { dealing = false, revealed = false } = {})
   const message = dealing
     ? revealed ? '身份记住了吗？收好牌，我们准备进入第一个夜晚。' : '牌已发到各位面前。只翻开你自己的那张，别偷看邻座。'
     : view ? lines[view.phase] || '这一桌由我主持。收好身份，按阶段行动。' : '我是鸦，今晚由我发牌。入夜，请闭眼。';
-  return `<section class="wp-wwl-dm" aria-label="乌鸦主持人"><img src="${esc(CROW_DM_IMAGE)}" alt="拿着身份牌的乌鸦主持人鸦"><div><small>鸦 · 本桌主持</small><p>${esc(message)}</p></div></section>`;
+  return `<section class="wp-wwl-dm" aria-label="乌鸦主持人"><img src="${esc(CROW_DM_IMAGE)}" alt="像素乌鸦主持人鸦"><div><small>鸦 · 本桌主持</small><p>${esc(message)}</p></div></section>`;
 }
 
 export function crowDealMarkup(state) {
