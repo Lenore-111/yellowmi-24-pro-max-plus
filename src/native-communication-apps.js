@@ -1,6 +1,7 @@
 import { readSocialBucket, writeSocialBucket, socialScope } from './social-storage.js';
 import { buildCommunicationRegistry } from './communication-registry.js';
 import { readWorldBackstage, subscribeWorldBackstage } from './world-backstage-bridge.js';
+import { capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.27';
 
 const COMMUNICATION_STORAGE_KEY = 'world_phone_communication_realism_v1';
 
@@ -99,6 +100,15 @@ function cellularData() {
     snapshot,
     people: registry.people.filter((person) => person.channels.cellular.available),
   };
+}
+
+function protectNativeControls(screen, snapshot) {
+  const scope = capturePhoneGameScope(), root = screen.querySelector('.wp-comm-app');
+  for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener(type, event => {
+    if (screen.querySelector('.wp-comm-app') === root && readPhoneGameMode() === 'world'
+      && isPhoneGameScopeCurrent(scope) && readWorldBackstage().branchKey === snapshot.branchKey) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+  }, true);
 }
 
 function phoneTabs(active) {
@@ -214,6 +224,7 @@ function renderPhone(screen, goHome, state, context) {
     renderPhone(screen, goHome, state, context);
   });
   screen.querySelector('[data-keypad-call]')?.addEventListener('click', () => recordAttempt(state.phone.draftNumber));
+  protectNativeControls(screen, snapshot);
 }
 
 function smsListMarkup(snapshot, people, state) {
@@ -284,6 +295,7 @@ function renderSms(screen, goHome, state, context) {
     }
     renderSms(screen, goHome, state, context);
   });
+  protectNativeControls(screen, snapshot);
 }
 
 export function renderNativeCommunicationApp(screen, { app, goHome }) {

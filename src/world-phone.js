@@ -669,7 +669,18 @@ export function mountWorldPhone() {
   let snapshot = readWorldBackstage();
   const chatScope = () => { const ctx = globalThis.SillyTavern?.getContext?.(); return ctx?.chatMetadata ?? ctx?.chat_metadata ?? null; };
   let scope = chatScope();
+  const worldScopeKey = () => {
+    const ctx = globalThis.SillyTavern?.getContext?.();
+    return JSON.stringify([
+      ctx?.chatId ?? ctx?.getCurrentChatId?.() ?? '',
+      ctx?.characterId ?? '',
+      ctx?.groupId ?? '',
+      readWorldBackstage().branchKey,
+    ]);
+  };
+  let scopeKey = worldScopeKey();
   let gameScope = capturePhoneGameScope().key;
+  let modeEpoch = capturePhoneGameScope().modeEpoch;
   let composing = false;
   let pendingRefresh = false;
   let statusMarkup = '';
@@ -699,9 +710,18 @@ export function mountWorldPhone() {
     paintStatusbar();
   }
 
-  function toggleMomentLike(momentId, liked) {
-    snapshot = setWorldBackstageMomentLiked(momentId, liked);
-    repaintWechat();
+  async function toggleMomentLike(momentId, liked) {
+    try {
+      const next = await setWorldBackstageMomentLiked(momentId, liked);
+      snapshot = next;
+      if (current === 'app:wechat') repaintWechat();
+    } catch (error) {
+      console.warn('[世界小手机] 点赞操作未完成：', error);
+      if (current === 'app:wechat') {
+        const area = screen.querySelector('[data-wx-content]');
+        if (area) area.insertAdjacentHTML('afterbegin', '<p role="alert">点赞失败，请确认世界背面连接和权限后重试。</p>');
+      }
+    }
   }
 
   function repaintWechat() {
@@ -769,19 +789,25 @@ export function mountWorldPhone() {
   function refresh(nextSnapshot = null) {
     const nextScope = chatScope();
     const nextGameScope = capturePhoneGameScope().key;
+    const nextModeEpoch = capturePhoneGameScope().modeEpoch;
+    if (nextModeEpoch !== modeEpoch && current.startsWith('app:')) current = 'home';
+    modeEpoch = nextModeEpoch;
     if (nextGameScope !== gameScope && screen.querySelector('[data-phone-game-app]')) current = 'home';
     gameScope = nextGameScope;
-    const sameScope = nextScope === scope;
-    if (nextScope !== scope) {
+    const nextScopeKey = worldScopeKey();
+    const sameScope = nextScope === scope && nextScopeKey === scopeKey;
+    if (!sameScope) {
       scope = nextScope;
+      scopeKey = nextScopeKey;
       wechatRoute.conversationId = '';
       wechatRoute.tab = 'chats';
       composing = false;
-      if (screen.querySelector('[data-phone-game-app]') || current === 'app:wechat' || current === 'app:delivery') current = 'home';
+      if (screen.querySelector('[data-phone-game-app]') || ['app:wechat', 'app:delivery', 'app:phone', 'app:messages'].includes(current)) current = 'home';
     }
-    if (composing && current === 'app:wechat') { pendingRefresh = true; return; }
+    if (sameScope && composing && current === 'app:wechat') { pendingRefresh = true; return; }
     snapshot = nextSnapshot || readWorldBackstage();
     const sheet = sameScope ? screen.querySelector('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet') : null;
+    if (!sameScope) screen.querySelectorAll('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet').forEach(item => item.remove());
     const focused = sheet?.contains(document.activeElement) ? document.activeElement : null;
     sheet?.remove();
     if (current === 'lock') showLock();

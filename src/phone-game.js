@@ -28,16 +28,22 @@ const clean = (value, max = 800) => String(value ?? '').trim().slice(0, max);
 const integer = (value, min = 0, max = 1000000000) => Math.min(max, Math.max(min, Number.isFinite(Number(value)) ? Math.floor(Number(value)) : 0));
 const id = () => globalThis.crypto?.randomUUID?.() || `pg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 function context() { try { return globalThis.SillyTavern?.getContext?.() || null; } catch { return null; } }
+const modeListeners = new Set();
+export function subscribePhoneGameModeChange(listener) {
+  modeListeners.add(listener);
+  return () => modeListeners.delete(listener);
+}
 
 export function capturePhoneGameScope() {
   const ctx = context();
   const card = ctx?.characters?.[ctx.characterId];
   const characterKey = ctx?.groupId ? `group:${ctx.groupId}` : `card:${card?.avatar || card?.name || ctx?.characterId || 'none'}`;
-  return { ctx, metadata: ctx?.chatMetadata || null, key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
+  const metadata = ctx?.chatMetadata || null;
+  return { ctx, metadata, modeEpoch: integer(readStore({ metadata }).modeEpoch), key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
 }
 export function isPhoneGameScopeCurrent(scope) {
   const current = capturePhoneGameScope();
-  return current.metadata === scope.metadata && current.key === scope.key;
+  return current.metadata === scope.metadata && current.key === scope.key && current.modeEpoch === scope.modeEpoch;
 }
 function requireScope(scope) {
   if (!isPhoneGameScopeCurrent(scope)) throw new Error('聊天或角色已切换，这次操作保留在原存档，请回到原聊天继续。');
@@ -63,7 +69,17 @@ export function readPhoneGameMode() { return readStore(capturePhoneGameScope()).
 export function setPhoneGameMode(mode) {
   if (!['game', 'world'].includes(mode)) throw new Error('未知手机模式');
   const scope = capturePhoneGameScope();
-  persist(scope, { ...readStore(scope), mode });
+  const previous = readPhoneGameMode();
+  if (previous === 'game' && mode === 'world') {
+    for (const call of readPhoneGameState(scope).communications.calls) {
+      if (['dialing', 'connected'].includes(call.outcome)) endPhoneGameCall(call.id, scope);
+    }
+  }
+  const store = readStore(scope);
+  persist(scope, { ...store, mode, modeEpoch: integer(store.modeEpoch) + (previous === mode ? 0 : 1) });
+  if (previous !== mode) for (const listener of modeListeners) {
+    try { listener(); } catch (error) { console.warn('[世界小手机] 模式切换通知失败', error); }
+  }
 }
 function collectActors(ctx) {
   return collectPhoneGameActors(ctx, readWorldBackstage().contacts || []);
