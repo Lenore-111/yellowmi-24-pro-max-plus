@@ -10,7 +10,7 @@ import { renderMusicApp } from './music-app.js';
 import { renderPocketGame } from './pocket-game.js';
 import { renderDeliveryApp } from './lingqi-delivery.js';
 import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js';
-import { renderPhoneGameApp } from './phone-game-view.js';
+import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.24';
 import { findMessageMatches, highlightMessageText } from './message-search.js';
 import {
   DEFAULT_HOME_LAYOUT,

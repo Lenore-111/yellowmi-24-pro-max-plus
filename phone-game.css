@@ -64,6 +64,15 @@
 .wpg-thread-head b { font-size: 13px; overflow-wrap: anywhere; }
 .wpg-thread-head button { font-size: 12px; }
 .wpg-relation-strip { font-size: 11px; color: #9b899f; text-align: center; margin: 12px 0; }
+#world-phone-stage .wp-game-app .wpg-main.is-thread { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; }
+.wpg-main.is-thread > .wpg-thread-head,
+.wpg-main.is-thread > .wpg-relation-strip,
+.wpg-main.is-thread > .wpg-error,
+.wpg-main.is-thread > .wpg-info,
+.wpg-main.is-thread > .wpg-generating { flex: 0 0 auto; }
+.wpg-main.is-thread > .wpg-thread { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wpg-main.is-thread > .wpg-compose { position: static; bottom: auto; flex: 0 0 auto; margin: 0; background: transparent; }
+.wpg-main.is-thread > .wpg-compose textarea { resize: none; }
 .wpg-chat-event { display: flex; flex-direction: column; align-items: flex-start; margin: 16px 0; }
 .wpg-chat-event > small { font-size: 10px; align-self: center; color: #a799ad; margin-bottom: 10px; }
 .wpg-bubble { max-width: 88%; padding: 11px 13px; border-radius: 14px 14px 14px 3px; background: #fff; font-size: 13px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }

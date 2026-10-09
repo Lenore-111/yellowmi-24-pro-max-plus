@@ -109,14 +109,14 @@
 @media (max-width: 700px) {
   #world-phone-stage.wp-stage {
     width: 100vw;
-    height: 100dvh;
-    min-height: 100dvh;
+    height: var(--phone-visible-height, 100dvh);
+    min-height: var(--phone-visible-height, 100dvh);
   }
 
   #world-phone-stage .wp-device-wrap {
     inset: 0 !important;
     width: 100vw !important;
-    height: 100dvh !important;
+    height: var(--phone-visible-height, 100dvh) !important;
     min-width: 0 !important;
     max-width: none !important;
     max-height: none !important;

@@ -7,7 +7,7 @@
   "js": "index.js",
   "css": "world-phone.css",
   "author": "World Phone",
-  "version": "0.3.0-alpha.23",
+  "version": "0.3.0-alpha.24",
   "auto_update": true,
   "minimum_client_version": "1.12.0"
 }

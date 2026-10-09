@@ -175,6 +175,8 @@ export function mountShellLayout() {
   function syncMode() {
     const mobile = isMobile();
     stage.dataset.shellMode = mobile ? 'mobile-fullscreen' : 'desktop-floating';
+    if (mobile) stage.style.setProperty('--phone-visible-height', `${Math.round(viewportSize().height)}px`);
+    else stage.style.removeProperty('--phone-visible-height');
     document.documentElement.classList.toggle('wp-mobile-fullscreen-active', mobile && !stage.hidden);
 
     if (close) {
@@ -341,6 +343,7 @@ export function mountShellLayout() {
     handle?.remove();
     delete stage.dataset.shellLayout;
     delete stage.dataset.shellMode;
+    stage.style.removeProperty('--phone-visible-height');
     document.documentElement.classList.remove('wp-mobile-fullscreen-active');
   };
 }

@@ -1,12 +1,12 @@
 import { mountSocialTools } from './src/social-tools.js';
-import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.23';
+import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.24';
 import { mountPhoneInteractions } from './src/phone-interactions.js';
 import { mountNativeCommunicationApps } from './src/native-communication-apps.js';
 import { mountWorldPhoneUpdateManager } from './src/update-manager.js';
-import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.23';
-import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.23';
-import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.23';
-import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.23';
+import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.24';
+import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.24';
+import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.24';
+import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.24';
 import { mountDeviceRealism } from './src/device-realism.js';
 import { mountSystemRealism } from './src/system-realism.js';
 import { mountBatteryRealism } from './src/battery-realism.js';
@@ -15,7 +15,7 @@ import { mountInteractionRealism } from './src/interaction-realism.js';
 import { mountAppExperienceRealism } from './src/app-experience-realism.js';
 import { mountFlightModeRealism } from './src/flight-mode-realism.js';
 import { loadCustomThemes } from './src/custom-phone-themes.js';
-import { mountShellLayout } from './src/shell-layout.js';
+import { mountShellLayout } from './src/shell-layout.js?v=0.3.0-alpha.24';
 
 let phone = null;
 let unmountSocialTools = null;
@@ -56,7 +56,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-casino-style', './casino.css?build=casino-v2');
   ensureExternalStyle('world-phone-casino-motion-style', './casino-motion.css?build=casino-motion-v3');
   ensureExternalStyle('world-phone-wallet-style', './wallet.css?build=wallet-v1');
-  ensureExternalStyle('world-phone-game-style', './phone-game.css?build=phone-game-v1');
+  ensureExternalStyle('world-phone-game-style', './phone-game.css?build=phone-game-v2');
   ensureExternalStyle('world-phone-music-style', './music.css?build=music-v1');
   ensureExternalStyle('world-phone-app-store-style', './app-store.css?build=store-v1');
   ensureExternalStyle('world-phone-app-experience-realism-style', './app-experience-realism.css?build=app-experience-v1');
@@ -72,7 +72,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-battery-realism-style', './battery-realism.css?build=battery-realism-v1');
   ensureExternalStyle('world-phone-app-switcher-realism-style', './app-switcher-realism.css?build=interaction-realism-v1');
   ensureExternalStyle('world-phone-interaction-realism-style', './interaction-realism.css?build=interaction-realism-v2');
-  ensureExternalStyle('world-phone-shell-layout-style', './shell-layout.css?build=shell-layout-v1');
+  ensureExternalStyle('world-phone-shell-layout-style', './shell-layout.css?build=shell-layout-v2');
   ensureExternalStyle('world-phone-pocket-experience-style', './pocket-experience.css?build=alpha8');
   ensureExternalStyle('world-phone-game-tables-style', './game-tables.css?build=alpha8');
   ensureExternalStyle('world-phone-social-polish-style', './social-polish.css?build=alpha9');
@@ -96,7 +96,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.23 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[世界小手机] 0.3.0-alpha.24 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {
