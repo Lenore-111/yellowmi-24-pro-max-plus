@@ -51,7 +51,7 @@ function createHarness(sources) {
   const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
   const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
-     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall']);
+     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,...game},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);

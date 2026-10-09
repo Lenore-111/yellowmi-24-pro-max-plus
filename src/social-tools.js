@@ -9,7 +9,7 @@ export function mountSocialTools({ phone } = {}) {
   let destroyed = false;
   let queued = false;
   const makeSheet = (title, content) => {
-    stage.querySelector('.wp-social-sheet')?.remove();
+    stage.querySelectorAll('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet').forEach(sheet => sheet.remove());
     const sheet = document.createElement('section'); sheet.className = 'wp-social-sheet';
     sheet.setAttribute('role','dialog'); sheet.setAttribute('aria-label',title);
     sheet.innerHTML = `<header><b>${esc(title)}</b><button type="button" data-social-close aria-label="关闭">×</button></header><div class="wp-social-sheet-body">${content}</div><p role="alert" data-social-error></p>`;
@@ -20,7 +20,7 @@ export function mountSocialTools({ phone } = {}) {
   };
   const runAction = async (sheet, action, payload, done) => {
     const error = sheet.querySelector('[data-social-error]');
-    try { const result = await performWorldBackstageSocialAction(action, payload); done?.(result); }
+    try { const result = await performWorldBackstageSocialAction(action, payload); if (sheet.isConnected) done?.(result); }
     catch (cause) { if (error) error.textContent = cause?.message || '操作失败，请重试'; }
   };
   const collections = () => {

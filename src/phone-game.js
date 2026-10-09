@@ -29,6 +29,40 @@ const integer = (value, min = 0, max = 1000000000) => Math.min(max, Math.max(min
 const id = () => globalThis.crypto?.randomUUID?.() || `pg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 function context() { try { return globalThis.SillyTavern?.getContext?.() || null; } catch { return null; } }
 const modeListeners = new Set();
+let metadataSaveTask = null;
+function savePhoneMetadata(scope) {
+  if (typeof scope.ctx?.saveMetadata !== 'function') {
+    scope.ctx?.saveMetadataDebounced?.();
+    return;
+  }
+  if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
+    metadataSaveTask.pending = true;
+    return;
+  }
+  const task = { scope, pending: false };
+  metadataSaveTask = task;
+  const sameChat = () => {
+    const current = capturePhoneGameScope();
+    return current.metadata === scope.metadata && current.key === scope.key;
+  };
+  task.promise = (async () => {
+    try {
+      do {
+        task.pending = false;
+        if (!sameChat()) return;
+        await scope.ctx.saveMetadata();
+      } while (task.pending && sameChat());
+    } catch (error) { console.warn('[世界小手机] 手机存档保存失败', error); }
+    finally { if (metadataSaveTask === task) metadataSaveTask = null; }
+  })();
+}
+export function flushPhoneGameMetadata(scope) {
+  requireScope(scope);
+  if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
+    return metadataSaveTask.promise;
+  }
+  return null;
+}
 export function subscribePhoneGameModeChange(listener) {
   modeListeners.add(listener);
   return () => modeListeners.delete(listener);
@@ -58,8 +92,9 @@ function persist(scope, store) {
   requireScope(scope);
   if (scope.metadata) {
     scope.metadata[PHONE_GAME_KEY] = clone(store);
-    if (scope.ctx?.saveMetadataDebounced) scope.ctx.saveMetadataDebounced();
-    else if (scope.ctx?.saveMetadata) void Promise.resolve(scope.ctx.saveMetadata()).catch(() => {});
+    // The host cancels debounced metadata saves when a chat closes. Start the
+    // save now so a pending SMS survives an immediate chat switch.
+    savePhoneMetadata(scope);
   } else {
     if (!globalThis.localStorage) throw new Error('无法保存手机游戏存档');
     globalThis.localStorage.setItem(PHONE_GAME_KEY, JSON.stringify(store));

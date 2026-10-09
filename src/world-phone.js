@@ -9,7 +9,7 @@ import { renderWalletApp } from './wallet-app.js';
 import { renderMusicApp } from './music-app.js';
 import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.27';
 import { renderDeliveryApp } from './lingqi-delivery.js';
-import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js?v=0.3.0-alpha.27';
+import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.27';
 import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.27';
 import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.27';
 import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.27';
@@ -790,7 +790,7 @@ export function mountWorldPhone() {
     const nextScope = chatScope();
     const nextGameScope = capturePhoneGameScope().key;
     const nextModeEpoch = capturePhoneGameScope().modeEpoch;
-    if (nextModeEpoch !== modeEpoch && current.startsWith('app:')) current = 'home';
+    if (nextModeEpoch !== modeEpoch && current.startsWith('app:') && current !== 'app:settings') current = 'home';
     modeEpoch = nextModeEpoch;
     if (nextGameScope !== gameScope && screen.querySelector('[data-phone-game-app]')) current = 'home';
     gameScope = nextGameScope;
@@ -823,6 +823,7 @@ export function mountWorldPhone() {
 
   function openStage() {
     window.clearTimeout(closeTimer);
+    document.body.append(stage);
     launcher.setAttribute('aria-expanded', 'true');
     refresh();
     stage.hidden = false;
@@ -861,6 +862,7 @@ export function mountWorldPhone() {
   document.addEventListener('keydown', onEscape);
 
   const unsubscribe = subscribeWorldBackstage((next) => refresh(next));
+  const unsubscribeMode = subscribePhoneGameModeChange(() => refresh());
   const clockTimer = window.setInterval(() => {
     if (stage.hidden) return;
     snapshot = readWorldBackstage();
@@ -882,6 +884,7 @@ export function mountWorldPhone() {
     destroy() {
       disposeCurrentApp();
       unsubscribe?.();
+      unsubscribeMode?.();
       window.clearTimeout(closeTimer);
       document.removeEventListener('keydown', onEscape);
       document.removeEventListener('click', onGameAppClick, true);
