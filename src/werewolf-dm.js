@@ -1,4 +1,4 @@
-import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.25';
+import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.27';
 
 export const CROW_DM_IMAGE = new URL('../assets/werewolf/crow-dm.png?v=pixel-1', import.meta.url).href;
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));

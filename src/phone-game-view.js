@@ -4,8 +4,8 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameState, readPhoneGameMode,
   queuePhoneGameInteraction, togglePhoneGameLike, startPhoneGameShift, servePhoneGameCoffee,
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
-} from './phone-game.js?v=0.3.0-alpha.26';
-import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.26';
+} from './phone-game.js?v=0.3.0-alpha.27';
+import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.27';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const labels = { wechat: '微信', weibo: '微博', rednote: '小红书', wallet: '钱包', delivery: '玲七快送' };
@@ -82,7 +82,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   function chats(state) {
     const actor = state.actors.find(actor => actor.id === ui.actorId);
     if (actor) {
-      const events = state.events.filter(event => event.actorId === actor.id);
+      const events = state.events.filter(event => event.actorId === actor.id && !['sms', 'call'].includes(event.kind));
       const rel = relation(state, actor);
       return `<div class="wpg-thread-head"><button type="button" data-pg-chats>‹ 消息</button><b>${esc(actor.name)}</b><button type="button" data-pg-gift-to="${esc(actor.id)}">送礼</button></div><div class="wpg-relation-strip">${esc(phoneGameRelationLabel(rel.affinity))} · 熟悉度 ${rel.affinity}/100</div><div class="wpg-thread">${events.map(event => `<article class="wpg-chat-event"><small>${esc(phoneGameClock({ tick: event.tick }))}${event.kind === 'comment' ? ' · 来自帖子评论' : event.kind === 'gift' ? ' · 收到礼物' : ''}</small><div class="wpg-bubble is-user">${esc(phoneGameEventDisplayText(state, event))}</div><div class="wpg-bubble">${replyMarkup(event)}</div><button type="button" class="wpg-text-button" data-pg-export="${esc(event.id)}">带入正文…</button></article>`).join('') || `<div class="wpg-empty">给${esc(actor.name)}发一句话吧。</div>`}</div><form data-pg-message class="wpg-compose"><textarea data-pg-draft rows="1" maxlength="1200" aria-label="私聊内容" placeholder="发消息" ${ui.busy ? 'readonly' : ''}>${esc(ui.draft)}</textarea><button type="submit" ${ui.busy ? 'disabled' : ''}>发送</button></form>`;
     }
@@ -92,7 +92,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
       return `<article class="wpg-person"><header>${avatar(actor.name)}<div><b>${esc(actor.name)}</b><small>${esc(phoneGameRelationLabel(rel.affinity))} · ${rel.affinity}/100</small></div></header><progress max="100" value="${rel.affinity}" aria-label="${esc(actor.name)}的熟悉度"></progress><p>${rel.preferences.length ? `发现的偏好：${esc(rel.preferences.join('、'))}` : `还没有发现${esc(phoneGameActorPronoun(actor))}的偏好，试着聊聊。`}</p>${rel.memory ? `<details><summary>共同经历</summary><p>${esc(rel.memory)}</p></details>` : ''}<button type="button" data-pg-chat="${esc(actor.id)}">聊一会</button><button type="button" data-pg-gift-to="${esc(actor.id)}">选礼物</button></article>`;
     }).join('')}`;
     return `<h2>消息</h2><div class="wpg-chat-list">${state.actors.map(actor => {
-      const last = state.events.filter(event => event.actorId === actor.id).at(-1);
+      const last = state.events.filter(event => event.actorId === actor.id && !['sms', 'call'].includes(event.kind)).at(-1);
       return `<button type="button" data-pg-chat="${esc(actor.id)}">${avatar(actor.name)}<span><b>${esc(actor.name)}</b><small>${esc(last ? last.status === 'pending' ? '等待回应 · 可重试' : last.reply : `开始聊聊${phoneGameActorPronoun(actor)}的生活`)}</small></span><i>›</i></button>`;
     }).join('')}</div>`;
   }

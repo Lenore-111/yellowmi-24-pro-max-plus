@@ -127,11 +127,8 @@ function phoneContactRow(person, state) {
 }
 
 function renderPhoneBody(snapshot, people, state, notice) {
-  if (!snapshot.connected) {
-    return `<div class="wp-comm-empty"><b>未连接世界背面</b><p>电话不会自己生成联系人或通话记录。</p></div>`;
-  }
   if (notice) {
-    return `<section class="wp-call-result"><span>☎</span><b>${escapeHtml(notice.name || notice.number)}</b><small>${escapeHtml(notice.number)}</small><p>无法接通：当前世界背面手机桥还没有开放蜂窝通话写接口。</p><button type="button" data-call-result-close>返回电话</button></section>`;
+    return `<section class="wp-call-result"><span>☎</span><b>${escapeHtml(notice.name || notice.number)}</b><small>${escapeHtml(notice.number)}</small><p>无法接通：当前没有可用的通话服务。</p><button type="button" data-call-result-close>返回电话</button></section>`;
   }
   if (state.phone.tab === 'keypad') {
     const number = state.phone.draftNumber;
@@ -289,6 +286,13 @@ function renderSms(screen, goHome, state, context) {
   });
 }
 
+export function renderNativeCommunicationApp(screen, { app, goHome }) {
+  const state = loadState();
+  const context = { phoneNotice: null, smsNotice: '' };
+  if (app === 'phone') renderPhone(screen, goHome, state, context);
+  else renderSms(screen, goHome, state, context);
+}
+
 export function mountNativeCommunicationApps({ phone } = {}) {
   let state = loadState();
   let scope = socialScope();
@@ -304,7 +308,7 @@ export function mountNativeCommunicationApps({ phone } = {}) {
 
     // 先登记当前应用，避免刷新、后台切换仍把通讯页当成桌面。
     phone?.openApp?.(appButton.dataset.app);
-    if (screen.querySelector('[data-phone-game-app]')) return;
+    if (screen.querySelector('[data-phone-game-app], .wp-comm-app')) return;
     const goHome = () => typeof phone?.home === 'function' ? phone.home() : phone?.refresh?.();
     if (appButton.dataset.app === 'phone') {
       context.phoneNotice = null;

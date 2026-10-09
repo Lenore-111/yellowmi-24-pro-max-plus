@@ -123,3 +123,58 @@
 .wpg-export p, .wpg-export small { font-size: 11px; line-height: 1.6; }
 .wpg-export textarea { width: 100%; min-height: 150px; resize: vertical; border: 1px solid #ddd0e6; border-radius: 12px; padding: 12px; font: inherit; font-size: 12px; background: #faf7fc; color: #51425c; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) { .wp-game-app * { scroll-behavior: auto; } }
+
+.wpg-communication { --pg-accent: #24845c; background: #f4f5f7; }
+.wpg-communication .wpg-main { padding: 14px 12px; }
+.wpg-phone-tabs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); flex: 0 0 auto; padding: 6px 4px calc(28px + env(safe-area-inset-bottom,0px)); background: #fff; border-top: 1px solid #e1e3e6; }
+.wpg-phone-tabs button { min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: #737b83; font: inherit; font-size: 12px; }
+.wpg-phone-tabs button[aria-pressed="true"] { background: #e4eee8; color: #24845c; }
+.wpg-comm-search, .wpg-dialer > label, .wpg-new-sms > label { display: grid; gap: 8px; font-size: 12px; color: #737b83; margin-bottom: 14px; }
+.wpg-comm-list { display: grid; gap: 8px; }
+.wpg-contact { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 12px 10px; border-radius: 14px; background: #fff; }
+.wpg-contact > div { flex: 1 1 110px; min-width: 0; display: grid; gap: 5px; }
+.wpg-contact b, .wpg-sms-row b, .wpg-call-record b { overflow-wrap: anywhere; font-size: 14px; }
+.wpg-contact small { font-size: 10px; color: #7c858d; overflow-wrap: anywhere; }
+.wpg-contact button { flex: 0 0 auto; min-width: 44px; padding: 7px; background: #edf5ee; color: #24845c; font-size: 12px; }
+.wpg-contact button[aria-pressed="true"] { color: #9d7618; background: #fbf2d8; }
+.wpg-dialer { max-width: 360px; margin: 10px auto; }
+.wpg-dialer input { width: 100%; text-align: center; font-size: 25px; letter-spacing: 2px; }
+.wpg-digits { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; padding: 10px 12px; }
+.wpg-digits button { min-height: 56px; border-radius: 50%; background: #fff; color: #202a31; font-size: 26px; }
+.wpg-dial-actions { display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; gap: 8px; margin-top: 18px; }
+.wpg-main .wpg-dial-call { background: #24845c; color: #fff; }
+.wpg-main .wpg-call-record, .wpg-main .wpg-sms-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; text-align: left; background: #fff; color: #28333b; }
+.wpg-call-record > div, .wpg-sms-row > div { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.wpg-call-record small, .wpg-sms-row small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; color: #899098; }
+.wpg-call-record i, .wpg-sms-row i { font-size: 10px; font-style: normal; color: #899098; }
+.wpg-communication .wpg-main.is-call, .wpg-communication .wpg-main.is-sms { display: flex; flex-direction: column; overflow: hidden; }
+.wpg-call { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.wpg-call-person { flex: 0 0 auto; text-align: center; padding: 10px 0; }
+.wpg-call-person > span { display: grid; place-items: center; width: 66px; height: 66px; margin: 0 auto 12px; border-radius: 50%; background: #dce9df; color: #24845c; font-size: 28px; }
+.wpg-call-person small { color: #899098; }
+.wpg-call-person p { margin: 10px 0 0; color: #24845c; font-size: 12px; }
+.wpg-call-lines { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wpg-call-lines article p { padding: 12px; border-radius: 12px; background: #fff; font-size: 13px; }
+.wpg-call-lines article p.is-user { background: #dce9df; }
+.wpg-call-lines article b { display: block; color: #24845c; margin-bottom: 5px; font-size: 11px; }
+.wpg-main .wpg-hangup { flex: 0 0 auto; align-self: center; background: #c64a53; color: #fff; min-width: 140px; }
+.wpg-call-note { flex: 0 0 auto; text-align: center; font-size: 10px; color: #899098; }
+.wpg-comm-compose { display: flex; gap: 8px; flex: 0 0 auto; align-items: flex-end; padding-top: 10px; }
+.wpg-comm-compose textarea { flex: 1; min-width: 0; min-height: 46px; max-height: 120px; resize: none; }
+.wpg-comm-compose button { flex: 0 0 auto; background: #24845c; color: #fff; }
+.wpg-new-sms { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
+.wpg-new-sms input, .wpg-new-sms select { width: 100%; }
+.wpg-sms-space { flex: 1 1 0; min-height: 0; overflow-y: auto; color: #899098; font-size: 12px; text-align: center; }
+.wpg-sms-person { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex: 0 0 auto; color: #899098; font-size: 11px; }
+.wpg-sms-person button { font-size: 12px; }
+.wpg-sms-history { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wpg-sms-history article { display: flex; flex-direction: column; align-items: flex-start; margin: 16px 0; }
+.wpg-sms-history article > small:first-child { align-self: center; color: #899098; font-size: 10px; }
+.wpg-sms-bubble { max-width: 88%; padding: 11px 13px; border-radius: 15px 15px 15px 3px; background: #fff; font-size: 13px; margin: 8px 0; }
+.wpg-sms-bubble.is-user { align-self: flex-end; border-radius: 15px 15px 3px 15px; background: #dce9df; }
+.wpg-sms-status { align-self: flex-end; color: #899098; font-size: 10px; }
+.wpg-sms-history .wpg-sms-retry { align-self: flex-end; font-size: 11px; margin-top: 6px; }
+.wpg-communication [hidden] { display: none !important; }
+@media (max-height: 560px) { .wpg-call-person { padding: 0; } .wpg-call-person > span { display: none; } .wpg-call-person h2 { margin-bottom: 3px; } .wpg-digits { gap: 6px; } .wpg-digits button { min-height: 44px; } }
+.wpg-communication .wpg-main.is-sms, .wpg-communication .wpg-main.is-call { padding-bottom: calc(34px + env(safe-area-inset-bottom,0px)); }
+.wpg-communication .wpg-main.is-sms > .wpg-error, .wpg-communication .wpg-main.is-call > .wpg-error { flex: 0 0 auto; max-height: 96px; overflow-y: auto; }

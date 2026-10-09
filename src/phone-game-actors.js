@@ -82,7 +82,7 @@ export function collectPhoneGameActors(ctx, contacts = []) {
     if (!name || actors.some(actor => actor.name === name)) continue;
     const profile = phoneGameCardProfile(card).slice(0, 7000);
     const identity = { ...card?.data, ...card, ...card?.data?.extensions?.world_phone, name };
-    actors.push({ id: `card:${card.avatar || card.name || card.data?.name || index}`, name: name.slice(0, 80), profile, pronoun: inferPhoneGamePronoun(identity, profile) });
+    actors.push({ id: `card:${card.avatar || card.name || card.data?.name || index}`, name: name.slice(0, 80), profile, phoneNumber: clean(identity.phoneNumber || identity.phone_number || identity.mobile || identity.contactChannels?.phone), pronoun: inferPhoneGamePronoun(identity, profile) });
   }
   for (const person of contacts) {
     const name = clean(person.name).slice(0, 80);
@@ -93,9 +93,9 @@ export function collectPhoneGameActors(ctx, contacts = []) {
     const profile = [ownProfile, cardProfile].filter(Boolean).join('\n').slice(0, 7000);
     const resolved = inferPhoneGamePronoun({ ...raw, name }, ownProfile) || inferPhoneGamePronoun({ name }, cardProfile);
     const existing = actors.find(actor => actor.name === name);
-    if (existing) { existing.pronoun = resolved || existing.pronoun; continue; }
+    if (existing) { existing.pronoun = resolved || existing.pronoun; existing.phoneNumber ||= clean(raw.phoneNumber || raw.phone_number || raw.mobile || raw.contactChannels?.phone); continue; }
     if (!clean(person.id)) continue;
-    actors.push({ id: `world:${person.id}`, name, profile, pronoun: resolved });
+    actors.push({ id: `world:${person.id}`, name, profile, phoneNumber: clean(raw.phoneNumber || raw.phone_number || raw.mobile || raw.contactChannels?.phone), pronoun: resolved });
   }
   return actors.slice(0, 12);
 }

@@ -1,4 +1,4 @@
-import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.25';
+import { roleLabel } from './werewolf-local-engine.js?v=0.3.0-alpha.27';
 
 function stableIndex(seed, length) {
   if (!length) return -1;

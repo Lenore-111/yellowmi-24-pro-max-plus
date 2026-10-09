@@ -7,10 +7,12 @@ import {
 import { renderCasinoApp } from './casino-app.js';
 import { renderWalletApp } from './wallet-app.js';
 import { renderMusicApp } from './music-app.js';
-import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.25';
+import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.27';
 import { renderDeliveryApp } from './lingqi-delivery.js';
-import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js?v=0.3.0-alpha.26';
-import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.26';
+import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js?v=0.3.0-alpha.27';
+import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.27';
+import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.27';
+import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.27';
 import { findMessageMatches, highlightMessageText } from './message-search.js';
 import {
   DEFAULT_HOME_LAYOUT,
@@ -668,11 +670,11 @@ export function mountWorldPhone() {
   const chatScope = () => { const ctx = globalThis.SillyTavern?.getContext?.(); return ctx?.chatMetadata ?? ctx?.chat_metadata ?? null; };
   let scope = chatScope();
   let gameScope = capturePhoneGameScope().key;
-  let unmountGameApp = null;
-  function cleanupGameApp() { unmountGameApp?.(); unmountGameApp = null; }
   let composing = false;
   let pendingRefresh = false;
   let statusMarkup = '';
+  let disposeApp = () => {};
+  function disposeCurrentApp() { disposeApp(); disposeApp = () => {}; }
 
   function paintStatusbar() {
     const now = presentationTime(snapshot);
@@ -683,7 +685,7 @@ export function mountWorldPhone() {
   }
 
   function showLock() {
-    cleanupGameApp();
+    disposeCurrentApp();
     current = 'lock';
     delete screen.dataset.homeEditing;
     renderLock(screen, snapshot, showHome);
@@ -691,7 +693,7 @@ export function mountWorldPhone() {
   }
 
   function showHome() {
-    cleanupGameApp();
+    disposeCurrentApp();
     current = 'home';
     renderHome(screen, snapshot, openApp, showLock);
     paintStatusbar();
@@ -743,13 +745,15 @@ export function mountWorldPhone() {
   }
 
   function openApp(app, options = {}) {
-    cleanupGameApp();
+    disposeCurrentApp();
     current = `app:${app}`;
-    if (readPhoneGameMode() === 'game' && ['wechat', 'weibo', 'rednote', 'wallet', 'delivery', 'phone', 'messages'].includes(app)) {
-      const gameApp = ['phone', 'messages'].includes(app) ? 'wechat' : app;
-      current = `app:${gameApp}`;
-      unmountGameApp = renderPhoneGameApp(screen, { app: gameApp, goHome: showHome, openApp, ...options });
+    if (readPhoneGameMode() === 'game' && ['phone', 'messages'].includes(app)) {
+      disposeApp = renderPhoneGameCommunicationApp(screen, { app, goHome: showHome, openApp, ...options });
     }
+    else if (readPhoneGameMode() === 'game' && ['wechat', 'weibo', 'rednote', 'wallet', 'delivery'].includes(app)) {
+      disposeApp = renderPhoneGameApp(screen, { app, goHome: showHome, openApp, ...options });
+    }
+    else if (app === 'phone' || app === 'messages') renderNativeCommunicationApp(screen, { app, goHome: showHome });
     else if (app === 'wechat') repaintWechat();
     else if (app === 'news') renderNews(screen, snapshot, showHome, shareNews);
     else if (app === 'puzzle') renderPocketGame(screen, { goHome: showHome });
@@ -850,7 +854,7 @@ export function mountWorldPhone() {
     shareContent,
     current: () => current,
     destroy() {
-      cleanupGameApp();
+      disposeCurrentApp();
       unsubscribe?.();
       window.clearTimeout(closeTimer);
       document.removeEventListener('keydown', onEscape);

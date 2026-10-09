@@ -1,8 +1,8 @@
 import { DELIVERY_COLA } from './delivery-data.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
-import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js';
+import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.27';
 
-export { phoneGameActorPronoun } from './phone-game-actors.js';
+export { phoneGameActorPronoun } from './phone-game-actors.js?v=0.3.0-alpha.27';
 
 export const PHONE_GAME_KEY = 'world_phone_game_v1';
 export const PHONE_GAME_GIFTS = Object.freeze([
@@ -73,21 +73,45 @@ function createState(scope) {
   const power = ctx?.powerUserSettings || {};
   const persona = ctx?.chatMetadata?.persona || Object.keys(power.personas || {}).find(key => power.personas[key] === ctx?.name1) || power.default_persona;
   return {
-    version: 2, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
+    version: 3, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
     actors: collectActors(ctx),
     origin: clean((ctx?.chat || []).filter(message => !message.is_system).slice(-6).map(message => `${message.is_user ? ctx?.name1 || '你' : message.name || ctx?.name2 || '角色'}：${message.mes || ''}`).join('\n'), 7000),
     tick: 0, balance: 100, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
   };
 }
+export const phoneGameDialNumber = value => String(value ?? '').replace(/[^0-9+*#]/g, '').slice(0, 24);
+function normalizeCommunications(raw, actors) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const actorIds = new Set(actors.map(actor => actor.id));
+  const usedNumbers = new Set();
+  const contacts = actors.map(actor => {
+    const old = (Array.isArray(source.contacts) ? source.contacts : []).find(item => item.actorId === actor.id);
+    const supplied = actor.phoneNumber || actor.profile.match(/(?:手机号|手机号码|联系电话|电话号码|phoneNumber)\s*[：:=]\s*([+\d][\d +()-]{3,24})/i)?.[1];
+    let hash = 0;
+    for (const char of actor.id) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0;
+    const virtual = supplied ? false : old?.number ? Boolean(old.virtual) : true;
+    let number = phoneGameDialNumber(supplied || old?.number) || `800${String(hash % 100000000).padStart(8, '0')}`;
+    while (virtual && usedNumbers.has(number)) number = `800${String(++hash % 100000000).padStart(8, '0')}`;
+    usedNumbers.add(number);
+    return { actorId: actor.id, number, virtual, favorite: Boolean(old?.favorite) };
+  });
+  const calls = (Array.isArray(source.calls) ? source.calls : []).filter(call => call && (!call.actorId || actorIds.has(call.actorId))).slice(-80)
+    .map(call => ({ id: clean(call.id, 100), actorId: clean(call.actorId, 180), number: phoneGameDialNumber(call.number),
+      startedAt: integer(call.startedAt, 0, Number.MAX_SAFE_INTEGER), connectedAt: integer(call.connectedAt, 0, Number.MAX_SAFE_INTEGER), endedAt: integer(call.endedAt, 0, Number.MAX_SAFE_INTEGER),
+      outcome: ['dialing', 'connected', 'ended', 'cancelled', 'declined', 'unavailable'].includes(call.outcome) ? call.outcome : 'unavailable' }));
+  const drafts = Object.fromEntries(Object.entries(source.drafts || {}).filter(([key]) => actorIds.has(key) || key === 'new')
+    .map(([key, value]) => [key, String(value ?? '').slice(0, 1200)]).filter(([, value]) => value));
+  return { contacts, calls, drafts };
+}
 export function normalizePhoneGameState(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const actors = (Array.isArray(source.actors) ? source.actors : []).filter(actor => actor && clean(actor.id) && clean(actor.name)).slice(0, 12)
-    .map(actor => ({ id: clean(actor.id, 180), name: clean(actor.name, 80), profile: clean(actor.profile, 7000), pronoun: inferPhoneGamePronoun(actor, clean(actor.profile, 7000)) }));
+    .map(actor => ({ id: clean(actor.id, 180), name: clean(actor.name, 80), profile: clean(actor.profile, 7000), phoneNumber: phoneGameDialNumber(actor.phoneNumber), pronoun: inferPhoneGamePronoun(actor, clean(actor.profile, 7000)) }));
   const actorIds = new Set(actors.map(actor => actor.id));
   const events = (Array.isArray(source.events) ? source.events : []).filter(event => event && actorIds.has(event.actorId)).slice(-160)
-    .map(event => ({ id: clean(event.id, 100), actorId: event.actorId, kind: ['chat', 'comment', 'gift'].includes(event.kind) ? event.kind : 'chat',
+    .map(event => ({ id: clean(event.id, 100), actorId: event.actorId, kind: ['chat', 'comment', 'gift', 'sms', 'call'].includes(event.kind) ? event.kind : 'chat',
       text: clean(event.text, 1200), postId: clean(event.postId, 100), giftId: clean(event.giftId, 80), note: clean(event.note, 200),
-      tick: integer(event.tick), status: event.status === 'replied' ? 'replied' : 'pending', reply: clean(event.reply, 1200),
+      tick: integer(event.tick), status: ['replied', 'cancelled'].includes(event.status) ? event.status : 'pending', callId: clean(event.callId, 100), reply: clean(event.reply, 1200),
       affinityDelta: integer(event.affinityDelta, -3, 3) }));
   const posts = (Array.isArray(source.posts) ? source.posts : []).filter(post => post && actorIds.has(post.actorId) && platforms.includes(post.platform)).slice(-80)
     .map(post => ({ id: clean(post.id, 100), actorId: post.actorId, platform: post.platform, title: clean(post.title, 80), text: clean(post.text, 1000),
@@ -101,10 +125,10 @@ export function normalizePhoneGameState(raw) {
   const shift = source.shift && Array.isArray(source.shift.orders) && source.shift.orders.length === 3
     && source.shift.orders.every(recipe => PHONE_GAME_RECIPES.some(item => item.id === recipe))
     ? { id: clean(source.shift.id, 100), orders: [...source.shift.orders], index: integer(source.shift.index, 0, 3), correct: integer(source.shift.correct, 0, 3), claimed: Boolean(source.shift.claimed) } : null;
-  return { version: 2, user: clean(source.user || '你', 80), userProfile: clean(source.userProfile, 4000), actors,
+  return { version: 3, user: clean(source.user || '你', 80), userProfile: clean(source.userProfile, 4000), actors,
     origin: clean(source.origin, 7000), tick: integer(source.tick), balance: integer(source.balance), earned: integer(source.earned), spent: integer(source.spent),
     ledger: (Array.isArray(source.ledger) ? source.ledger : []).slice(-50).map(item => ({ id: clean(item.id, 100), text: clean(item.text, 160), amount: integer(item.amount, -1000000, 1000000), tick: integer(item.tick) })),
-    posts, events, relations, shift,
+    posts, events, relations, shift, communications: normalizeCommunications(source.communications, actors),
     actorArchive: Array.isArray(source.actorArchive) ? clone(source.actorArchive) : [] };
 }
 function reconcileActors(raw, ctx) {
@@ -123,7 +147,7 @@ function reconcileActors(raw, ctx) {
   const active = actors.filter(actor => actor && !excludedIds.has(actor.id)).map(actor => {
     const current = known.find(item => item.id === actor.id || item.name === actor.name);
     return current ? { ...actor, name: current.name, pronoun: current.pronoun,
-      profile: current.profile || actor.profile } : actor;
+      profile: current.profile || actor.profile, phoneNumber: current.phoneNumber || actor.phoneNumber } : actor;
   });
   for (const actor of known) {
     if (active.length >= 12) break;
@@ -185,6 +209,50 @@ function actorIn(state, actorId) {
   if (!actor) throw new Error('这个角色不在当前手机存档里');
   return actor;
 }
+export function togglePhoneGameContactFavorite(actorId, scope = capturePhoneGameScope()) {
+  return commit(scope, state => {
+    actorIn(state, actorId);
+    const contact = state.communications.contacts.find(contact => contact.actorId === actorId);
+    contact.favorite = !contact.favorite;
+  });
+}
+export function savePhoneGameSmsDraft(actorId, text, scope = capturePhoneGameScope()) {
+  return commit(scope, state => {
+    if (actorId !== 'new') actorIn(state, actorId);
+    if (text) state.communications.drafts[actorId] = String(text).slice(0, 1200);
+    else delete state.communications.drafts[actorId];
+  });
+}
+export function startPhoneGameCall(number, scope = capturePhoneGameScope()) {
+  let callId, eventId = '';
+  const next = commit(scope, state => {
+    const dialed = phoneGameDialNumber(number);
+    if (!dialed) throw new Error('先输入号码，或选择联系人');
+    if (state.communications.calls.some(call => ['dialing', 'connected'].includes(call.outcome))) throw new Error('先挂断当前通话');
+    const matches = state.communications.contacts.filter(contact => contact.number === dialed);
+    if (matches.length > 1) throw new Error('这个号码对应多个联系人，请检查角色资料里的号码');
+    const contact = matches[0];
+    const actor = contact ? actorIn(state, contact.actorId) : null;
+    if (actor && state.events.some(event => event.actorId === actor.id && event.status === 'pending')) throw new Error('对方还有一条待回应的互动，请先回到原应用重试回应');
+    callId = id();
+    const now = Date.now();
+    state.communications.calls.push({ id: callId, actorId: actor?.id || '', number: dialed, startedAt: now, connectedAt: 0, endedAt: actor ? 0 : now, outcome: actor ? 'dialing' : 'unavailable' });
+    if (actor) {
+      state.tick += 1; eventId = id();
+      state.events.push({ id: eventId, actorId: actor.id, kind: 'call', callId, text: `我拨打了${actor.name}的电话。`, tick: state.tick, status: 'pending', reply: '', affinityDelta: 0 });
+    }
+  });
+  return { state: next, callId, eventId };
+}
+export function endPhoneGameCall(callId, scope = capturePhoneGameScope(), outcome = '') {
+  return commit(scope, state => {
+    const call = state.communications.calls.find(call => call.id === callId);
+    if (!call || !['dialing', 'connected'].includes(call.outcome)) return;
+    call.outcome = outcome === 'unavailable' ? 'unavailable' : call.outcome === 'connected' ? 'ended' : 'cancelled';
+    call.endedAt = Date.now();
+    for (const event of state.events) if (event.callId === callId && event.status === 'pending') event.status = 'cancelled';
+  });
+}
 export function phoneGameClock(state) { return `第 ${1 + Math.floor(state.tick / 24)} 天 · ${String(8 + Math.floor((state.tick % 24) / 2)).padStart(2, '0')}:${state.tick % 2 ? '30' : '00'}`; }
 export function phoneGameRelationLabel(value) { return value >= 75 ? '亲近' : value >= 40 ? '熟悉' : value >= 15 ? '渐渐熟络' : '初识'; }
 export function phoneGameEventDisplayText(state, event) {
@@ -196,12 +264,13 @@ export function phoneGameEventDisplayText(state, event) {
 export function togglePhoneGameLike(postId, scope = capturePhoneGameScope()) {
   return commit(scope, state => { const post = state.posts.find(post => post.id === postId); if (post) post.liked = !post.liked; });
 }
-export function queuePhoneGameInteraction({ actorId, kind = 'chat', text = '', postId = '', giftId = '', note = '' }, scope = capturePhoneGameScope()) {
+export function queuePhoneGameInteraction({ actorId, kind = 'chat', text = '', postId = '', giftId = '', note = '', callId = '' }, scope = capturePhoneGameScope()) {
   let eventId;
   const next = commit(scope, state => {
     const actor = actorIn(state, actorId);
-    if (!['chat', 'comment', 'gift'].includes(kind)) throw new Error('未知互动');
+    if (!['chat', 'comment', 'gift', 'sms', 'call'].includes(kind)) throw new Error('未知互动');
     if (state.events.some(event => event.actorId === actorId && event.status === 'pending')) throw new Error(`${phoneGameActorPronoun(actor)}还有一条待回应的互动，先点“重试回应”。`);
+    if (kind === 'call' && !state.communications.calls.some(call => call.id === callId && call.actorId === actorId && call.outcome === 'connected')) throw new Error('通话已经结束，请重新拨号');
     if (kind === 'comment' && !state.posts.some(post => post.id === postId && post.actorId === actorId)) throw new Error('原帖已不存在');
     let body = clean(text, 1200);
     if (kind === 'gift') {
@@ -215,7 +284,7 @@ export function queuePhoneGameInteraction({ actorId, kind = 'chat', text = '', p
     }
     if (!body) throw new Error('先写点什么');
     state.tick += 1; eventId = id();
-    state.events.push({ id: eventId, actorId, kind, text: body, postId, giftId, note: clean(note, 200), tick: state.tick, status: 'pending', reply: '', affinityDelta: 0 });
+    state.events.push({ id: eventId, actorId, kind, text: body, postId, giftId, callId, note: clean(note, 200), tick: state.tick, status: 'pending', reply: '', affinityDelta: 0 });
   });
   return { state: next, eventId };
 }
@@ -225,8 +294,17 @@ export function applyPhoneGameReply(eventId, response, scope = capturePhoneGameS
     if (!event || event.status !== 'pending') throw new Error('这条互动已处理，不会重复结算');
     const reply = typeof response?.text === 'string' ? clean(response.text, 1200) : '';
     if (!reply) throw new Error('角色回应为空，请重试');
+    const call = event.kind === 'call' ? state.communications.calls.find(call => call.id === event.callId) : null;
+    if (event.kind === 'call') {
+      if (!call || !['dialing', 'connected'].includes(call.outcome)) throw new Error('通话已挂断，本次回应未写入');
+      if (call.outcome === 'dialing') {
+        call.outcome = response.answered === false ? 'declined' : 'connected';
+        if (call.outcome === 'connected') call.connectedAt = Date.now(); else call.endedAt = Date.now();
+      }
+    }
     const relation = state.relations[event.actorId];
     let delta = integer(response.affinityDelta, -3, 3);
+    if (call?.outcome === 'declined') delta = 0;
     if (event.kind === 'gift' && relation.giftCounts[event.giftId] > 2) delta = Math.min(delta, 1);
     event.affinityDelta = Math.min(100, Math.max(0, relation.affinity + delta)) - relation.affinity;
     relation.affinity += event.affinityDelta;
@@ -273,6 +351,8 @@ export function phoneGameEventExport(state, eventId) {
   if (!event) throw new Error('事件已不存在');
   const actor = actorIn(state, event.actorId);
   const action = event.kind === 'gift' ? `我给${actor.name}送了${PHONE_GAME_GIFTS.find(gift => gift.id === event.giftId)?.name || '一份礼物'}${event.note ? `，附言“${event.note}”` : ''}。`
+    : event.kind === 'sms' ? `我给${actor.name}发了一条短信：“${event.text}”。`
+    : event.kind === 'call' ? `我在与${actor.name}的电话中说：“${event.text}”。`
     : event.kind === 'comment' ? `我在${actor.name}的帖子下留言：“${event.text}”。` : `我用手机给${actor.name}发了一条消息：“${event.text}”。`;
   return `${action}\n请结合正文当前场景安排这个行动及后续回应。`;
 }
