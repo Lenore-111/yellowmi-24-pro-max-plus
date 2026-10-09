@@ -680,6 +680,7 @@ export function mountWorldPhone() {
   };
   let scopeKey = worldScopeKey();
   let gameScope = capturePhoneGameScope().key;
+  let modeEpoch = capturePhoneGameScope().modeEpoch;
   let composing = false;
   let pendingRefresh = false;
   let statusMarkup = '';
@@ -788,6 +789,9 @@ export function mountWorldPhone() {
   function refresh(nextSnapshot = null) {
     const nextScope = chatScope();
     const nextGameScope = capturePhoneGameScope().key;
+    const nextModeEpoch = capturePhoneGameScope().modeEpoch;
+    if (nextModeEpoch !== modeEpoch && current.startsWith('app:')) current = 'home';
+    modeEpoch = nextModeEpoch;
     if (nextGameScope !== gameScope && screen.querySelector('[data-phone-game-app]')) current = 'home';
     gameScope = nextGameScope;
     const nextScopeKey = worldScopeKey();
@@ -798,7 +802,7 @@ export function mountWorldPhone() {
       wechatRoute.conversationId = '';
       wechatRoute.tab = 'chats';
       composing = false;
-      if (screen.querySelector('[data-phone-game-app]') || current === 'app:wechat' || current === 'app:delivery') current = 'home';
+      if (screen.querySelector('[data-phone-game-app]') || ['app:wechat', 'app:delivery', 'app:phone', 'app:messages'].includes(current)) current = 'home';
     }
     if (sameScope && composing && current === 'app:wechat') { pendingRefresh = true; return; }
     snapshot = nextSnapshot || readWorldBackstage();

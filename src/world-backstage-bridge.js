@@ -1,3 +1,5 @@
+import { capturePhoneGameScope, readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.27';
+
 const WORLD_STATE_KEY = 'world_backstage_v1';
 const REQUIRED_PHONE_BRIDGE_VERSION = 2;
 const REQUIRED_PHONE_ACTIONS = Object.freeze([
@@ -347,25 +349,28 @@ function activePhoneScope(snapshot = readWorldBackstage()) {
     characterId: text(ctx?.characterId),
     groupId: text(ctx?.groupId),
     branchKey: text(snapshot.branchKey),
+    mode: readPhoneGameMode(),
+    modeEpoch: capturePhoneGameScope().modeEpoch,
   };
 }
 
 function samePhoneScope(left, right) {
   return left.metadata === right.metadata && left.chatId === right.chatId
     && left.characterId === right.characterId && left.groupId === right.groupId
-    && left.branchKey === right.branchKey;
+    && left.branchKey === right.branchKey && left.mode === right.mode && left.modeEpoch === right.modeEpoch;
 }
 
 export async function performWorldBackstageSocialAction(action, payload) {
   const before = readWorldBackstage();
   if (!before.connected) throw new Error(before.connectionMessage || '世界背面未连接');
+  if (readPhoneGameMode() !== 'world') throw new Error('手机当前处于独立模式，本次操作不会写入世界背面。');
   if (!before.capabilities.includes(action)) throw new Error('当前世界背面正式版本不支持此操作，请更新推荐配套版本。');
   const scope = activePhoneScope(before);
   const host = requireHostAction();
   const surface = await host.phoneAction(action, payload);
   const next = readWorldBackstage();
   if (!samePhoneScope(scope, activePhoneScope(next))) {
-    throw new Error('聊天、角色或分支已切换，旧操作结果已丢弃');
+    throw new Error('聊天、角色、分支或手机模式已切换，旧操作结果已丢弃');
   }
   if (!next.connected) throw new Error(next.connectionMessage || '世界背面连接已断开');
   return { snapshot: next, conversationId: text(surface?.social?.activeConversationId) };

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 // Run the actual module bodies with an isolated SillyTavern host, controllable
 // model promises and virtual time. No browser or model credentials are needed.
-const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js"];
+const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js","src/world-backstage-bridge.js"];
 const sources = Object.fromEntries(await Promise.all(paths.map(async path =>
   [path, await readFile(new URL('../' + path, import.meta.url), 'utf8')])));
 
@@ -51,7 +51,7 @@ function createHarness(sources) {
   const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
   const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
-     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES']);
+     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,...game},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
@@ -86,9 +86,38 @@ function createHarness(sources) {
       },querySelectorAll(){return [];}
     };
   }
-  return {ctx,game,ai,view,model,clock,tavern,groupChats,timers,handlers,screenMock};
+  return {ctx,game,ai,view,model,clock,tavern,groupChats,timers,handlers,screenMock,globals};
 }
 async function flush() { for(let i=0;i<16;i++) await Promise.resolve(); }
+
+test('快速切模式后旧短信结果不结算，原短信保留供重试', async () => {
+  const h=createHarness(sources),actor=h.game.readPhoneGameState().actors[0];
+  const q=h.game.queuePhoneGameInteraction({actorId:actor.id,kind:'sms',text:'稍后联系'}),task=h.model(false);
+  const pending=h.ai.generatePhoneGameContent({eventId:q.eventId}),rejected=assert.rejects(pending,/模式/);
+  h.game.setPhoneGameMode('world');h.game.setPhoneGameMode('game');
+  task.resolve(JSON.stringify({text:'迟到的短信',affinityDelta:3,memory:'不应写入'}));await rejected;await flush();
+  const state=h.game.readPhoneGameState();assert.equal(state.events[0].status,'pending');assert.equal(state.relations[actor.id].memory,'');
+  assert.equal(h.ai.isPhoneGameGenerating(),false);assert.equal(h.timers.size,0);
+});
+
+test('切模式挂断电话，迟到接听不能复活通话', async () => {
+  const h=createHarness(sources),state=h.game.readPhoneGameState();
+  const call=h.game.startPhoneGameCall(state.communications.contacts[0].number),task=h.model(false);
+  const pending=h.ai.generatePhoneGameContent({eventId:call.eventId}),rejected=assert.rejects(pending,/模式/);
+  h.game.setPhoneGameMode('world');h.game.setPhoneGameMode('game');
+  task.resolve(JSON.stringify({answered:true,text:'迟到接听'}));await rejected;await flush();
+  const next=h.game.readPhoneGameState();assert.equal(next.communications.calls[0].outcome,'cancelled');assert.equal(next.events[0].status,'cancelled');
+});
+
+test('独立模式不调用世界写命令，世界旧确认在模式切换后失效', async () => {
+  const h=createHarness(sources);let calls=0,resolve;
+  const surface={connected:true,bridgeVersion:2,branchKey:'a',capabilities:['social-open-direct','social-create-group','social-respond-friend','social-comment-moment','social-send-message','social-read-conversation','social-set-moment-like']};
+  h.globals.worldBackstageHost={phoneBridgeVersion:2,getPhoneSurface:()=>surface,phoneAction:()=>{calls++;return new Promise(done=>resolve=done);}};
+  const bridge=moduleFrom(sources['src/world-backstage-bridge.js'],{globalThis:h.globals,...h.game},['sendWorldBackstageMessage']);
+  await assert.rejects(bridge.sendWorldBackstageMessage('direct-a','独立消息'),/独立模式/);assert.equal(calls,0);
+  h.game.setPhoneGameMode('world');const pending=bridge.sendWorldBackstageMessage('direct-a','世界消息'),rejected=assert.rejects(pending,/模式已切换/);
+  h.game.setPhoneGameMode('game');h.game.setPhoneGameMode('world');resolve(surface);await rejected;assert.equal(calls,1);
+});
 
 
 test("正文推进、编辑与候选切换不重置手机存档", async () => {

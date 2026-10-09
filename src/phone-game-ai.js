@@ -3,6 +3,7 @@ import * as groupChats from '/scripts/group-chats.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
+  subscribePhoneGameModeChange,
 } from './phone-game.js?v=0.3.0-alpha.27';
 
 export const PHONE_GAME_GENERATION_TIMEOUT_MS = 60000;
@@ -14,8 +15,8 @@ let lastStatus = null;
 export function isPhoneGameGenerating() { return Boolean(generation); }
 export function phoneGameGenerationStatus(scope = capturePhoneGameScope()) {
   return {
-    busy: Boolean(generation?.scope.key === scope.key && generation.scope.metadata === scope.metadata),
-    error: lastStatus?.scope.key === scope.key && lastStatus.scope.metadata === scope.metadata ? lastStatus.error : '',
+    busy: Boolean(generation?.scope.key === scope.key && generation.scope.metadata === scope.metadata && generation.scope.modeEpoch === scope.modeEpoch),
+    error: lastStatus?.scope.key === scope.key && lastStatus.scope.metadata === scope.metadata && lastStatus.scope.modeEpoch === scope.modeEpoch ? lastStatus.error : '',
   };
 }
 export function subscribePhoneGameGeneration(listener) {
@@ -128,6 +129,7 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     scopeTimer = globalThis.setInterval(() => {
       if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') operation.cancel('已切换聊天或模式，原互动已保存，可回去重试。');
     }, 250);
+    cleanups.push(subscribePhoneGameModeChange(() => operation.cancel('已切换手机模式，原互动已保存，可回去重试。')));
     if (eventTypes.GENERATION_STARTED && eventSource?.on) {
       const onMainStart = (type, options, dryRun) => {
         if (!dryRun) operation.cancel('正文开始生成，本次手机回应已停止等待；互动保留，可稍后重试。', false);

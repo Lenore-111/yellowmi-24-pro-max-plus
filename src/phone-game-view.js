@@ -125,6 +125,11 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     paintedRoute = route;
     screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>独立游戏 · 仅在手机里</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${app === 'wechat' && !ui.actorId ? `<div class="wpg-wx-tabs">${[['chats','消息'],['moments','朋友圈'],['relations','关系']].map(([id,label]) => `<button type="button" data-pg-tab="${id}" aria-pressed="${ui.tab === id}">${label}</button>`).join('')}</div>` : ''}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
+    const root = screen.querySelector('[data-phone-game-app]');
+    for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener?.(type, event => {
+      if (current() && screen.querySelector('[data-phone-game-app]') === root) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+    }, true);
     screen.querySelector('[data-pg-cancel]')?.addEventListener('click', () => cancelPhoneGameGeneration(scope));
     screen.querySelectorAll('[data-pg-app]').forEach(button => button.onclick = () => openApp(button.dataset.pgApp));
     screen.querySelectorAll('[data-pg-tab]').forEach(button => button.onclick = () => { ui.tab = button.dataset.pgTab; ui.postId = ''; ui.draft = ''; paint(); });
@@ -171,7 +176,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   }
   paint();
   const unsubscribe = subscribePhoneGameGeneration(({ scope: changedScope, busy, error }) => {
-    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || !current()) return;
+    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || changedScope.modeEpoch !== scope.modeEpoch || !current()) return;
     ui.busy = busy; ui.error = error;
     paint();
   });
