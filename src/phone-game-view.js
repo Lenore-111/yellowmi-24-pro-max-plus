@@ -39,6 +39,7 @@ function exportSheet(screen, state, eventId, scope) {
 export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' }) {
   const scope = capturePhoneGameScope();
   const viewId = Math.random().toString(36).slice(2);
+  let paintedRoute = '';
   const ui = { tab: 'chats', actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [] };
   function current() { return isPhoneGameScopeCurrent(scope) && readPhoneGameMode() === 'game' && screen.querySelector('[data-phone-game-app]')?.dataset.phoneGameView === viewId; }
   function action(fn) {
@@ -106,7 +107,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     if (ui.tab === 'gifts') return `<button type="button" class="wpg-text-button" data-pg-wallet>‹ 返回钱包</button>${giftShop(state)}`;
     const shift = state.shift;
     const recipe = shift && shift.index < 3 ? PHONE_GAME_RECIPES.find(recipe => recipe.id === shift.orders[shift.index]) : null;
-    return `<section class="wpg-wallet-card"><small>手机游戏余额</small><strong>¥${state.balance}</strong><div><span>挣到 ¥${state.earned}</span><span>花掉 ¥${state.spent}</span></div></section><div class="wpg-wallet-links"><button type="button" data-pg-gifts>挑礼物</button><button type="button" data-pg-app="delivery">请吃饭</button><button type="button" data-pg-app="wechat">看看消息</button></div><section class="wpg-coffee"><h2>街角咖啡店</h2><p>做三杯饮品，领一班工资。选对原料再出杯。</p><details><summary>配方小抄</summary>${PHONE_GAME_RECIPES.map(item => `<p>${item.name}：${item.ingredients.join(' + ')}</p>`).join('')}</details>${recipe ? `<div class="wpg-order"><small>第 ${shift.index + 1}/3 单</small><b>客人要一杯${recipe.name}</b><div class="wpg-ingredients">${['咖啡','水','牛奶','巧克力','茶'].map(item => `<label><input type="checkbox" data-pg-ingredient value="${item}" ${ui.ingredients.includes(item) ? 'checked' : ''}>${item}</label>`).join('')}</div><button type="button" data-pg-serve>出杯</button></div>` : `<div class="wpg-order">${shift?.claimed ? `<b>上一班完成：${shift.correct}/3 单正确，收入 ¥${10 + shift.correct * 20}</b>` : '<b>随时来上一个短班</b>'}<button type="button" data-pg-shift>${shift ? '再来一班' : '开始营业'}</button></div>`}<small>每班底薪 ¥10，每杯正确另加 ¥20；结束后自动入账。</small></section><section class="wpg-ledger"><h3>钱包流水</h3>${state.ledger.slice().reverse().map(item => `<div><span>${esc(item.text)}</span><b>${item.amount > 0 ? '+' : ''}¥${item.amount}</b></div>`).join('') || '<p>还没有流水，去赚第一份工资吧。</p>'}</section>`;
+    return `<section class="wpg-wallet-card"><small>手机游戏余额</small><strong>¥${state.balance}</strong><div><span>挣到 ¥${state.earned}</span><span>花掉 ¥${state.spent}</span></div></section><div class="wpg-wallet-links"><button type="button" data-pg-gifts>挑礼物</button><button type="button" data-pg-app="delivery">请吃饭</button><button type="button" data-pg-app="wechat">看看消息</button></div><section class="wpg-coffee"><h2>街角咖啡店</h2><p>做三杯饮品，领一班工资。选对原料再出杯。</p><details><summary>配方小抄</summary>${PHONE_GAME_RECIPES.map(item => `<p>${item.name}：${item.ingredients.join(' + ')}</p>`).join('')}</details>${recipe ? `<div class="wpg-order"><small>第 ${shift.index + 1}/3 单</small><b>客人要一杯${recipe.name}</b><div class="wpg-ingredients" role="group" aria-label="选择饮品原料">${['咖啡','水','牛奶','巧克力','茶'].map(item => `<button type="button" data-pg-ingredient="${item}" aria-pressed="${ui.ingredients.includes(item)}"><span aria-hidden="true">${ui.ingredients.includes(item) ? '✓' : '+'}</span>${item}</button>`).join('')}</div><small data-pg-order-status role="status">${ui.info ? esc(ui.info) : '点选需要的原料，再点击出杯。'}</small><button type="button" data-pg-serve>出杯</button></div>` : `<div class="wpg-order">${ui.info ? `<small role="status">${esc(ui.info)}</small>` : ''}${shift?.claimed ? `<b>上一班完成：${shift.correct}/3 单正确，收入 ¥${10 + shift.correct * 20}</b>` : '<b>随时来上一个短班</b>'}<button type="button" data-pg-shift>${shift ? '再来一班' : '开始营业'}</button></div>`}<small>每班底薪 ¥10，每杯正确另加 ¥20；结束后自动入账。</small></section><section class="wpg-ledger"><h3>钱包流水</h3>${state.ledger.slice().reverse().map(item => `<div><span>${esc(item.text)}</span><b>${item.amount > 0 ? '+' : ''}¥${item.amount}</b></div>`).join('') || '<p>还没有流水，去赚第一份工资吧。</p>'}</section>`;
   }
   function paint() {
     if (!isPhoneGameScopeCurrent(scope)) return;
@@ -114,7 +115,12 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     if (ui.actorId && !state.actors.some(actor => actor.id === ui.actorId)) ui.actorId = '';
     const content = !state.actors.length ? '<div class="wpg-empty"><b>暂无可用角色</b><p>打开人物角色卡，或让世界背面提供已认识的联系人。世界观和剧情卡的标题不会作为人物出现。</p></div>'
       : app === 'wallet' ? wallet(state) : app === 'delivery' ? giftShop(state) : app === 'wechat' ? chats(state) : feed(state, app);
-    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>独立游戏 · 仅在手机里</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${app === 'wechat' && !ui.actorId ? `<div class="wpg-wx-tabs">${[['chats','消息'],['moments','朋友圈'],['relations','关系']].map(([id,label]) => `<button type="button" data-pg-tab="${id}" aria-pressed="${ui.tab === id}">${label}</button>`).join('')}</div>` : ''}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应…</p>' : ''}${content}</main>${nav()}</section>`;
+    const route = [app, ui.tab, app === 'wechat' ? ui.actorId : '', ui.postId, ui.filter].join('|');
+    const keepPosition = route === paintedRoute;
+    const scrollTop = keepPosition ? screen.querySelector('.wpg-main')?.scrollTop || 0 : 0;
+    const recipeOpen = keepPosition && Boolean(screen.querySelector('.wpg-coffee details')?.open);
+    paintedRoute = route;
+    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>独立游戏 · 仅在手机里</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${app === 'wechat' && !ui.actorId ? `<div class="wpg-wx-tabs">${[['chats','消息'],['moments','朋友圈'],['relations','关系']].map(([id,label]) => `<button type="button" data-pg-tab="${id}" aria-pressed="${ui.tab === id}">${label}</button>`).join('')}</div>` : ''}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应…</p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
     screen.querySelectorAll('[data-pg-app]').forEach(button => button.onclick = () => openApp(button.dataset.pgApp));
     screen.querySelectorAll('[data-pg-tab]').forEach(button => button.onclick = () => { ui.tab = button.dataset.pgTab; ui.postId = ''; ui.draft = ''; paint(); });
@@ -138,8 +144,22 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     screen.querySelector('[data-pg-gifts]')?.addEventListener('click', () => { ui.tab = 'gifts'; paint(); });
     screen.querySelector('[data-pg-wallet]')?.addEventListener('click', () => { ui.tab = 'wallet'; paint(); });
     screen.querySelector('[data-pg-shift]')?.addEventListener('click', () => action(() => { startPhoneGameShift(scope); ui.info = ''; }));
-    screen.querySelectorAll('[data-pg-ingredient]').forEach(input => input.onchange = () => { ui.ingredients = [...screen.querySelectorAll('[data-pg-ingredient]:checked')].map(input => input.value); });
-    screen.querySelector('[data-pg-serve]')?.addEventListener('click', () => action(() => { const { correct } = servePhoneGameCoffee(ui.ingredients, scope); ui.ingredients = []; ui.info = correct ? '这杯做对了！' : '原料没对上，下一杯再试试。'; }));
+    screen.querySelectorAll('[data-pg-ingredient]').forEach(button => button.onclick = () => {
+      const ingredient = button.dataset.pgIngredient;
+      const selected = !ui.ingredients.includes(ingredient);
+      ui.ingredients = selected ? [...ui.ingredients, ingredient] : ui.ingredients.filter(item => item !== ingredient);
+      button.setAttribute('aria-pressed', String(selected));
+      button.querySelector('span').textContent = selected ? '✓' : '+';
+      screen.querySelector('[data-pg-order-status]').textContent = ui.ingredients.length ? `已选：${ui.ingredients.join('、')}` : '点选需要的原料，再点击出杯。';
+    });
+    screen.querySelector('[data-pg-serve]')?.addEventListener('click', () => {
+      if (!ui.ingredients.length) { screen.querySelector('[data-pg-order-status]').textContent = '先选原料再出杯，这一单还在等你。'; return; }
+      action(() => { const { correct } = servePhoneGameCoffee(ui.ingredients, scope); ui.ingredients = []; ui.info = correct ? '这杯做对了！' : '原料没对上，下一杯再试试。'; });
+    });
+    const recipeDetails = screen.querySelector('.wpg-coffee details');
+    if (recipeDetails) recipeDetails.open = recipeOpen;
+    const main = screen.querySelector('.wpg-main');
+    if (main) main.scrollTop = scrollTop;
     if (app === 'wechat' && ui.actorId) {
       const thread = screen.querySelector('.wpg-thread');
       thread?.scrollTo(0, thread.scrollHeight);

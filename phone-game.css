@@ -104,8 +104,9 @@
 .wpg-order small { color: #a18a7b; font-size: 11px; }
 .wpg-order b { font-size: 14px; }
 .wpg-ingredients { display: flex; flex-wrap: wrap; gap: 8px; }
-.wpg-ingredients label { display: flex; align-items: center; gap: 4px; background: #fff; border-radius: 9px; padding: 6px 9px; font-size: 12px; min-height: 44px; }
-.wpg-ingredients input { padding: 0; min-height: 18px; width: 18px; accent-color: #88668c; }
+.wpg-ingredients button { display: flex; align-items: center; gap: 7px; background: #fff; color: #5b436e; border: 2px solid transparent; border-radius: 9px; padding: 8px 12px; font-size: 12px; min-height: 44px; touch-action: manipulation; }
+.wpg-ingredients button[aria-pressed="true"] { background: #eee3f4; border-color: #88668c; color: #5b356a; }
+.wpg-ingredients button > span { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid currentColor; border-radius: 5px; }
 .wpg-ledger > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eae1ec; font-size: 11px; }
 .wpg-ledger span { min-width: 0; overflow-wrap: anywhere; }
 .wpg-ledger b { flex: 0 0 auto; color: #7f5d8c; }

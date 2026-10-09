@@ -1,4 +1,5 @@
 const PRESS_SELECTOR = 'button,[role="button"]';
+const CONTROL_SELECTOR = 'button,[role="button"],input,select,textarea,label,summary,a[href],[contenteditable="true"],[data-phone-gesture-ignore]';
 const TOP = 42;
 const EDGE = 26;
 const BOTTOM = 34;
@@ -164,6 +165,8 @@ export function mountInteractionRealism({ phone } = {}) {
 
   const down = (event) => {
     if (event.button > 0) return;
+    // 新的一次按下属于下一次操作，不沿用上一次滑动的点击屏蔽。
+    blockClickUntil = 0;
     pressed = event.target?.closest?.(PRESS_SELECTOR) || null;
     pressed?.classList.add('is-wp-pressed');
     if (screenOff || stage.classList.contains('is-screen-off')) return;
@@ -173,6 +176,9 @@ export function mountInteractionRealism({ phone } = {}) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     const current = kind(stage, phone);
+    // 控件的轻微手指移动不能变成系统手势；导航条和状态栏保留系统操作。
+    if (current !== 'lock' && event.target?.closest?.(CONTROL_SELECTOR)
+      && !event.target.closest('.wp-gesture-bar,[data-system-open]')) return;
     let type = '';
     if (y <= TOP) type = 'pull';
     else if (current === 'lock') type = 'unlock';

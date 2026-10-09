@@ -77,7 +77,7 @@ function formatAttemptTime(timestamp) {
 function header(title, subtitle, backLabel = '返回桌面') {
   return `
     <header class="wp-comm-header">
-      <button type="button" data-comm-home aria-label="${escapeHtml(backLabel)}">‹</button>
+      <button type="button" data-comm-home data-app-back aria-label="${escapeHtml(backLabel)}">‹</button>
       <div><b>${escapeHtml(title)}</b><small>${escapeHtml(subtitle)}</small></div>
       <span></span>
     </header>
@@ -246,7 +246,7 @@ function renderSms(screen, goHome, state, context) {
   screen.innerHTML = `
     <section class="wp-view wp-comm-app wp-sms-app">
       ${header(person ? person.name : '短信', person ? person.channels.cellular.number : (snapshot.connected ? '号码消息' : '未连接世界背面'), person ? '返回短信' : '返回桌面')}
-      <main class="wp-comm-body">${person ? smsThreadMarkup(person, state, context) : smsListMarkup(snapshot, people, state)}</main>
+      <main class="wp-comm-body">${!person && context.smsNotice ? `<div class="wp-comm-notice" role="status">${escapeHtml(context.smsNotice)}</div>` : ''}${person ? smsThreadMarkup(person, state, context) : smsListMarkup(snapshot, people, state)}</main>
       ${person ? '' : '<button type="button" class="wp-sms-compose" aria-label="新短信" data-sms-new>＋</button>'}
     </section>
   `;
@@ -295,14 +295,17 @@ export function mountNativeCommunicationApps({ phone } = {}) {
   const context = { phoneNotice: null, smsNotice: '' };
   const clickHandler = (event) => {
     const appButton = event.target?.closest?.('[data-app="phone"], [data-app="messages"]');
-    if (!appButton) return;
+    if (!appButton || !document.querySelector('#world-phone-stage')?.contains(appButton)) return;
     const screen = document.querySelector('#world-phone-stage [data-screen]');
-    if (!screen) return;
+    if (!screen || screen.dataset.homeEditing === '1') return;
 
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    const goHome = () => phone?.refresh?.();
+    // 先登记当前应用，避免刷新、后台切换仍把通讯页当成桌面。
+    phone?.openApp?.(appButton.dataset.app);
+    if (screen.querySelector('[data-phone-game-app]')) return;
+    const goHome = () => typeof phone?.home === 'function' ? phone.home() : phone?.refresh?.();
     if (appButton.dataset.app === 'phone') {
       context.phoneNotice = null;
       renderPhone(screen, goHome, state, context);

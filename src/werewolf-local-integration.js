@@ -1,6 +1,6 @@
-import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.24';
-import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.24';
-import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.24';
+import { LocalWerewolfGameController } from './werewolf-local-game.js?v=0.3.0-alpha.25';
+import { roleLabel, WEREWOLF_PHASES } from './werewolf-local-engine.js?v=0.3.0-alpha.25';
+import { crowHostMarkup, crowDealMarkup } from './werewolf-dm.js?v=0.3.0-alpha.25';
 
 const APP_ID = 'werewolf-local';
 

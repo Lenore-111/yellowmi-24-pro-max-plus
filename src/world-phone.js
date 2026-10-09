@@ -7,10 +7,10 @@ import {
 import { renderCasinoApp } from './casino-app.js';
 import { renderWalletApp } from './wallet-app.js';
 import { renderMusicApp } from './music-app.js';
-import { renderPocketGame } from './pocket-game.js';
+import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.25';
 import { renderDeliveryApp } from './lingqi-delivery.js';
 import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js';
-import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.24';
+import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.25';
 import { findMessageMatches, highlightMessageText } from './message-search.js';
 import {
   DEFAULT_HOME_LAYOUT,
