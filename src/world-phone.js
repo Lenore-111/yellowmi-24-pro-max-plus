@@ -726,7 +726,11 @@ export function mountWorldPhone() {
 
   function repaintWechat() {
     current = 'app:wechat';
+    const sheet = screen.querySelector('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet');
+    const focused = sheet?.contains(document.activeElement) ? document.activeElement : null;
+    sheet?.remove();
     renderWeChat(screen, snapshot, wechatRoute, repaintWechat, showHome, toggleMomentLike);
+    if (sheet) { screen.append(sheet); focused?.focus({ preventScroll: true }); }
     paintStatusbar();
   }
 
