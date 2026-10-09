@@ -28,10 +28,10 @@ const HOME_APP_DEFS = {
   wechat: ['微', '微信', 'is-wechat'],
   news: ['闻', '世界新闻', 'is-news'],
   wallet: ['¥', '钱包', 'is-wallet'],
-  delivery: ['🥡', '玲七快送', 'is-delivery'],
+  delivery: ['🥡', 'Echo快送', 'is-delivery'],
   gallery: ['▧', '相册', 'is-gallery'],
   music: ['♫', '音乐', 'is-music'],
-  casino: ['♠', '七号赌场', 'is-casino'],
+  casino: ['♠', 'Echo 赌场', 'is-casino'],
   puzzle: ['2048', '数字花园', 'is-puzzle'],
   settings: ['⚙', '设置', 'is-settings'],
   phone: ['☎', '电话', 'is-phone'],
@@ -127,7 +127,7 @@ function renderLock(screen, snapshot, unlock) {
       </div>
       <div class="wp-lock-bottom">
         <button type="button" class="wp-lock-shortcut" aria-label="手电筒">✦</button>
-        <button type="button" class="wp-unlock" data-unlock><span></span><b>上滑进入世界小手机</b></button>
+        <button type="button" class="wp-unlock" data-unlock><span></span><b>上滑进入Echo 手机</b></button>
         <button type="button" class="wp-lock-shortcut" aria-label="相机">◉</button>
       </div>
     </section>
@@ -193,7 +193,7 @@ function renderAppHeader(title, subtitle = '', backLabel = '返回桌面', trail
 
 function renderPlaceholder(screen, app, snapshot, goHome) {
   const meta = {
-    gallery: ['相册', '本机内容', '以后用于查看世界小手机里真实产生或保存的图片。'],
+    gallery: ['相册', '本机内容', '以后用于查看Echo 手机里真实产生或保存的图片。'],
     phone: ['电话', '语音通讯', '预留电话与来电界面。不会偷偷生成第二套角色关系。'],
     messages: ['短信', '系统通讯', '预留短信与验证码等轻量通讯。'],
     browser: ['浏览器', '公开网络', '预留世界网页与公共信息入口。'],
@@ -409,7 +409,7 @@ function renderWxMe(content, snapshot, route, repaint) {
   content.innerHTML = `
     <div class="wp-wx-me-card">
       <span class="wp-wx-me-avatar">${initials(snapshot.user)}</span>
-      <div><b>${escapeHtml(snapshot.user)}</b><small>世界小手机用户</small></div>
+      <div><b>${escapeHtml(snapshot.user)}</b><small>Echo 手机用户</small></div>
     </div>
     <div class="wp-wx-me-list">
       <button type="button" data-social-collections><span>社交收藏</span><b>›</b></button>
@@ -579,8 +579,8 @@ function renderWeChat(screen, snapshot, route, repaint, goHome, toggleMomentLike
 function renderSettings(screen, snapshot, goHome, onResetHome) {
   screen.innerHTML = `
     <section class="wp-view wp-native-app wp-settings-app">
-      ${renderAppHeader('设置', '世界小手机')}
-      <div class="wp-settings-hero"><div class="wp-settings-device">世界小手机</div><p>REAL PHONE SHELL · WORLD BACKSTAGE SIM</p></div>
+      ${renderAppHeader('设置', 'Echo 手机')}
+      <div class="wp-settings-hero"><div class="wp-settings-device">Echo 手机</div><p>REAL PHONE SHELL · WORLD BACKSTAGE SIM</p></div>
       <div class="wpg-mode-settings">
         <b>手机玩法</b>
         <button type="button" data-game-mode="game" aria-pressed="${readPhoneGameMode() === 'game'}">独立游戏 · 仅在手机里</button>
@@ -625,17 +625,17 @@ function mountStage() {
   const launcher = el('button', 'wp-launcher');
   launcher.id = LAUNCHER_ID;
   launcher.type = 'button';
-  launcher.title = '世界小手机 · 拖动调整位置';
-  launcher.setAttribute('aria-label', '打开世界小手机');
+  launcher.title = 'Echo 手机 · 拖动调整位置';
+  launcher.setAttribute('aria-label', '打开Echo 手机');
   launcher.setAttribute('aria-controls', STAGE_ID);
   launcher.setAttribute('aria-expanded', 'false');
-  launcher.innerHTML = '<span class="wp-orb-halo" aria-hidden="true"></span><span class="wp-orb-orbit is-one" aria-hidden="true"></span><span class="wp-orb-orbit is-two" aria-hidden="true"></span><span class="wp-orb-light" aria-hidden="true"></span><span class="wp-launcher-phone" aria-hidden="true"><svg viewBox="0 0 24 30" fill="none"><rect x="5" y="3" width="14" height="24" rx="4" fill="var(--phone-orb-bg)" stroke="currentColor" stroke-width="1.35"/><path d="M10 6h4M10 23h4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><circle cx="12" cy="14.5" r="2" fill="currentColor"/></svg></span><b>世界小手机</b>';
+  launcher.innerHTML = '<span class="wp-orb-halo" aria-hidden="true"></span><span class="wp-orb-orbit is-one" aria-hidden="true"></span><span class="wp-orb-orbit is-two" aria-hidden="true"></span><span class="wp-orb-light" aria-hidden="true"></span><span class="wp-launcher-phone" aria-hidden="true"><svg viewBox="0 0 24 30" fill="none"><rect x="5" y="3" width="14" height="24" rx="4" fill="var(--phone-orb-bg)" stroke="currentColor" stroke-width="1.35"/><path d="M10 6h4M10 23h4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><circle cx="12" cy="14.5" r="2" fill="currentColor"/></svg></span><b>Echo 手机</b>';
 
   const stage = el('div', 'wp-stage');
   stage.id = STAGE_ID;
   stage.hidden = true;
   stage.innerHTML = `
-    <button type="button" class="wp-stage-close" data-stage-close aria-label="关闭世界小手机">×</button>
+    <button type="button" class="wp-stage-close" data-stage-close aria-label="关闭Echo 手机">×</button>
     <div class="wp-device-wrap">
       <div class="wp-device">
         <span class="wp-side-key wp-side-key--volume-up"></span>
@@ -843,7 +843,7 @@ export function mountWorldPhone() {
   }, 30_000);
 
   showLock();
-  console.info('[世界小手机] shell + live WeChat + news + wallet active');
+  console.info('[Echo 手机] shell + live WeChat + news + wallet active');
 
   return {
     refresh,

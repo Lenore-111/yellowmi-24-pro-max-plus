@@ -16,7 +16,7 @@ function dCartDock(state){
 
 function dHome(ui,state){
  const found=searchDeliveryMerchants(ui.query,ui.category);
- return `<div class="wpdelivery-scroll"><div class="wpdelivery-hero"><small>LINGQI DELIVERY · LOCAL DEMO</small><h1>好好吃饭，<br>今天也有好味道。</h1><p>玲七快送 · 本机演示</p><span aria-hidden="true">🥡</span></div>
+ return `<div class="wpdelivery-scroll"><div class="wpdelivery-hero"><small>ECHO DELIVERY · LOCAL DEMO</small><h1>好好吃饭，<br>今天也有好味道。</h1><p>Echo快送 · 本机演示</p><span aria-hidden="true">🥡</span></div>
  <div class="wpdelivery-address-tip"><span>📍</span><div><b>虚构收餐地点</b><small>结算时填写 · 不读取现实定位</small></div><i>›</i></div>
  <label class="wpdelivery-search"><span>⌕</span><input data-dsearch maxlength="70" autocomplete="off" value="${deliveryEsc(ui.query)}" placeholder="搜索商家、餐品"></label>
  <div class="wpdelivery-title"><b>今天想吃点什么？</b><small>演示菜单</small></div><nav class="wpdelivery-categories">${["全部","中式","甜品","饮品"].map(x=>`<button type="button" data-dcategory="${x}" class="${ui.category===x?"is-active":""}">${x}</button>`).join("")}</nav>

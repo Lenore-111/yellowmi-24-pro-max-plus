@@ -127,7 +127,7 @@ export function mountPhoneInteractions({ phone } = {}) {
       phone?.refresh?.();
     } catch (error) {
       const message = String(error?.message || error || '发送失败');
-      if (!message.includes('手机桥未连接')) console.error('[世界小手机] 微信发送失败:', error);
+      if (!message.includes('手机桥未连接')) console.error('[Echo 手机] 微信发送失败:', error);
       compose.dataset.error = message;
     } finally {
       sending = false;

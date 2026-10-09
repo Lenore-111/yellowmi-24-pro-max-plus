@@ -1,12 +1,12 @@
 {
-  "display_name": "世界小手机",
+  "display_name": "Echo 手机",
   "loading_order": 50,
   "requires": [],
   "optional": [],
   "dependencies": [],
   "js": "index.js",
   "css": "world-phone.css",
-  "author": "World Phone",
+  "author": "Echo",
   "version": "0.3.0-alpha.27",
   "auto_update": true,
   "minimum_client_version": "1.12.0"

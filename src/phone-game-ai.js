@@ -25,7 +25,7 @@ export function subscribePhoneGameGeneration(listener) {
 function notifyGeneration(scope, error = '') {
   lastStatus = { scope, error };
   for (const listener of generationListeners) {
-    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[世界小手机] 生成状态刷新失败', error); }
+    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[Echo 手机] 生成状态刷新失败', error); }
   }
 }
 export function isMainGenerationActive() {

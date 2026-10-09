@@ -46,7 +46,7 @@ function appLabel(kind) {
   if (kind === 'message') return '微信';
   if (kind === 'moment') return '朋友圈';
   if (kind === 'news') return '世界新闻';
-  return '世界小手机';
+  return 'Echo 手机';
 }
 
 export function buildNotificationFeed(snapshot = {}) {
@@ -186,7 +186,7 @@ function renderControlPanel(snapshot, state) {
     <section class="wp-system-slider-card">
       <div><span>☀</span><b>小手机屏幕亮度</b><small>${Math.round(state.brightness * 100)}%</small></div>
       <input type="range" min="35" max="100" step="1" value="${Math.round(state.brightness * 100)}" data-system-brightness aria-label="小手机屏幕亮度">
-      <p>只调整这台世界小手机的画面，不控制真实设备亮度。</p>
+      <p>只调整这台Echo 手机的画面，不控制真实设备亮度。</p>
     </section>
     <p class="wp-system-boundary">控制中心只管理小手机本机 UI。网络、蓝牙、蜂窝、物理手电筒等真实设备能力不会被伪造。</p>
   </main>`;
@@ -227,7 +227,7 @@ function ensureSettingsControls(stage, state) {
   group.dataset.systemStateSignature = signature;
   group.innerHTML = `<header>系统控制</header>
     <button type="button" class="wp-device-row" data-system-settings-open><span>月</span><div><b>勿扰模式</b><small>点按打开控制中心</small></div><strong>${state.focus ? '已开启' : '关闭'}</strong><i>›</i></button>
-    <button type="button" class="wp-device-row" data-system-settings-open><span>☀</span><div><b>屏幕亮度</b><small>仅影响世界小手机画面</small></div><strong>${Math.round(state.brightness * 100)}%</strong><i>›</i></button>
+    <button type="button" class="wp-device-row" data-system-settings-open><span>☀</span><div><b>屏幕亮度</b><small>仅影响Echo 手机画面</small></div><strong>${Math.round(state.brightness * 100)}%</strong><i>›</i></button>
     <button type="button" class="wp-device-row" data-system-settings-open><span>◌</span><div><b>减少动效</b><small>点按打开控制中心</small></div><strong>${state.reduceMotion ? '已开启' : '关闭'}</strong><i>›</i></button>`;
   return true;
 }
@@ -319,7 +319,7 @@ export function mountSystemRealism({ phone } = {}) {
     try {
       snapshot = markWorldBackstageConversationRead(id) || readWorldBackstage();
     } catch (error) {
-      console.error('[世界小手机] 标记会话已读失败:', error);
+      console.error('[Echo 手机] 标记会话已读失败:', error);
       return;
     }
     phone?.refresh?.();

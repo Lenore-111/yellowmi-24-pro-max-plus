@@ -1,0 +1,166 @@
+/* Restore phone's distinct app surfaces; independent data/actions stay local. */
+#world-phone-stage .echo-restored-app { color:#252525; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+#world-phone-stage .echo-restored-app .wp-app-header { border-bottom:1px solid #e6e6e6; }
+#world-phone-stage .echo-restored-app .wp-app-header small:empty { display:none; }
+#world-phone-stage .echo-restored-app .wpg-main { padding:0; }
+#world-phone-stage :where(.echo-restored-app) .wpg-main button { background:transparent; color:inherit; border-radius:0; }
+#world-phone-stage .echo-restored-app .wpg-main input,
+#world-phone-stage .echo-restored-app .wpg-main select,
+#world-phone-stage .echo-restored-app .wpg-main textarea { color:#252525; border-color:#e5e5e5; }
+#world-phone-stage .echo-restored-app .wpg-avatar { background:#e9ecef; color:#546372; }
+#world-phone-stage .echo-restored-app .wpg-error,
+#world-phone-stage .echo-restored-app .wpg-generating { margin:8px 12px; }
+#world-phone-stage .echo-app-nav { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; flex:0 0 auto; padding:0 0 calc(28px + env(safe-area-inset-bottom,0px)); border-top:1px solid #e8e8e8; background:#fff; z-index:6; }
+#world-phone-stage .echo-app-nav button { display:grid; justify-items:center; align-content:center; gap:4px; min-width:0; min-height:52px; padding:6px 2px; border:0; background:transparent; color:#898989; font:inherit; font-size:10px; }
+#world-phone-stage .echo-app-nav svg { width:23px; height:23px; }
+#world-phone-stage .echo-app-nav button[aria-current="page"] { color:var(--echo-app-accent,#07b75b); }
+#world-phone-stage .echo-app-nav.is-wechat { background:#f7f7f7; }
+#world-phone-stage .is-game-wechat { --echo-app-accent:#07b75b; background:#ededed; }
+#world-phone-stage .is-game-weibo { --echo-app-accent:#ff8200; background:#f2f3f5; }
+#world-phone-stage .is-game-rednote { --echo-app-accent:#fa344e; background:#fff; }
+#world-phone-stage .is-game-delivery { --echo-app-accent:#ff6c24; background:#fffaf4; }
+#world-phone-stage .is-game-wallet { --echo-app-accent:#6e55e5; background:#f5f4f9; }
+#world-phone-stage .echo-feed-empty { grid-column:1/-1; display:grid; justify-items:center; align-content:center; gap:10px; min-height:230px; padding:34px 24px; text-align:center; color:#a0a0a0; }
+#world-phone-stage .echo-feed-empty > svg { width:36px; height:36px; stroke-width:1; opacity:.6; }
+#world-phone-stage .echo-feed-empty b { font-size:14px; color:#777; }
+#world-phone-stage .echo-feed-empty p { font-size:12px; margin:0; line-height:1.7; }
+#world-phone-stage .echo-restored-app button.echo-refresh { border:1px solid #e7e7e7; border-radius:20px; font-size:11px; min-height:30px; padding:5px 12px; background:#fff; }
+#world-phone-stage .echo-wb-tabs { display:flex; justify-content:center; align-items:center; gap:18px; min-height:48px; background:#fff; padding:0 10px; }
+#world-phone-stage .echo-wb-tabs > button:not(.echo-refresh) { font-size:16px; color:#999; padding:0 0 8px; min-height:44px; position:relative; }
+#world-phone-stage .echo-wb-tabs > button.is-active { color:#222; font-weight:700; }
+#world-phone-stage .echo-wb-tabs > button.is-active:after { content:""; height:3px; position:absolute; bottom:4px; left:25%; right:25%; border-radius:3px; background:#ff8200; }
+#world-phone-stage .echo-social-search { display:flex; align-items:center; gap:7px; margin:8px 12px 12px; padding:0 10px; border-radius:22px; background:#eee; }
+#world-phone-stage .echo-social-search svg { width:17px; height:17px; color:#aaa; flex-shrink:0; }
+#world-phone-stage .echo-social-search input { min-width:0; flex:1; border:0; background:transparent; padding:8px 0; min-height:38px; font-size:12px; }
+#world-phone-stage .echo-social-search button { font-size:11px; min-height:36px; padding:4px; color:#999; }
+#world-phone-stage .echo-weibo-feed { display:grid; gap:9px; }
+#world-phone-stage .echo-post { border:0; border-radius:0; box-shadow:none; background:#fff; padding:14px 14px 0; margin:0; }
+#world-phone-stage .echo-post > header { display:flex; align-items:center; gap:9px; }
+#world-phone-stage .echo-post > header > div { display:grid; min-width:0; gap:4px; flex:1; }
+#world-phone-stage .echo-post header b { font-size:14px; color:#ed8034; }
+#world-phone-stage .echo-post header small { font-size:10px; color:#aaa; }
+#world-phone-stage .echo-post .wpg-avatar { width:38px; height:38px; flex-basis:38px; border-radius:50%; }
+#world-phone-stage .echo-post h3 { font-size:15px; line-height:1.5; margin:13px 0 7px; }
+#world-phone-stage .echo-post p { font-size:14px; line-height:1.7; margin:10px 0 14px; }
+#world-phone-stage .echo-post button.echo-follow { color:#ff8200; border:1px solid #ffceaa; padding:4px 12px; border-radius:4px; min-height:28px; font-size:11px; }
+#world-phone-stage .echo-post footer { display:flex; padding:0; border-top:1px solid #f1f1f1; }
+#world-phone-stage .echo-post footer button { display:flex; justify-content:center; align-items:center; flex:1; gap:6px; min-height:40px; padding:5px; color:#999; font-size:11px; }
+#world-phone-stage .echo-post footer svg { width:18px; height:18px; }
+#world-phone-stage .echo-post button[aria-pressed="true"] { color:var(--echo-app-accent); }
+#world-phone-stage .echo-rn-tabs { display:flex; align-items:center; gap:10px; padding:12px 13px 4px; background:#fff; }
+#world-phone-stage .echo-rn-tabs b { font-size:17px; }
+#world-phone-stage .echo-rn-tabs span { min-width:0; flex:1; color:#aaa; font-size:10px; }
+#world-phone-stage .echo-rn-tabs .echo-refresh { padding:4px 8px; font-size:10px; }
+#world-phone-stage .echo-note-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:0 8px 16px; align-items:start; }
+#world-phone-stage .echo-note-card { min-width:0; border-radius:10px; overflow:hidden; background:#fff; border:1px solid #f1f1f1; }
+#world-phone-stage .echo-note-card button.echo-note-cover { display:flex; flex-direction:column; justify-content:flex-end; width:100%; min-height:180px; aspect-ratio:4/5; padding:13px; background:linear-gradient(145deg,#fce8dd,#ecd6cf); text-align:left; color:#784e46; }
+#world-phone-stage .echo-note-card:nth-child(3n+2) button.echo-note-cover { background:linear-gradient(155deg,#ddebe5,#c7d7c8); color:#4f6859; }
+#world-phone-stage .echo-note-card:nth-child(3n) button.echo-note-cover { background:linear-gradient(155deg,#e6e9f5,#ccd6ea); color:#54617f; }
+#world-phone-stage .echo-note-cover > span { font-size:10px; opacity:.7; margin-bottom:7px; }
+#world-phone-stage .echo-note-cover b { font-size:17px; line-height:1.6; overflow-wrap:anywhere; }
+#world-phone-stage .echo-note-cover small { margin-top:10px; font-size:10px; }
+#world-phone-stage .echo-note-copy { padding:9px 9px 6px; }
+#world-phone-stage .echo-note-copy > b { font-size:12px; line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+#world-phone-stage .echo-note-copy > div { display:flex; align-items:center; gap:5px; margin-top:8px; }
+#world-phone-stage .echo-note-copy .wpg-avatar { width:20px; height:20px; flex-basis:20px; font-size:10px; }
+#world-phone-stage .echo-note-copy > div > span:not(.wpg-avatar) { flex:1; min-width:0; font-size:10px; color:#999; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#world-phone-stage .echo-note-copy button { padding:2px; min-height:28px; }
+#world-phone-stage .echo-note-copy svg { width:16px; height:16px; color:#999; }
+#world-phone-stage .echo-note-copy button[aria-pressed="true"] svg { color:#fa344e; }
+#world-phone-stage .echo-social-profile { display:flex; gap:14px; align-items:center; padding:25px 18px 18px; background:#fff; }
+#world-phone-stage .echo-social-profile > .wpg-avatar { width:60px; height:60px; flex-basis:60px; font-size:22px; }
+#world-phone-stage .echo-social-profile > div { display:grid; gap:8px; }
+#world-phone-stage .echo-social-profile b { font-size:20px; }
+#world-phone-stage .echo-social-profile small { font-size:11px; color:#999; }
+#world-phone-stage .echo-profile-stats { display:flex; gap:36px; padding:5px 22px 20px; background:#fff; color:#999; font-size:11px; }
+#world-phone-stage .echo-profile-stats b { display:block; margin-bottom:5px; color:#333; font-size:17px; }
+#world-phone-stage .echo-section-title { padding:16px; font-size:14px; }
+#world-phone-stage .echo-account-actions button { width:100%; text-align:left; background:#fff; border-bottom:1px solid #eee; padding:14px; }
+#world-phone-stage .echo-wx-search { display:flex; margin:8px 9px; background:#fff; border-radius:5px; }
+#world-phone-stage .echo-wx-search input { min-width:0; flex:1; border:0; padding:8px 12px; min-height:34px; font-size:13px; }
+#world-phone-stage .echo-wx-search button { min-height:34px; font-size:12px; color:#999; }
+#world-phone-stage .is-game-wechat .wp-app-header { background:#ededed; }
+#world-phone-stage .is-game-wechat .wpg-chat-list { border-radius:0; }
+#world-phone-stage .is-game-wechat .wpg-chat-list > button { min-height:76px; padding:12px 15px; background:#fff; border-bottom:1px solid #e8e8e8; }
+#world-phone-stage .is-game-wechat .wpg-chat-list .wpg-avatar { width:48px; height:48px; flex-basis:48px; border-radius:7px; background:#d7e6da; }
+#world-phone-stage .is-game-wechat .wpg-chat-list b { font-size:16px; }
+#world-phone-stage .is-game-wechat .wpg-chat-list small { font-size:12px; color:#999; }
+#world-phone-stage .echo-wx-profile { display:flex; gap:15px; align-items:center; padding:30px 18px; background:#fff; }
+#world-phone-stage .echo-wx-profile .wpg-avatar { width:62px; height:62px; flex-basis:62px; border-radius:8px; }
+#world-phone-stage .echo-wx-profile > div { flex:1; display:grid; gap:9px; }
+#world-phone-stage .echo-wx-profile b { font-size:21px; }
+#world-phone-stage .echo-wx-profile small { font-size:12px; color:#999; }
+#world-phone-stage .echo-wx-me-list { margin-top:8px; }
+#world-phone-stage .echo-wx-me-list button { display:flex; width:100%; align-items:center; gap:16px; min-height:58px; padding:12px 18px; background:#fff; border-bottom:1px solid #eee; }
+#world-phone-stage .echo-wx-me-list svg { width:22px; height:22px; color:#07b75b; }
+#world-phone-stage .echo-wx-me-list span { flex:1; text-align:left; font-size:16px; }
+#world-phone-stage .echo-wx-me-list i { color:#aaa; font-style:normal; }
+#world-phone-stage .echo-contact-heading { padding:10px 15px; color:#999; font-size:12px; }
+#world-phone-stage .is-game-wechat .wpg-person { border-radius:0; padding:15px; border-bottom:1px solid #eee; box-shadow:none; margin:0; }
+#world-phone-stage .is-game-wechat .wpg-thread-head { flex:0 0 auto; padding:8px 12px; background:#ededed; border-bottom:1px solid #ddd; }
+#world-phone-stage .is-game-wechat .wpg-relation-strip { font-size:10px; padding:5px 12px; background:#e5e5e5; color:#999; }
+#world-phone-stage .is-game-wechat .wpg-thread { padding:12px; }
+#world-phone-stage .is-game-wechat .wpg-bubble { border-radius:4px; background:#fff; font-size:15px; }
+#world-phone-stage .is-game-wechat .wpg-bubble.is-user { background:#95ec69; border-radius:4px; }
+#world-phone-stage .is-game-wechat .wpg-compose { background:#f6f6f6; padding:8px 10px; border-top:1px solid #ddd; }
+#world-phone-stage .is-game-wechat .wpg-compose textarea { border:0; border-radius:4px; }
+#world-phone-stage .is-game-wechat .wpg-compose button { background:#07c160; color:#fff; border-radius:4px; padding:6px 14px; }
+#world-phone-stage .echo-moments-cover { position:relative; min-height:195px; display:flex; justify-content:flex-end; align-items:flex-end; gap:12px; padding:18px; background:linear-gradient(145deg,#779889,#243e32); color:white; }
+#world-phone-stage .echo-moments-cover > div { display:grid; text-align:right; gap:60px; }
+#world-phone-stage .echo-moments-cover .wpg-avatar { width:55px; height:55px; border-radius:6px; flex-basis:55px; }
+#world-phone-stage .echo-moments-actions { padding:12px; text-align:right; background:#fff; }
+#world-phone-stage .echo-moments-feed .echo-post { padding-left:16px; }
+#world-phone-stage .is-game-wallet .wpg-main { padding:14px 13px 24px; }
+#world-phone-stage .is-game-wallet .wpg-wallet-card { border-radius:24px; background:radial-gradient(circle at 85% 22%,#ffffff35,transparent 26%),linear-gradient(135deg,#5b51e8,#7659dc 47%,#9f5ccc); box-shadow:0 16px 32px #46349e25; }
+#world-phone-stage .is-game-wallet .wpg-wallet-card strong { font-size:40px; font-weight:600; letter-spacing:-1px; }
+#world-phone-stage .is-game-wallet .wpg-wallet-links { margin-top:20px; gap:10px; }
+#world-phone-stage .is-game-wallet .wpg-wallet-links button { min-height:68px; background:#fff; border-radius:16px; box-shadow:0 4px 14px #201a3e08; }
+#world-phone-stage .is-game-wallet .wpg-coffee { border:1px solid #ede9e3; background:#fffdf9; border-radius:18px; }
+#world-phone-stage .is-game-wallet .wpg-coffee h2 { font-family:Georgia,serif; font-size:22px; color:#5f4735; }
+#world-phone-stage .is-game-wallet .wpg-order > button { background:#6a4c37; color:#fff; border-radius:10px; width:100%; }
+#world-phone-stage .is-game-wallet .wpg-ingredients button { border:1px solid #ddd; border-radius:10px; background:#fff; }
+#world-phone-stage .is-game-wallet .wpg-ingredients button[aria-pressed="true"] { border-color:#7659dc; color:#7659dc; }
+#world-phone-stage .is-game-wallet .wpg-ledger { border-radius:16px; background:#fff; padding:16px; }
+#world-phone-stage .is-game-delivery .wpg-main { padding:12px 12px 24px; }
+#world-phone-stage .echo-delivery-hero { position:relative; overflow:hidden; border-radius:22px; background:linear-gradient(135deg,#ff852f,#ff5927); padding:22px 18px; color:#fff; }
+#world-phone-stage .echo-delivery-hero small { letter-spacing:1.3px; font-size:9px; opacity:.8; }
+#world-phone-stage .echo-delivery-hero h1 { font-size:25px; line-height:1.5; position:relative; z-index:1; margin:12px 0; }
+#world-phone-stage .echo-delivery-hero > span { position:absolute; right:12px; bottom:3px; font-size:64px; opacity:.7; transform:rotate(-12deg); }
+#world-phone-stage .echo-delivery-address { display:flex; align-items:center; gap:8px; margin:12px 0; padding:12px; border-radius:12px; background:#fff; color:#8e6a55; font-size:12px; }
+#world-phone-stage .echo-delivery-address svg { width:18px; height:18px; }
+#world-phone-stage .echo-delivery-address span { flex:1; }
+#world-phone-stage .echo-delivery-categories { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); padding:12px 0; }
+#world-phone-stage .echo-delivery-categories > span { display:grid; justify-items:center; gap:8px; font-size:28px; }
+#world-phone-stage .echo-delivery-categories b { font-size:11px; font-weight:500; }
+#world-phone-stage .echo-delivery-section { display:flex; align-items:center; justify-content:space-between; margin:18px 0 12px; }
+#world-phone-stage .echo-delivery-section h2 { margin:0; font-size:18px; }
+#world-phone-stage .echo-delivery-section small { color:#ad9586; font-size:10px; }
+#world-phone-stage .echo-delivery-products { display:grid; gap:12px; }
+#world-phone-stage .echo-delivery-products article { display:flex; align-items:center; gap:12px; background:#fff; border-radius:16px; border:1px solid #f4e9de; padding:12px; }
+#world-phone-stage .echo-product-picture { display:grid; place-items:center; width:80px; height:85px; flex:0 0 80px; background:#fff0d9; border-radius:12px; font-size:40px; }
+#world-phone-stage .echo-delivery-products article > div { flex:1; min-width:0; }
+#world-phone-stage .echo-delivery-products h3 { margin:0 0 8px; font-size:15px; }
+#world-phone-stage .echo-delivery-products small { display:block; font-size:10px; color:#baa494; line-height:1.6; }
+#world-phone-stage .echo-delivery-products strong { display:block; color:#ff6c24; margin-top:8px; font-size:17px; }
+#world-phone-stage .echo-delivery-products button { align-self:flex-end; border-radius:50%; background:#ff782b; color:#fff; min-height:32px; width:32px; padding:0; font-size:24px; }
+#world-phone-stage .echo-delivery-orders h2 { font-size:20px; margin:15px 0; }
+#world-phone-stage .wpg-communication.echo-restored-app { --pg-accent:#007aff; background:#f2f2f7; }
+#world-phone-stage .wpg-communication.echo-restored-app .wp-app-header { background:#f8f8fa; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-main { padding:12px 14px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-phone-tabs button { border-radius:0; font-size:10px; display:grid; justify-items:center; gap:5px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-phone-tabs svg { width:22px; height:22px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-phone-tabs button[aria-pressed="true"] { background:transparent; color:#007aff; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-comm-list { gap:0; background:#fff; border-radius:10px; overflow:hidden; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-comm-list > button { border-radius:0; border-bottom:1px solid #eee; min-height:72px; background:#fff; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-dialer { max-width:280px; margin:auto; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-digits button { background:#e4e4e8; border-radius:50%; height:64px; width:64px; font-size:28px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-dial-actions .wpg-dial-call { background:#34c759; color:#fff; border-radius:32px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-sms-bubble.is-user { background:#34c759; color:white; border-radius:18px; }
+#world-phone-stage .wpg-communication.echo-restored-app .wpg-comm-compose button { background:#34c759; color:#fff; border-radius:18px; }
+@container phone-screen (max-width:300px) {
+  #world-phone-stage .echo-rn-tabs > span { display:none; }
+  #world-phone-stage .echo-note-grid { gap:6px; padding-inline:6px; }
+  #world-phone-stage .echo-note-card button.echo-note-cover { min-height:140px; padding:10px; }
+  #world-phone-stage .echo-note-cover b { font-size:14px; }
+  #world-phone-stage .echo-product-picture { width:55px; height:68px; flex-basis:55px; font-size:30px; }
+}

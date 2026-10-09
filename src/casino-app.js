@@ -62,7 +62,7 @@ async function animationFinished(animation, fallbackMs) {
 }
 
 function header() {
-  return '<header class="wp-app-header wp-casino-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>七号赌场</b><small>NO. 7 · 娱乐筹码</small></div><span class="wp-casino-live-dot" aria-hidden="true"></span></header>';
+  return '<header class="wp-app-header wp-casino-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>Echo 赌场</b><small>NO. 7 · 娱乐筹码</small></div><span class="wp-casino-live-dot" aria-hidden="true"></span></header>';
 }
 
 function slotDetail(record) {

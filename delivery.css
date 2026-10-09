@@ -1,4 +1,4 @@
-/* 玲七快送: independent mobile food-delivery UI; scoped to the phone app. */
+/* Echo快送: independent mobile food-delivery UI; scoped to the phone app. */
 #world-phone-stage .wp-app.is-delivery .wp-app-icon{background:linear-gradient(145deg,#ffb254,#ff6b32);color:#fff;font-size:25px}
 #world-phone-stage .wp-delivery-app{display:flex;flex-direction:column;overflow:hidden;padding-top:34px;background:#fffaf4;color:#30271f;font:13px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #world-phone-stage .wp-delivery-app button,#world-phone-stage .wp-delivery-app input,#world-phone-stage .wp-delivery-app textarea{font:inherit}

@@ -90,13 +90,23 @@ export function mountShellLayout() {
     handle.type = 'button';
     handle.className = 'wp-shell-drag-handle';
     handle.dataset.shellDragHandle = '1';
-    handle.setAttribute('aria-label', '拖动世界小手机');
-    handle.title = '拖动世界小手机';
+    handle.setAttribute('aria-label', '拖动Echo 手机');
+    handle.title = '拖动Echo 手机';
     handle.innerHTML = '<span></span>';
     wrap.prepend(handle);
   }
 
   const isMobile = () => Boolean(media?.matches ?? globalThis.innerWidth <= 700);
+
+  // Tavern's transformed root makes fixed children follow host scrolling.
+  // Offset only the phone overlay, preserving the host's layout and scroll.
+  function syncHostScroll() {
+    const transformedRoot = getComputedStyle(document.documentElement).transform !== 'none';
+    stage.style.setProperty('--phone-host-scroll-x', `${transformedRoot ? globalThis.scrollX : 0}px`);
+    stage.style.setProperty('--phone-host-scroll-y', `${transformedRoot ? globalThis.scrollY : 0}px`);
+  }
+  window.addEventListener('scroll', syncHostScroll, { passive: true });
+  syncHostScroll();
 
   function positionLauncher(edge, top, tucked = false) {
     const viewport = viewportSize();
@@ -180,7 +190,7 @@ export function mountShellLayout() {
     document.documentElement.classList.toggle('wp-mobile-fullscreen-active', mobile && !stage.hidden);
 
     if (close) {
-      const label = mobile ? '返回酒馆' : '收起世界小手机';
+      const label = mobile ? '返回酒馆' : '收起Echo 手机';
       close.setAttribute('aria-label', label);
       close.title = label;
     }
@@ -263,6 +273,7 @@ export function mountShellLayout() {
 
   function onViewportChange() {
     if (drag) return;
+    syncHostScroll();
     syncMode();
   }
 
@@ -310,11 +321,40 @@ export function mountShellLayout() {
 
   const observer = new MutationObserver(onStageMutation);
   observer.observe(stage, { attributes: true, attributeFilter: ['hidden', 'class'] });
+
+  // Status ink follows the active page, including independent phone apps.
+  const screen = stage.querySelector('[data-screen]');
+  let themeFrame = 0;
+  function syncStatusTheme() {
+    themeFrame = 0;
+    const view = screen?.querySelector(':scope > .wp-view');
+    if (!view) return;
+    let lightBackground = stage.dataset.phoneSkinTone === 'light';
+    if (!view.matches('.wp-home, .wp-lockscreen')) {
+      for (const node of [view, view.querySelector('.wp-app-header'), screen]) {
+        if (!node) continue;
+        const values = getComputedStyle(node).backgroundColor.match(/[\d.]+/g)?.map(Number);
+        if (!values || (values[3] ?? 1) < .9) continue;
+        lightBackground = .2126 * values[0] + .7152 * values[1] + .0722 * values[2] > 150;
+        break;
+      }
+    }
+    stage.dataset.statusTheme = lightBackground ? 'dark' : 'light';
+  }
+  const scheduleStatusTheme = () => {
+    if (!themeFrame) themeFrame = requestAnimationFrame(syncStatusTheme);
+  };
+  const themeObserver = new MutationObserver(scheduleStatusTheme);
+  if (screen) themeObserver.observe(screen, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'data-phone-wallpaper'] });
+  syncStatusTheme();
   syncMode();
   onStageMutation();
 
   return () => {
     observer.disconnect();
+    themeObserver.disconnect();
+    cancelAnimationFrame(themeFrame);
+    delete stage.dataset.statusTheme;
     paletteObserver.disconnect(); rootObserver.disconnect();
     window.removeEventListener('world-backstage:ready', syncPalette);
     window.clearTimeout(suppressTimer);
@@ -337,6 +377,9 @@ export function mountShellLayout() {
     window.removeEventListener('pointerdown', onPointerInput, true);
     window.removeEventListener('keydown', onKeyboardInput, true);
     window.removeEventListener('resize', onViewportChange);
+    window.removeEventListener('scroll', syncHostScroll);
+    stage.style.removeProperty('--phone-host-scroll-x');
+    stage.style.removeProperty('--phone-host-scroll-y');
     globalThis.visualViewport?.removeEventListener?.('resize', onViewportChange);
     media?.removeEventListener?.('change', onViewportChange);
     launcher.removeEventListener('click', blockDraggedLauncherClick, true);

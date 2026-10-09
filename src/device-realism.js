@@ -98,7 +98,7 @@ function renderSettingsDetails(section, phone) {
 
   const hero = section.querySelector('.wp-settings-hero');
   if (hero) {
-    hero.outerHTML = `<div class="wp-device-profile"><span>${esc(summary.user.slice(0, 1) || '我')}</span><div><b>${esc(summary.user)}</b><small>世界小手机 · ${esc(VERSION)}</small></div><i class="${summary.connected ? 'is-good' : ''}">${summary.connected ? 'SIM 已插入' : '无 SIM'}</i></div>`;
+    hero.outerHTML = `<div class="wp-device-profile"><span>${esc(summary.user.slice(0, 1) || '我')}</span><div><b>${esc(summary.user)}</b><small>Echo 手机 · ${esc(VERSION)}</small></div><i class="${summary.connected ? 'is-good' : ''}">${summary.connected ? 'SIM 已插入' : '无 SIM'}</i></div>`;
   }
 
   const list = section.querySelector('.wp-settings-list');
@@ -119,7 +119,7 @@ function renderSettingsDetails(section, phone) {
         ${settingsRow('狼', '狼人杀', summary.werewolfActive ? '进行中' : '无进行中对局', { app: 'werewolf-local', note: '游戏状态只在本机' })}
       </section>
       <section class="wp-device-group"><header>设备</header>
-        ${settingsRow('存', '世界小手机数据', formatBytes(summary.localBytes), { note: '仅统计 world_phone_ 本机存储' })}
+        ${settingsRow('存', 'Echo 手机数据', formatBytes(summary.localBytes), { note: '仅统计 world_phone_ 本机存储' })}
         ${settingsRow('版', '版本', VERSION, { note: 'Alpha 构建' })}
         <button type="button" class="wp-device-refresh" data-device-refresh>↻ 重新读取设备状态</button>
       </section>
