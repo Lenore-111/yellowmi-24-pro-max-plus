@@ -1,11 +1,11 @@
 import { mountSocialTools } from './src/social-tools.js';
-import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.25';
-import { mountPhoneInteractions } from './src/phone-interactions.js';
+import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.26';
+import { mountPhoneInteractions } from './src/phone-interactions.js?v=0.3.0-alpha.26';
 import { mountNativeCommunicationApps } from './src/native-communication-apps.js?v=0.3.0-alpha.25';
 import { mountWorldPhoneUpdateManager } from './src/update-manager.js';
 import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.25';
 import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.25';
-import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.25';
+import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.26';
 import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.25';
 import { mountDeviceRealism } from './src/device-realism.js?v=0.3.0-alpha.25';
 import { mountSystemRealism } from './src/system-realism.js';
@@ -96,7 +96,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[世界小手机] 0.3.0-alpha.25 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[世界小手机] 0.3.0-alpha.26 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {

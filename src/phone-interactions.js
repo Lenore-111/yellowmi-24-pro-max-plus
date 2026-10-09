@@ -4,7 +4,7 @@ import {
   sendWorldBackstageMessage,
   subscribeWorldBackstage,
 } from './world-backstage-bridge.js';
-import { readPhoneGameMode } from './phone-game.js';
+import { readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.26';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({

@@ -4,8 +4,8 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameState, readPhoneGameMode,
   queuePhoneGameInteraction, togglePhoneGameLike, startPhoneGameShift, servePhoneGameCoffee,
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
-} from './phone-game.js';
-import { generatePhoneGameContent, isPhoneGameGenerating } from './phone-game-ai.js';
+} from './phone-game.js?v=0.3.0-alpha.26';
+import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.26';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const labels = { wechat: '微信', weibo: '微博', rednote: '小红书', wallet: '钱包', delivery: '玲七快送' };
@@ -111,6 +111,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   }
   function paint() {
     if (!isPhoneGameScopeCurrent(scope)) return;
+    const generationStatus = phoneGameGenerationStatus(scope);
+    ui.busy = generationStatus.busy;
+    if (generationStatus.error && !ui.error) ui.error = generationStatus.error;
     const state = readPhoneGameState(scope);
     if (ui.actorId && !state.actors.some(actor => actor.id === ui.actorId)) ui.actorId = '';
     const content = !state.actors.length ? '<div class="wpg-empty"><b>暂无可用角色</b><p>打开人物角色卡，或让世界背面提供已认识的联系人。世界观和剧情卡的标题不会作为人物出现。</p></div>'
@@ -120,8 +123,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     const scrollTop = keepPosition ? screen.querySelector('.wpg-main')?.scrollTop || 0 : 0;
     const recipeOpen = keepPosition && Boolean(screen.querySelector('.wpg-coffee details')?.open);
     paintedRoute = route;
-    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>独立游戏 · 仅在手机里</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${app === 'wechat' && !ui.actorId ? `<div class="wpg-wx-tabs">${[['chats','消息'],['moments','朋友圈'],['relations','关系']].map(([id,label]) => `<button type="button" data-pg-tab="${id}" aria-pressed="${ui.tab === id}">${label}</button>`).join('')}</div>` : ''}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应…</p>' : ''}${content}</main>${nav()}</section>`;
+    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>独立游戏 · 仅在手机里</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${app === 'wechat' && !ui.actorId ? `<div class="wpg-wx-tabs">${[['chats','消息'],['moments','朋友圈'],['relations','关系']].map(([id,label]) => `<button type="button" data-pg-tab="${id}" aria-pressed="${ui.tab === id}">${label}</button>`).join('')}</div>` : ''}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
+    screen.querySelector('[data-pg-cancel]')?.addEventListener('click', () => cancelPhoneGameGeneration(scope));
     screen.querySelectorAll('[data-pg-app]').forEach(button => button.onclick = () => openApp(button.dataset.pgApp));
     screen.querySelectorAll('[data-pg-tab]').forEach(button => button.onclick = () => { ui.tab = button.dataset.pgTab; ui.postId = ''; ui.draft = ''; paint(); });
     screen.querySelector('[data-pg-filter]')?.addEventListener('change', event => { ui.filter = event.target.value; paint(); });
@@ -166,4 +170,10 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     }
   }
   paint();
+  const unsubscribe = subscribePhoneGameGeneration(({ scope: changedScope, busy, error }) => {
+    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || !current()) return;
+    ui.busy = busy; ui.error = error;
+    paint();
+  });
+  return unsubscribe;
 }

@@ -1,5 +1,4 @@
 import { DELIVERY_COLA } from './delivery-data.js';
-import { casinoBranchKey } from './casino.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
 import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js';
 
@@ -34,7 +33,7 @@ export function capturePhoneGameScope() {
   const ctx = context();
   const card = ctx?.characters?.[ctx.characterId];
   const characterKey = ctx?.groupId ? `group:${ctx.groupId}` : `card:${card?.avatar || card?.name || ctx?.characterId || 'none'}`;
-  return { ctx, metadata: ctx?.chatMetadata || null, key: JSON.stringify([characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', casinoBranchKey(), ctx?.chatId || '']) };
+  return { ctx, metadata: ctx?.chatMetadata || null, key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
 }
 export function isPhoneGameScopeCurrent(scope) {
   const current = capturePhoneGameScope();
@@ -132,13 +131,41 @@ function reconcileActors(raw, ctx) {
   }
   return { ...source, actors: active, actorArchive };
 }
+
+function legacyPhoneGameSave(store, scope) {
+  const [, characterKey, personaKey, chatId] = JSON.parse(scope.key);
+  const candidates = Object.entries(store.saves || {}).filter(([key, value]) => {
+    if (!value || typeof value !== 'object') return false;
+    try {
+      const parts = JSON.parse(key);
+      return Array.isArray(parts) && parts.length === 4
+        && parts[0] === characterKey && parts[1] === personaKey && parts[3] === chatId;
+    } catch { return false; }
+  });
+  // Old versions made one save per committed floor. Recover the furthest phone
+  // progress, rather than a freshly reset save at the newest narrative floor.
+  // Keep every original entry; never merge balances, gifts or pending replies.
+  const progress = value => [
+    integer(value.tick), (Array.isArray(value.events) ? value.events : []).length, (Array.isArray(value.posts) ? value.posts : []).length,
+    (Array.isArray(value.events) ? value.events : []).filter(event => event?.status === 'replied').length,
+    integer(value.earned) + integer(value.spent), (Array.isArray(value.ledger) ? value.ledger : []).length,
+  ];
+  candidates.sort(([keyA, a], [keyB, b]) => {
+    const left = progress(a), right = progress(b);
+    for (let i = 0; i < left.length; i++) if (left[i] !== right[i]) return right[i] - left[i];
+    return keyA.localeCompare(keyB);
+  });
+  return candidates[0]?.[1] || null;
+}
+
 export function readPhoneGameState(scope = capturePhoneGameScope()) {
   requireScope(scope);
   const store = readStore(scope);
-  const raw = Object.hasOwn(store.saves || {}, scope.key) ? store.saves[scope.key] : null;
+  const hasStableSave = Object.hasOwn(store.saves || {}, scope.key);
+  const raw = hasStableSave ? store.saves[scope.key] : legacyPhoneGameSave(store, scope);
   if (raw) {
     const state = normalizePhoneGameState(reconcileActors(raw, scope.ctx));
-    if (JSON.stringify(state) !== JSON.stringify(raw)) persist(scope, { ...store, saves: { ...store.saves, [scope.key]: state } });
+    if (!hasStableSave || JSON.stringify(state) !== JSON.stringify(raw)) persist(scope, { ...store, saves: { ...store.saves, [scope.key]: state } });
     return clone(state);
   }
   const state = normalizePhoneGameState(createState(scope));

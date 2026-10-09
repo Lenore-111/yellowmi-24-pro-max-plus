@@ -1,7 +1,7 @@
 import { readSocialBucket, writeSocialBucket, socialScope } from './social-storage.js';
 import { buildCommunicationRegistry } from './communication-registry.js';
 import { readWorldBackstage, subscribeWorldBackstage } from './world-backstage-bridge.js';
-import { readPhoneGameMode } from './phone-game.js';
+import { readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.26';
 
 const STORAGE_KEY = 'world_phone_social_realism_v1';
 const APPS = {

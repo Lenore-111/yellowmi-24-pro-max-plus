@@ -1,10 +1,43 @@
+import * as tavern from '/script.js';
+import * as groupChats from '/scripts/group-chats.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
-} from './phone-game.js';
+} from './phone-game.js?v=0.3.0-alpha.26';
 
-let generating = false;
-export function isPhoneGameGenerating() { return generating; }
+export const PHONE_GAME_GENERATION_TIMEOUT_MS = 60000;
+let generation = null;
+let rawInFlight = null;
+const generationListeners = new Set();
+let lastStatus = null;
+
+export function isPhoneGameGenerating() { return Boolean(generation); }
+export function phoneGameGenerationStatus(scope = capturePhoneGameScope()) {
+  return {
+    busy: Boolean(generation?.scope.key === scope.key && generation.scope.metadata === scope.metadata),
+    error: lastStatus?.scope.key === scope.key && lastStatus.scope.metadata === scope.metadata ? lastStatus.error : '',
+  };
+}
+export function subscribePhoneGameGeneration(listener) {
+  generationListeners.add(listener);
+  return () => generationListeners.delete(listener);
+}
+function notifyGeneration(scope, error = '') {
+  lastStatus = { scope, error };
+  for (const listener of generationListeners) {
+    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[世界小手机] 生成状态刷新失败', error); }
+  }
+}
+export function isMainGenerationActive() {
+  const ctx = globalThis.SillyTavern?.getContext?.();
+  if (typeof tavern.isGenerating === 'function' && tavern.isGenerating()) return true;
+  return Boolean(tavern.is_send_press || groupChats.is_group_generating
+    || ctx?.streamingProcessor && !ctx.streamingProcessor.isStopped);
+}
+export function cancelPhoneGameGeneration(scope = capturePhoneGameScope()) {
+  if (!generation || generation.scope.key !== scope.key || generation.scope.metadata !== scope.metadata) return;
+  generation.cancel('已停止等待，互动已保存，可以重试回应。');
+}
 
 export function buildPhoneGamePrompt(state, { platform = '', eventId = '' } = {}) {
   const event = state.events.find(item => item.id === eventId);
@@ -48,20 +81,72 @@ function parseResponse(raw) {
 }
 
 export async function generatePhoneGameContent(request, scope = capturePhoneGameScope()) {
-  if (generating) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
+  if (generation) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
+  if (rawInFlight) throw new Error('上一条模型请求正在停止，请稍后重试。');
   if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('请回到原聊天的独立游戏模式继续。');
+  // getContext does not expose isGenerating; use the live script export for both
+  // streaming and non-streaming main generations, including group chats.
+  if (isMainGenerationActive()) throw new Error('正文正在生成，等正文结束后再玩手机。');
   const generator = scope.ctx?.generateRaw;
   if (typeof generator !== 'function') throw new Error('请先连接酒馆模型。手机互动已保存，连接后可以重试。');
-  if (scope.ctx?.isGenerating?.()) throw new Error('正文正在生成，等正文结束后再玩手机。');
   const state = readPhoneGameState(scope);
   if (!state.actors.length) throw new Error('先在酒馆选择一张角色卡，再打开手机。');
   const prompt = buildPhoneGamePrompt(state, request);
-  generating = true;
+  const operation = { scope, cancel: null, cancelled: false };
+  const cleanups = [];
+  const eventSource = scope.ctx?.eventSource;
+  const eventTypes = scope.ctx?.eventTypes || scope.ctx?.event_types || {};
+  let timeout, scopeTimer, errorText = '';
+  const cancelled = new Promise((resolve, reject) => {
+    operation.cancel = (message, stopRaw = true) => {
+      if (operation.cancelled) return;
+      operation.cancelled = true;
+      reject(new Error(message));
+      // generateRaw creates its own AbortController and listens for this host
+      // event. Never emit it while a main generation is active or starting.
+      if (stopRaw && !isMainGenerationActive() && eventTypes.GENERATION_STOPPED && eventSource?.emit) {
+        try { Promise.resolve(eventSource.emit(eventTypes.GENERATION_STOPPED)).catch(() => {}); } catch {}
+      }
+    };
+  });
+  generation = operation;
+  notifyGeneration(scope);
   try {
-    // Raw generation uses an explicit prompt and never appends to ctx.chat or installs extension prompts.
-    const raw = await generator.call(scope.ctx, { prompt, systemPrompt: '只运行独立手机游戏，按要求返回 JSON。', responseLength: request.eventId ? 900 : 1200, trimNames: false });
-    if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('已切换聊天或模式，本次结果未写入；原互动仍可重试。');
+    // Call immediately so generateRaw installs its stop listener before a cancel
+    // button can fire. Keep the raw-task lease until the transport actually ends.
+    const task = Promise.resolve(generator.call(scope.ctx, {
+      prompt, systemPrompt: '只运行独立手机游戏，按要求返回 JSON。',
+      responseLength: request.eventId ? 900 : 1200, trimNames: false,
+    }));
+    rawInFlight = task;
+    const release = () => { if (rawInFlight === task) rawInFlight = null; };
+    task.then(release, release);
+    timeout = globalThis.setTimeout(() => operation.cancel('模型等待超过一分钟，互动已保存，可以重试回应。'), PHONE_GAME_GENERATION_TIMEOUT_MS);
+    scopeTimer = globalThis.setInterval(() => {
+      if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') operation.cancel('已切换聊天或模式，原互动已保存，可回去重试。');
+    }, 250);
+    if (eventTypes.GENERATION_STARTED && eventSource?.on) {
+      const onMainStart = (type, options, dryRun) => {
+        if (!dryRun) operation.cancel('正文开始生成，本次手机回应已停止等待；互动保留，可稍后重试。', false);
+      };
+      eventSource.on(eventTypes.GENERATION_STARTED, onMainStart);
+      cleanups.push(() => {
+        if (eventSource.off) eventSource.off(eventTypes.GENERATION_STARTED, onMainStart);
+        else eventSource.removeListener?.(eventTypes.GENERATION_STARTED, onMainStart);
+      });
+    }
+    const raw = await Promise.race([task, cancelled]);
+    if (operation.cancelled || !isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('已切换聊天或模式，本次结果未写入；原互动仍可重试。');
     const response = parseResponse(raw);
     return request.eventId ? applyPhoneGameReply(request.eventId, response, scope) : applyPhoneGamePosts(request.platform, response.posts, scope);
-  } finally { generating = false; }
+  } catch (error) {
+    errorText = String(error.message || error);
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeout);
+    globalThis.clearInterval(scopeTimer);
+    cleanups.forEach(cleanup => cleanup());
+    if (generation === operation) generation = null;
+    notifyGeneration(scope, errorText);
+  }
 }
