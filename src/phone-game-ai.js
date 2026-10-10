@@ -3,6 +3,8 @@ import * as groupChats from '/scripts/group-chats.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
+  subscribePhoneGameModeChange,
+  flushPhoneGameMetadata,
 } from './phone-game.js?v=0.3.0-alpha.27';
 
 export const PHONE_GAME_GENERATION_TIMEOUT_MS = 60000;
@@ -14,8 +16,8 @@ let lastStatus = null;
 export function isPhoneGameGenerating() { return Boolean(generation); }
 export function phoneGameGenerationStatus(scope = capturePhoneGameScope()) {
   return {
-    busy: Boolean(generation?.scope.key === scope.key && generation.scope.metadata === scope.metadata),
-    error: lastStatus?.scope.key === scope.key && lastStatus.scope.metadata === scope.metadata ? lastStatus.error : '',
+    busy: Boolean(generation?.scope.key === scope.key && generation.scope.metadata === scope.metadata && generation.scope.modeEpoch === scope.modeEpoch),
+    error: lastStatus?.scope.key === scope.key && lastStatus.scope.metadata === scope.metadata && lastStatus.scope.modeEpoch === scope.modeEpoch ? lastStatus.error : '',
   };
 }
 export function subscribePhoneGameGeneration(listener) {
@@ -25,7 +27,7 @@ export function subscribePhoneGameGeneration(listener) {
 function notifyGeneration(scope, error = '') {
   lastStatus = { scope, error };
   for (const listener of generationListeners) {
-    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[Echo 手机] 生成状态刷新失败', error); }
+    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[世界小手机] 生成状态刷新失败', error); }
   }
 }
 export function isMainGenerationActive() {
@@ -90,6 +92,11 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   // getContext does not expose isGenerating; use the live script export for both
   // streaming and non-streaming main generations, including group chats.
   if (isMainGenerationActive()) throw new Error('正文正在生成，等正文结束后再玩手机。');
+  const metadataSave = flushPhoneGameMetadata(scope);
+  if (metadataSave) await metadataSave;
+  if (generation || rawInFlight) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
+  if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('请回到原聊天的独立游戏模式继续。');
+  if (isMainGenerationActive()) throw new Error('正文正在生成，等正文结束后再玩手机。');
   const generator = scope.ctx?.generateRaw;
   if (typeof generator !== 'function') throw new Error('请先连接酒馆模型。手机互动已保存，连接后可以重试。');
   const state = readPhoneGameState(scope);
@@ -128,9 +135,16 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     scopeTimer = globalThis.setInterval(() => {
       if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') operation.cancel('已切换聊天或模式，原互动已保存，可回去重试。');
     }, 250);
+    cleanups.push(subscribePhoneGameModeChange(() => operation.cancel('已切换手机模式，原互动已保存，可回去重试。')));
     if (eventTypes.GENERATION_STARTED && eventSource?.on) {
-      const onMainStart = (type, options, dryRun) => {
-        if (!dryRun) operation.cancel('正文开始生成，本次手机回应已停止等待；互动保留，可稍后重试。', false);
+      const onMainStart = async (type, options, dryRun) => {
+        if (!dryRun) {
+          operation.cancel('正文开始生成，本次手机回应已停止等待；互动保留，可稍后重试。', false);
+          // The host awaits GENERATION_STARTED before sending its request. Keep
+          // that boundary until the raw phone transport ends, without emitting
+          // a global stop event that could cancel the new narrative generation.
+          await task.catch(() => {});
+        }
       };
       eventSource.on(eventTypes.GENERATION_STARTED, onMainStart);
       cleanups.push(() => {

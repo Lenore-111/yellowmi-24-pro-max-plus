@@ -9,7 +9,7 @@ export function mountSocialTools({ phone } = {}) {
   let destroyed = false;
   let queued = false;
   const makeSheet = (title, content) => {
-    stage.querySelector('.wp-social-sheet')?.remove();
+    stage.querySelectorAll('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet').forEach(sheet => sheet.remove());
     const sheet = document.createElement('section'); sheet.className = 'wp-social-sheet';
     sheet.setAttribute('role','dialog'); sheet.setAttribute('aria-label',title);
     sheet.innerHTML = `<header><b>${esc(title)}</b><button type="button" data-social-close aria-label="关闭">×</button></header><div class="wp-social-sheet-body">${content}</div><p role="alert" data-social-error></p>`;
@@ -18,9 +18,9 @@ export function mountSocialTools({ phone } = {}) {
     sheet.querySelector('input,textarea,button')?.focus();
     return sheet;
   };
-  const runAction = (sheet, action, payload, done) => {
+  const runAction = async (sheet, action, payload, done) => {
     const error = sheet.querySelector('[data-social-error]');
-    try { const result = performWorldBackstageSocialAction(action, payload); done?.(result); }
+    try { const result = await performWorldBackstageSocialAction(action, payload); if (sheet.isConnected) done?.(result); }
     catch (cause) { if (error) error.textContent = cause?.message || '操作失败，请重试'; }
   };
   const collections = () => {
@@ -62,7 +62,7 @@ export function mountSocialTools({ phone } = {}) {
       const moment = snapshot.moments.find(item => item.id === article.dataset.momentId); if (!moment) return;
       const button = document.createElement('button'); button.type = 'button'; button.dataset.socialComment = moment.id;
       button.textContent = '评论'; button.disabled = !snapshot.capabilities.includes('social-comment-moment');
-      if (button.disabled) button.title = '更新世界背面测试版后可评论';
+      if (button.disabled) button.title = '请安装支持完整第二版手机桥的世界背面正式版';
       article.querySelector('.wp-wx-moment-meta')?.append(button);
       if (moment.raw?.comments?.length) {
         const list = document.createElement('div');list.className='wp-moment-replies';

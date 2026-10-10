@@ -28,16 +28,56 @@ const clean = (value, max = 800) => String(value ?? '').trim().slice(0, max);
 const integer = (value, min = 0, max = 1000000000) => Math.min(max, Math.max(min, Number.isFinite(Number(value)) ? Math.floor(Number(value)) : 0));
 const id = () => globalThis.crypto?.randomUUID?.() || `pg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 function context() { try { return globalThis.SillyTavern?.getContext?.() || null; } catch { return null; } }
+const modeListeners = new Set();
+let metadataSaveTask = null;
+function savePhoneMetadata(scope) {
+  if (typeof scope.ctx?.saveMetadata !== 'function') {
+    scope.ctx?.saveMetadataDebounced?.();
+    return;
+  }
+  if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
+    metadataSaveTask.pending = true;
+    return;
+  }
+  const task = { scope, pending: false };
+  metadataSaveTask = task;
+  const sameChat = () => {
+    const current = capturePhoneGameScope();
+    return current.metadata === scope.metadata && current.key === scope.key;
+  };
+  task.promise = (async () => {
+    try {
+      do {
+        task.pending = false;
+        if (!sameChat()) return;
+        await scope.ctx.saveMetadata();
+      } while (task.pending && sameChat());
+    } catch (error) { console.warn('[世界小手机] 手机存档保存失败', error); }
+    finally { if (metadataSaveTask === task) metadataSaveTask = null; }
+  })();
+}
+export function flushPhoneGameMetadata(scope) {
+  requireScope(scope);
+  if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
+    return metadataSaveTask.promise;
+  }
+  return null;
+}
+export function subscribePhoneGameModeChange(listener) {
+  modeListeners.add(listener);
+  return () => modeListeners.delete(listener);
+}
 
 export function capturePhoneGameScope() {
   const ctx = context();
   const card = ctx?.characters?.[ctx.characterId];
   const characterKey = ctx?.groupId ? `group:${ctx.groupId}` : `card:${card?.avatar || card?.name || ctx?.characterId || 'none'}`;
-  return { ctx, metadata: ctx?.chatMetadata || null, key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
+  const metadata = ctx?.chatMetadata || null;
+  return { ctx, metadata, modeEpoch: integer(readStore({ metadata }).modeEpoch), key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
 }
 export function isPhoneGameScopeCurrent(scope) {
   const current = capturePhoneGameScope();
-  return current.metadata === scope.metadata && current.key === scope.key;
+  return current.metadata === scope.metadata && current.key === scope.key && current.modeEpoch === scope.modeEpoch;
 }
 function requireScope(scope) {
   if (!isPhoneGameScopeCurrent(scope)) throw new Error('聊天或角色已切换，这次操作保留在原存档，请回到原聊天继续。');
@@ -52,8 +92,9 @@ function persist(scope, store) {
   requireScope(scope);
   if (scope.metadata) {
     scope.metadata[PHONE_GAME_KEY] = clone(store);
-    if (scope.ctx?.saveMetadataDebounced) scope.ctx.saveMetadataDebounced();
-    else if (scope.ctx?.saveMetadata) void Promise.resolve(scope.ctx.saveMetadata()).catch(() => {});
+    // The host cancels debounced metadata saves when a chat closes. Start the
+    // save now so a pending SMS survives an immediate chat switch.
+    savePhoneMetadata(scope);
   } else {
     if (!globalThis.localStorage) throw new Error('无法保存手机游戏存档');
     globalThis.localStorage.setItem(PHONE_GAME_KEY, JSON.stringify(store));
@@ -63,7 +104,17 @@ export function readPhoneGameMode() { return readStore(capturePhoneGameScope()).
 export function setPhoneGameMode(mode) {
   if (!['game', 'world'].includes(mode)) throw new Error('未知手机模式');
   const scope = capturePhoneGameScope();
-  persist(scope, { ...readStore(scope), mode });
+  const previous = readPhoneGameMode();
+  if (previous === 'game' && mode === 'world') {
+    for (const call of readPhoneGameState(scope).communications.calls) {
+      if (['dialing', 'connected'].includes(call.outcome)) endPhoneGameCall(call.id, scope);
+    }
+  }
+  const store = readStore(scope);
+  persist(scope, { ...store, mode, modeEpoch: integer(store.modeEpoch) + (previous === mode ? 0 : 1) });
+  if (previous !== mode) for (const listener of modeListeners) {
+    try { listener(); } catch (error) { console.warn('[世界小手机] 模式切换通知失败', error); }
+  }
 }
 function collectActors(ctx) {
   return collectPhoneGameActors(ctx, readWorldBackstage().contacts || []);
