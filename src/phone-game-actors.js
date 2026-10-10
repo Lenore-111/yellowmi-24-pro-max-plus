@@ -57,7 +57,6 @@ export function isPhoneGameScenarioCard(card) {
   return /(?:这是一张|本卡(?:是|为)|类型\s*[：:])[^。\n]{0,60}(?:多人\s*GM|世界观|群像|叙事引擎|模拟器)/i.test(description)
     || /\{\{char\}\}[^。\n]{0,30}(?:不是(?:单一|单个|一个)(?:恋爱)?角色|是(?:叙事引擎|旁白|主持人))/.test(description);
 }
-
 export function phoneGameCardName(card) {
   if (isPhoneGameScenarioCard(card)) return '';
   const profile = phoneGameCardProfile(card);
@@ -73,37 +72,49 @@ function subjectEntries(card, name) {
   }).map(entry => clean(entry.content)).filter(Boolean);
 }
 
+function cardActorId(card, ctx, fallbackIndex = 0) {
+  const avatar = clean(card?.avatar || card?.data?.avatar);
+  if (avatar) return `card:${avatar}`;
+  const explicitId = clean(card?.id ?? card?.data?.id);
+  if (explicitId) return `card:id:${explicitId}`;
+  const characterIndex = Array.isArray(ctx?.characters) ? ctx.characters.indexOf(card) : -1;
+  if (characterIndex >= 0) return `card:character:${characterIndex}`;
+  return `card:slot:${fallbackIndex}`;
+}
+
 export function collectPhoneGameActors(ctx, contacts = []) {
   const cards = ctx?.groupId ? (ctx.groups?.find(group => String(group.id) === String(ctx.groupId))?.members || [])
     .map(avatar => ctx.characters?.find(card => card.avatar === avatar)).filter(Boolean) : [ctx?.characters?.[ctx?.characterId]].filter(Boolean);
   const actors = [];
   for (const [index, card] of cards.entries()) {
     const name = phoneGameCardName(card);
-    if (!name || actors.some(actor => actor.name === name)) continue;
+    const actorId = cardActorId(card, ctx, index);
+    if (!name || actors.some(actor => actor.id === actorId)) continue;
     const profile = phoneGameCardProfile(card).slice(0, 7000);
     const identity = { ...card?.data, ...card, ...card?.data?.extensions?.world_phone, name };
-    actors.push({ id: `card:${card.avatar || card.name || card.data?.name || index}`, name: name.slice(0, 80), profile, phoneNumber: clean(identity.phoneNumber || identity.phone_number || identity.mobile || identity.contactChannels?.phone), pronoun: inferPhoneGamePronoun(identity, profile) });
+    actors.push({ id: actorId, name: name.slice(0, 80), profile, phoneNumber: clean(identity.phoneNumber || identity.phone_number || identity.mobile || identity.contactChannels?.phone), pronoun: inferPhoneGamePronoun(identity, profile) });
   }
   for (const person of contacts) {
     const name = clean(person.name).slice(0, 80);
-    if (!name || name === ctx?.name1 || cards.some(card => isPhoneGameScenarioCard(card) && clean(card.name || card.data?.name) === name)) continue;
+    const personId = clean(person.id);
+    if (!name || !personId || name === ctx?.name1) continue;
+    const actorId = `world:${personId}`;
     const raw = person.raw || {};
     const ownProfile = profileFields.map(field => typeof raw[field] === 'string' ? raw[field] : '').filter(Boolean).join('\n');
     const cardProfile = cards.flatMap(card => subjectEntries(card, name)).join('\n');
     const profile = [ownProfile, cardProfile].filter(Boolean).join('\n').slice(0, 7000);
     const resolved = inferPhoneGamePronoun({ ...raw, name }, ownProfile) || inferPhoneGamePronoun({ name }, cardProfile);
-    const existing = actors.find(actor => actor.name === name);
+    const existing = actors.find(actor => actor.id === actorId);
     if (existing) { existing.pronoun = resolved || existing.pronoun; existing.phoneNumber ||= clean(raw.phoneNumber || raw.phone_number || raw.mobile || raw.contactChannels?.phone); continue; }
-    if (!clean(person.id)) continue;
-    actors.push({ id: `world:${person.id}`, name, profile, phoneNumber: clean(raw.phoneNumber || raw.phone_number || raw.mobile || raw.contactChannels?.phone), pronoun: resolved });
+    actors.push({ id: actorId, name, profile, phoneNumber: clean(raw.phoneNumber || raw.phone_number || raw.mobile || raw.contactChannels?.phone), pronoun: resolved });
   }
   return actors.slice(0, 12);
 }
 
 export function isPhoneGameScenarioActor(actor, ctx) {
   if (!actor?.id?.startsWith('card:') && !actor?.id?.startsWith('world:')) return false;
+  if (actor.id.startsWith('world:')) return false;
   const cards = ctx?.characters || [];
-  const card = cards.find(card => `card:${card.avatar || card.name || card.data?.name}` === actor.id
-    || clean(card.name || card.data?.name) === actor.name);
+  const card = cards.find((candidate, index) => cardActorId(candidate, ctx, index) === actor.id);
   return card ? isPhoneGameScenarioCard(card) : isPhoneGameScenarioCard({ name: actor.name, description: actor.profile });
 }
