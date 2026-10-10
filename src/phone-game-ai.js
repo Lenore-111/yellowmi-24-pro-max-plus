@@ -137,7 +137,9 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     scopeTimer = globalThis.setInterval(() => {
       if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') operation.cancel('已切换聊天或模式，原互动已保存，可回去重试。');
     }, 250);
-    cleanups.push(subscribePhoneGameModeChange(() => operation.cancel('已切换手机模式，原互动已保存，可回去重试。')));
+    if (typeof subscribePhoneGameModeChange === 'function') {
+      cleanups.push(subscribePhoneGameModeChange(() => operation.cancel('已切换手机模式，原互动已保存，可回去重试。')));
+    }
     if (eventTypes.GENERATION_STARTED && eventSource?.on) {
       const onMainStart = async (type, options, dryRun) => {
         if (!dryRun) {
