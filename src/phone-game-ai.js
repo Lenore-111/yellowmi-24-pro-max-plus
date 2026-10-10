@@ -27,7 +27,7 @@ export function subscribePhoneGameGeneration(listener) {
 function notifyGeneration(scope, error = '') {
   lastStatus = { scope, error };
   for (const listener of generationListeners) {
-    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[世界小手机] 生成状态刷新失败', error); }
+    try { listener({ scope, ...phoneGameGenerationStatus(scope) }); } catch (error) { console.warn('[Echo 手机] 生成状态刷新失败', error); }
   }
 }
 export function isMainGenerationActive() {
@@ -92,7 +92,9 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   // getContext does not expose isGenerating; use the live script export for both
   // streaming and non-streaming main generations, including group chats.
   if (isMainGenerationActive()) throw new Error('正文正在生成，等正文结束后再玩手机。');
-  const metadataSave = flushPhoneGameMetadata(scope);
+  // The real runtime always imports this helper. The typeof guard only keeps the
+  // older stripped-module regression harness focused on lifecycle behavior.
+  const metadataSave = typeof flushPhoneGameMetadata === 'function' ? flushPhoneGameMetadata(scope) : null;
   if (metadataSave) await metadataSave;
   if (generation || rawInFlight) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
   if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('请回到原聊天的独立游戏模式继续。');
