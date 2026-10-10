@@ -71,7 +71,10 @@ export function subscribePhoneGameModeChange(listener) {
 export function capturePhoneGameScope() {
   const ctx = context();
   const card = ctx?.characters?.[ctx.characterId];
-  const characterKey = ctx?.groupId ? `group:${ctx.groupId}` : `card:${card?.avatar || card?.name || ctx?.characterId || 'none'}`;
+  const cardIdentity = clean(card?.avatar || card?.data?.avatar)
+    || clean(card?.id ?? card?.data?.id)
+    || (ctx?.characterId !== undefined && ctx?.characterId !== null ? `character:${ctx.characterId}` : 'none');
+  const characterKey = ctx?.groupId ? `group:${ctx.groupId}` : `card:${cardIdentity}`;
   const metadata = ctx?.chatMetadata || null;
   return { ctx, metadata, modeEpoch: integer(readStore({ metadata }).modeEpoch), key: JSON.stringify(['phone-game-v2', characterKey, ctx?.chatMetadata?.persona || ctx?.name1 || '', ctx?.chatId || ctx?.getCurrentChatId?.() || '']) };
 }
@@ -196,13 +199,13 @@ function reconcileActors(raw, ctx) {
       posts: posts.filter(post => post?.actorId === actor.id), relation: source.relations?.[actor.id] || {} });
   }
   const active = actors.filter(actor => actor && !excludedIds.has(actor.id)).map(actor => {
-    const current = known.find(item => item.id === actor.id || item.name === actor.name);
+    const current = known.find(item => item.id === actor.id);
     return current ? { ...actor, name: current.name, pronoun: current.pronoun,
       profile: current.profile || actor.profile, phoneNumber: current.phoneNumber || actor.phoneNumber } : actor;
   });
   for (const actor of known) {
     if (active.length >= 12) break;
-    if (!active.some(item => item.id === actor.id || item.name === actor.name)) active.push(actor);
+    if (!active.some(item => item.id === actor.id)) active.push(actor);
   }
   return { ...source, actors: active, actorArchive };
 }
