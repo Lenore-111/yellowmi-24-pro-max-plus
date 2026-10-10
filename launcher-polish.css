@@ -1,4 +1,4 @@
-/* Companion to the Backstage orb. These styles affect only the launcher. */
+/* Echo series launcher artwork. These styles affect only the launcher. */
 #world-phone-launcher-layer {
   /* 与手机外壳一样定位到页面主体，避开酒馆手机端根元素的变换。 */
   position: absolute; inset: 0; width: 100%; height: 100vh; height: 100dvh; z-index: 10040;
@@ -10,61 +10,56 @@
   --phone-orb-accent: #9f9ae7;
   --phone-orb-line: #a9a6dc57;
   --phone-orb-notice: #c6aa74;
-  width: 52px; height: 52px; min-height: 52px; display: grid; place-items: center;
-  padding: 0; border: 1px solid var(--phone-orb-line); border-radius: 50%;
-  background: var(--phone-orb-bg); color: var(--phone-orb-accent);
-  box-shadow: 0 10px 26px #080c2030, inset 0 0 12px color-mix(in srgb, var(--phone-orb-accent) 5%, transparent);
-  backdrop-filter: blur(16px); overflow: visible; pointer-events: auto;
+  width: 62px; height: 62px; min-height: 62px; display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 20px;
+  background: transparent; color: var(--phone-orb-accent);
+  box-shadow: none; backdrop-filter: none; overflow: visible; pointer-events: auto;
 }
 #world-phone-launcher:hover {
-  box-shadow: 0 12px 28px #080c2038, 0 0 15px color-mix(in srgb, var(--phone-orb-accent) 15%, transparent);
+  box-shadow: none;
+  filter: drop-shadow(0 10px 18px rgba(91,72,181,.22));
 }
 #world-phone-launcher > .wp-orb-halo,
 #world-phone-launcher > .wp-orb-orbit,
 #world-phone-launcher > .wp-orb-light {
-  position: absolute; width: auto; height: auto; border-radius: 50%;
-  background: none; box-shadow: none; pointer-events: none;
+  display: none;
 }
-#world-phone-launcher > .wp-orb-halo {
-  inset: -8px; border: 1px solid color-mix(in srgb, var(--phone-orb-accent) 20%, transparent);
-  animation: wp-orb-breathe 6.4s ease-in-out infinite;
-}
-#world-phone-launcher > .wp-orb-orbit {
-  inset: 14px 5px; border: 1px solid var(--phone-orb-accent); opacity: .55;
-}
-#world-phone-launcher > .wp-orb-orbit.is-one { transform: rotate(24deg); animation: wp-orb-orbit-one 112s linear infinite; }
-#world-phone-launcher > .wp-orb-orbit.is-two { inset: 13px 7px; transform: rotate(88deg); animation: wp-orb-orbit-two 147s linear infinite; opacity: .4; }
-#world-phone-launcher > .wp-orb-light { inset: 17px; background: var(--phone-orb-accent); opacity: .16; filter: blur(6px); }
 #world-phone-launcher .wp-launcher-phone {
-  position: relative; z-index: 1; width: 24px; height: 30px; border: 0; border-radius: 0;
-  background: none; box-shadow: none; color: var(--phone-orb-accent);
+  position: relative; z-index: 1; display: block;
+  width: 62px; height: 62px; border: 0; border-radius: 0;
+  background: none; box-shadow: none; color: transparent;
+  filter: drop-shadow(0 7px 13px rgba(78,62,163,.20));
 }
 #world-phone-launcher .wp-launcher-phone::before { display: none; }
-#world-phone-launcher .wp-launcher-phone svg { display: block; width: 100%; height: 100%; }
+#world-phone-launcher .wp-launcher-phone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: url('./assets/echo-phone-icon.png') center / contain no-repeat;
+  pointer-events: none;
+}
+#world-phone-launcher .wp-launcher-phone svg,
+#world-phone-launcher .wp-launcher-phone i { display: none; }
 #world-phone-launcher > b {
-  right: 68px; padding: 9px 13px; border: 1px solid var(--phone-orb-line); border-radius: 12px;
+  position: absolute; right: 74px; white-space: nowrap;
+  padding: 9px 13px; border: 1px solid var(--phone-orb-line); border-radius: 12px;
   background: var(--phone-orb-bg); color: var(--phone-orb-accent); font: 500 12px/1.4 system-ui;
   box-shadow: 0 6px 20px #080c2020;
 }
-#world-phone-launcher[data-edge="left"] > b { right: auto; left: 68px; }
+#world-phone-launcher[data-edge="left"] > b { right: auto; left: 74px; }
 #world-phone-launcher .wp-launcher-badge {
   z-index: 3; top: -3px; right: -3px; min-width: 17px; height: 17px;
-  border: 2px solid var(--phone-orb-bg); border-radius: 50%; background: var(--phone-orb-notice);
-  color: var(--phone-orb-bg); box-shadow: 0 0 8px color-mix(in srgb, var(--phone-orb-notice) 25%, transparent);
+  border: 2px solid rgba(255,255,255,.92); border-radius: 50%; background: var(--phone-orb-notice);
+  color: #25223b; box-shadow: 0 0 8px color-mix(in srgb, var(--phone-orb-notice) 25%, transparent);
   font: 700 9px/13px system-ui;
 }
 body:has(#world-phone-stage.is-open:not([hidden])) #world-phone-launcher { opacity: 0; pointer-events: none; }
-body:has(#world-phone-stage.is-open:not([hidden])) #world-phone-launcher > span { animation-play-state: paused; }
-@keyframes wp-orb-breathe { 0%,100% { transform: scale(1); opacity: .7; } 50% { transform: scale(1.035); opacity: 1; } }
-@keyframes wp-orb-orbit-one { from { transform: rotate(24deg); } to { transform: rotate(384deg); } }
-@keyframes wp-orb-orbit-two { from { transform: rotate(88deg); } to { transform: rotate(-272deg); } }
-@media (prefers-reduced-motion: reduce) { #world-phone-launcher > span { animation: none !important; } }
 
 /* Keep a touchable tab at the screen edge while the phone is idle. */
-#world-phone-launcher { transition: left 180ms ease, opacity 180ms ease; }
+#world-phone-launcher { transition: left 180ms ease, opacity 180ms ease, filter 180ms ease; }
 #world-phone-launcher.is-launcher-dragging { transition: none; }
 #world-phone-launcher.is-edge-tucked { opacity: .55; box-shadow: none; overflow: hidden; }
-#world-phone-launcher.is-edge-tucked > .wp-orb-halo,
 #world-phone-launcher.is-edge-tucked > b { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #world-phone-launcher { transition: none; }
