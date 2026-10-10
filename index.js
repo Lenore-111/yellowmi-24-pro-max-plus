@@ -16,6 +16,7 @@ import { mountAppExperienceRealism } from './src/app-experience-realism.js';
 import { mountFlightModeRealism } from './src/flight-mode-realism.js';
 import { loadCustomThemes } from './src/custom-phone-themes.js';
 import { mountShellLayout } from './src/shell-layout.js?v=0.3.0-alpha.27';
+import { mountPhoneAcceptanceGuards } from './src/phone-acceptance-guards.js';
 
 let phone = null;
 let unmountSocialTools = null;
@@ -34,6 +35,7 @@ let unmountInteractionRealism = null;
 let unmountAppExperienceRealism = null;
 let unmountFlightModeRealism = null;
 let unmountShellLayout = null;
+let unmountAcceptanceGuards = null;
 let unbindAppReady = null;
 let initialized = false;
 
@@ -81,6 +83,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-experience-baseline-style', './experience-baseline.css?build=alpha9');
   ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
   phone = mountWorldPhone();
+  unmountAcceptanceGuards = mountPhoneAcceptanceGuards({ phone });
   unmountShellLayout = mountShellLayout({ phone });
   unmountAppStore = mountAppStoreIntegration({ phone });
   unmountLocalWerewolf = mountLocalWerewolfIntegration({ phone });
@@ -173,6 +176,8 @@ export function onDeactivate() {
   unmountAppStore = null;
   unmountShellLayout?.();
   unmountShellLayout = null;
+  unmountAcceptanceGuards?.();
+  unmountAcceptanceGuards = null;
   phone?.destroy?.();
   phone = null;
   initialized = false;
