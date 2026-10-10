@@ -19,9 +19,18 @@ export function mountSocialTools({ phone } = {}) {
     return sheet;
   };
   const runAction = async (sheet, action, payload, done) => {
+    if (!sheet.isConnected || sheet.dataset.actionPending === '1') return;
+    sheet.dataset.actionPending = '1';
     const error = sheet.querySelector('[data-social-error]');
+    if (error) error.textContent = '';
+    const controls = [...sheet.querySelectorAll('button[type="submit"], [data-accept-friend], [data-decline-friend]')];
+    controls.forEach(control => { control.disabled = true; });
     try { const result = await performWorldBackstageSocialAction(action, payload); if (sheet.isConnected) done?.(result); }
     catch (cause) { if (error) error.textContent = cause?.message || '操作失败，请重试'; }
+    finally {
+      delete sheet.dataset.actionPending;
+      controls.forEach(control => { control.disabled = false; });
+    }
   };
   const collections = () => {
     const snapshot = readWorldBackstage();

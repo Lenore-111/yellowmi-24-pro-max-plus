@@ -1,5 +1,12 @@
+import { capturePhoneGameScope, readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.28';
+
 const WORLD_STATE_KEY = 'world_backstage_v1';
 const REQUIRED_PHONE_BRIDGE_VERSION = 2;
+const REQUIRED_PHONE_ACTIONS = Object.freeze([
+  'social-open-direct', 'social-create-group', 'social-respond-friend',
+  'social-comment-moment', 'social-send-message', 'social-read-conversation',
+  'social-set-moment-like',
+]);
 
 function text(value, fallback = '') {
   const result = String(value ?? '').trim();
@@ -219,10 +226,30 @@ function normalizeForums(publicOpinion) {
   })).filter((item) => item.id && item.title);
 }
 
-function emptySnapshot(context = getContext(), host = getHost()) {
+function connectionFailure(context, host, surface) {
+  if (!host) return { status: 'missing', message: '未安装世界背面，请安装推荐配套的正式版。' };
+  if (bridgeVersion(host) < REQUIRED_PHONE_BRIDGE_VERSION) {
+    return { status: 'outdated', message: '世界背面版本过旧，请更新至支持完整第二版手机桥的正式版本。' };
+  }
+  if (typeof host.phoneAction !== 'function' || typeof host.getPhoneSurface !== 'function') {
+    return { status: 'incompatible', message: '世界背面手机桥接口不完整，请更新配套正式版本。' };
+  }
+  if (!context || !surface?.connected) {
+    return { status: 'uninitialized', message: '世界背面尚未初始化当前聊天，手机可以正常使用独立模式。' };
+  }
+  const missing = REQUIRED_PHONE_ACTIONS.filter(action => !list(surface.capabilities).includes(action));
+  if (missing.length) {
+    return { status: 'incompatible', message: '世界背面缺少必要的社交权限，请更新至支持完整第二版手机桥的正式版本。' };
+  }
+  return null;
+}
+
+function emptySnapshot(context = getContext(), host = getHost(), failure = { status: 'disconnected', message: '世界背面暂不可用。' }) {
   return {
     connected: false,
     bridgeConnected: false,
+    connectionStatus: failure.status,
+    connectionMessage: failure.message,
     capabilities: [],
     bridgeVersion: bridgeVersion(host),
     engineVersion: text(host?.version),
@@ -252,7 +279,8 @@ export function readWorldBackstage() {
   const context = getContext();
   const host = getHost();
   const surface = safePhoneSurface(host);
-  if (!context || !surface?.connected) return emptySnapshot(context, host);
+  const failure = connectionFailure(context, host, surface);
+  if (failure) return emptySnapshot(context, host, failure);
 
   const social = surface.social && typeof surface.social === 'object' ? surface.social : {};
   const publicOpinion = surface.publicOpinion && typeof surface.publicOpinion === 'object'
@@ -272,6 +300,8 @@ export function readWorldBackstage() {
   return {
     connected: true,
     bridgeConnected: true,
+    connectionStatus: 'ready',
+    connectionMessage: '',
     capabilities: list(surface.capabilities).filter(item => typeof item === 'string'),
     bridgeVersion: Math.max(bridgeVersion(host), Number(surface.bridgeVersion) || 0),
     engineVersion: text(host?.version),
@@ -311,38 +341,67 @@ function requireHostAction() {
   return host;
 }
 
-export function performWorldBackstageSocialAction(action, payload) {
-  if (!readWorldBackstage().capabilities.includes(action)) throw new Error('请先更新世界背面测试版以使用此功能');
-  const surface = requireHostAction().phoneAction(action, payload);
-  return { snapshot: readWorldBackstage(), conversationId: text(surface?.social?.activeConversationId) };
+function activePhoneScope(snapshot = readWorldBackstage()) {
+  const ctx = getContext();
+  return {
+    metadata: ctx?.chatMetadata ?? ctx?.chat_metadata ?? null,
+    chatId: text(ctx?.chatId ?? ctx?.getCurrentChatId?.()),
+    characterId: text(ctx?.characterId),
+    groupId: text(ctx?.groupId),
+    branchKey: text(snapshot.branchKey),
+    mode: readPhoneGameMode(),
+    identityKey: capturePhoneGameScope().key,
+    modeEpoch: capturePhoneGameScope().modeEpoch,
+  };
 }
 
-export function sendWorldBackstageMessage(conversationId, body) {
+function samePhoneScope(left, right) {
+  return left.metadata === right.metadata && left.chatId === right.chatId
+    && left.characterId === right.characterId && left.groupId === right.groupId
+    && left.branchKey === right.branchKey && left.identityKey === right.identityKey
+    && left.mode === right.mode && left.modeEpoch === right.modeEpoch;
+}
+
+export async function performWorldBackstageSocialAction(action, payload) {
+  const before = readWorldBackstage();
+  if (!before.connected) throw new Error(before.connectionMessage || '世界背面未连接');
+  if (readPhoneGameMode() !== 'world') throw new Error('手机当前处于独立模式，本次操作不会写入世界背面。');
+  if (!before.capabilities.includes(action)) throw new Error('当前世界背面正式版本不支持此操作，请更新推荐配套版本。');
+  const scope = activePhoneScope(before);
+  const host = requireHostAction();
+  const surface = await host.phoneAction(action, payload);
+  const next = readWorldBackstage();
+  if (!samePhoneScope(scope, activePhoneScope(next))) {
+    throw new Error('聊天、角色、分支或手机模式已切换，旧操作结果已丢弃');
+  }
+  if (!next.connected) throw new Error(next.connectionMessage || '世界背面连接已断开');
+  return { snapshot: next, conversationId: text(surface?.social?.activeConversationId) };
+}
+
+export async function sendWorldBackstageMessage(conversationId, body) {
   const id = text(conversationId);
   const content = text(body).slice(0, 1600);
   if (!id) throw new Error('没有找到要发送的会话');
   if (!content) throw new Error('先写点什么再发送');
-  const host = requireHostAction();
-  host.phoneAction('social-send-message', { conversationId: id, text: content });
-  return readWorldBackstage();
+  return (await performWorldBackstageSocialAction('social-send-message', {
+    conversationId: id, text: content,
+  })).snapshot;
 }
 
-export function markWorldBackstageConversationRead(conversationId) {
+export async function markWorldBackstageConversationRead(conversationId) {
   const id = text(conversationId);
-  if (!id) return readWorldBackstage();
-  const host = authorizedHostAction();
-  if (!host) return readWorldBackstage();
-  host.phoneAction('social-read-conversation', { conversationId: id });
-  return readWorldBackstage();
+  if (!id) throw new Error('没有找到要标记已读的会话');
+  return (await performWorldBackstageSocialAction('social-read-conversation', {
+    conversationId: id,
+  })).snapshot;
 }
 
-export function setWorldBackstageMomentLiked(momentId, liked) {
-  const targetId = text(momentId);
-  if (!targetId) return readWorldBackstage();
-  const host = authorizedHostAction();
-  if (!host) return readWorldBackstage();
-  host.phoneAction('social-set-moment-like', { momentId: targetId, liked: Boolean(liked) });
-  return readWorldBackstage();
+export async function setWorldBackstageMomentLiked(momentId, liked) {
+  const id = text(momentId);
+  if (!id) throw new Error('没有找到这条动态');
+  return (await performWorldBackstageSocialAction('social-set-moment-like', {
+    momentId: id, liked: Boolean(liked),
+  })).snapshot;
 }
 
 function snapshotSignature(snapshot) {
@@ -391,6 +450,7 @@ function snapshotSignature(snapshot) {
   return JSON.stringify([
     snapshot.connected,
     snapshot.bridgeConnected,
+    snapshot.connectionStatus,
     snapshot.capabilities,
     snapshot.connections,
     snapshot.engineVersion,

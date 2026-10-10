@@ -7,12 +7,12 @@ import {
 import { renderCasinoApp } from './casino-app.js';
 import { renderWalletApp } from './wallet-app.js';
 import { renderMusicApp } from './music-app.js';
-import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.27';
+import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.28';
 import { renderDeliveryApp } from './lingqi-delivery.js';
-import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope } from './phone-game.js?v=0.3.0-alpha.27';
-import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.27';
-import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.27';
-import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.27';
+import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.28';
+import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.28';
+import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.28';
+import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.28';
 import { findMessageMatches, highlightMessageText } from './message-search.js';
 import {
   DEFAULT_HOME_LAYOUT,
@@ -669,7 +669,18 @@ export function mountWorldPhone() {
   let snapshot = readWorldBackstage();
   const chatScope = () => { const ctx = globalThis.SillyTavern?.getContext?.(); return ctx?.chatMetadata ?? ctx?.chat_metadata ?? null; };
   let scope = chatScope();
+  const worldScopeKey = () => {
+    const ctx = globalThis.SillyTavern?.getContext?.();
+    return JSON.stringify([
+      ctx?.chatId ?? ctx?.getCurrentChatId?.() ?? '',
+      ctx?.characterId ?? '',
+      ctx?.groupId ?? '',
+      readWorldBackstage().branchKey,
+    ]);
+  };
+  let scopeKey = worldScopeKey();
   let gameScope = capturePhoneGameScope().key;
+  let modeEpoch = capturePhoneGameScope().modeEpoch;
   let composing = false;
   let pendingRefresh = false;
   let statusMarkup = '';
@@ -699,14 +710,27 @@ export function mountWorldPhone() {
     paintStatusbar();
   }
 
-  function toggleMomentLike(momentId, liked) {
-    snapshot = setWorldBackstageMomentLiked(momentId, liked);
-    repaintWechat();
+  async function toggleMomentLike(momentId, liked) {
+    try {
+      const next = await setWorldBackstageMomentLiked(momentId, liked);
+      snapshot = next;
+      if (current === 'app:wechat') repaintWechat();
+    } catch (error) {
+      console.warn('[世界小手机] 点赞操作未完成：', error);
+      if (current === 'app:wechat') {
+        const area = screen.querySelector('[data-wx-content]');
+        if (area) area.insertAdjacentHTML('afterbegin', '<p role="alert">点赞失败，请确认世界背面连接和权限后重试。</p>');
+      }
+    }
   }
 
   function repaintWechat() {
     current = 'app:wechat';
+    const sheet = screen.querySelector('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet');
+    const focused = sheet?.contains(document.activeElement) ? document.activeElement : null;
+    sheet?.remove();
     renderWeChat(screen, snapshot, wechatRoute, repaintWechat, showHome, toggleMomentLike);
+    if (sheet) { screen.append(sheet); focused?.focus({ preventScroll: true }); }
     paintStatusbar();
   }
 
@@ -769,19 +793,25 @@ export function mountWorldPhone() {
   function refresh(nextSnapshot = null) {
     const nextScope = chatScope();
     const nextGameScope = capturePhoneGameScope().key;
+    const nextModeEpoch = capturePhoneGameScope().modeEpoch;
+    if (nextModeEpoch !== modeEpoch && current.startsWith('app:') && current !== 'app:settings') current = 'home';
+    modeEpoch = nextModeEpoch;
     if (nextGameScope !== gameScope && screen.querySelector('[data-phone-game-app]')) current = 'home';
     gameScope = nextGameScope;
-    const sameScope = nextScope === scope;
-    if (nextScope !== scope) {
+    const nextScopeKey = worldScopeKey();
+    const sameScope = nextScope === scope && nextScopeKey === scopeKey;
+    if (!sameScope) {
       scope = nextScope;
+      scopeKey = nextScopeKey;
       wechatRoute.conversationId = '';
       wechatRoute.tab = 'chats';
       composing = false;
-      if (screen.querySelector('[data-phone-game-app]') || current === 'app:wechat' || current === 'app:delivery') current = 'home';
+      if (screen.querySelector('[data-phone-game-app]') || ['app:wechat', 'app:delivery', 'app:phone', 'app:messages'].includes(current)) current = 'home';
     }
-    if (composing && current === 'app:wechat') { pendingRefresh = true; return; }
+    if (sameScope && composing && current === 'app:wechat') { pendingRefresh = true; return; }
     snapshot = nextSnapshot || readWorldBackstage();
     const sheet = sameScope ? screen.querySelector('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet') : null;
+    if (!sameScope) screen.querySelectorAll('.wp-social-sheet, .wp-wxr-contact-sheet, .wp-share-sheet').forEach(item => item.remove());
     const focused = sheet?.contains(document.activeElement) ? document.activeElement : null;
     sheet?.remove();
     if (current === 'lock') showLock();
@@ -797,6 +827,7 @@ export function mountWorldPhone() {
 
   function openStage() {
     window.clearTimeout(closeTimer);
+    document.body.append(stage);
     launcher.setAttribute('aria-expanded', 'true');
     refresh();
     stage.hidden = false;
@@ -835,6 +866,7 @@ export function mountWorldPhone() {
   document.addEventListener('keydown', onEscape);
 
   const unsubscribe = subscribeWorldBackstage((next) => refresh(next));
+  const unsubscribeMode = subscribePhoneGameModeChange(() => refresh());
   const clockTimer = window.setInterval(() => {
     if (stage.hidden) return;
     snapshot = readWorldBackstage();
@@ -856,6 +888,7 @@ export function mountWorldPhone() {
     destroy() {
       disposeCurrentApp();
       unsubscribe?.();
+      unsubscribeMode?.();
       window.clearTimeout(closeTimer);
       document.removeEventListener('keydown', onEscape);
       document.removeEventListener('click', onGameAppClick, true);

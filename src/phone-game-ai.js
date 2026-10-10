@@ -5,7 +5,7 @@ import {
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
   subscribePhoneGameModeChange,
   flushPhoneGameMetadata,
-} from './phone-game.js?v=0.3.0-alpha.27';
+} from './phone-game.js?v=0.3.0-alpha.28';
 
 export const PHONE_GAME_GENERATION_TIMEOUT_MS = 60000;
 let generation = null;

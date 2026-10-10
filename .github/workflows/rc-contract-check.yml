@@ -1,0 +1,31 @@
+name: Yellow Mi RC Contract Checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rc-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Phone game regression
+        run: node --import ./scripts/test-host-register.mjs --test tests/*.test.mjs
+      - name: Syntax checks for changed integration paths
+        run: |
+          node --check src/world-backstage-bridge.js
+          node --check src/social-tools.js
+          node --check src/phone-interactions.js
+          node --check src/world-phone.js
+          node --check src/phone-game-communication-view.js
+          node --check src/phone-game.js
+          node --check src/phone-game-ai.js
+          node --check src/phone-acceptance-guards.js
+          node --check src/native-communication-apps.js

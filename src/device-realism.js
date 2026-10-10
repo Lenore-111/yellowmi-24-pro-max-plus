@@ -1,6 +1,6 @@
 import { readWorldBackstage } from './world-backstage-bridge.js';
 
-const VERSION = '0.3.0-alpha.27';
+const VERSION = '0.3.0-alpha.28';
 const KNOWN_KEYS = {
   social: 'world_phone_social_realism_v1',
   utility: 'world_phone_utility_realism_v1',

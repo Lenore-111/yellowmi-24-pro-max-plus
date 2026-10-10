@@ -3,8 +3,8 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   phoneGameDialNumber, phoneGameClock, queuePhoneGameInteraction, startPhoneGameCall, endPhoneGameCall,
   togglePhoneGameContactFavorite, savePhoneGameSmsDraft,
-} from './phone-game.js?v=0.3.0-alpha.27';
-import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.27';
+} from './phone-game.js?v=0.3.0-alpha.28';
+import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
 const outcomes = { dialing:'正在呼叫', connected:'通话中', ended:'已结束', cancelled:'已取消', declined:'对方未接听', unavailable:'未接通' };
@@ -14,6 +14,7 @@ const elapsed = call => {
 };
 
 export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, actorId = '', autoCall = false }) {
+  if (readPhoneGameMode() !== 'game') return () => {};
   const scope = capturePhoneGameScope(), viewId = Math.random().toString(36).slice(2);
   let stopped = false, painted = false, timer = null, paintedRoute = '';
   const first = readPhoneGameState(scope);
@@ -60,7 +61,9 @@ export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, 
   function sendSms() {
     action(() => {
       if (ui.busy || isPhoneGameGenerating()) throw new Error('还有一次手机回应进行中，稍等一下。');
-      const state = readPhoneGameState(scope), contact = state.communications.contacts.find(contact => contact.number === phoneGameDialNumber(ui.number));
+      const state = readPhoneGameState(scope), matches = state.communications.contacts.filter(contact => contact.number === phoneGameDialNumber(ui.number));
+      if (matches.length > 1) throw new Error('这个号码对应多个联系人，请检查角色资料里的号码；短信未发送，草稿已保留。');
+      const contact = matches[0];
       if (!contact) { savePhoneGameSmsDraft('new', ui.draft, scope); throw new Error('这个号码不在当前通讯录中，短信未发送；草稿已保留。'); }
       const { eventId } = queuePhoneGameInteraction({ actorId:contact.actorId, kind:'sms', text:ui.draft }, scope);
       savePhoneGameSmsDraft(contact.actorId, '', scope); savePhoneGameSmsDraft('new', '', scope);
@@ -123,6 +126,11 @@ export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, 
     paintedRoute=route;ui.followReplies=false;
     screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app wpg-communication is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="${thread?'返回短信':'返回桌面'}">‹</button><div><b>${esc(title)}</b><small></small></div><span></span></header><main class="wpg-main${thread?' is-sms':''}${ui.callId && app==='phone'?' is-call':''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-gpc-cancel>停止等待</button></p>' : ''}${app==='phone'?phoneBody(state):smsBody(state)}</main>${app==='phone' && !ui.callId ? `<nav class="wpg-phone-tabs">${[['favorites','收藏'],['recents','最近'],['contacts','通讯录'],['keypad','拨号']].map(([tab,label]) => `<button type="button" data-gpc-tab="${tab}" aria-pressed="${ui.tab===tab}">${gameIcon({favorites:'save',recents:'orders',contacts:'contacts',keypad:'phone'}[tab])}<span>${label}</span></button>`).join('')}</nav>` : ''}</section>`;
     painted = true;
+    const root = screen.querySelector('[data-phone-game-app]');
+    for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener(type, event => {
+      if (current() && screen.querySelector('[data-phone-game-app]') === root) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+    }, true);
     screen.querySelector('[data-gpc-cancel]')?.addEventListener('click',()=>cancelPhoneGameGeneration(scope));
     screen.querySelector('[data-app-back]').onclick = () => {
       if (ui.callId && app==='phone') goHome();
@@ -163,7 +171,7 @@ export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, 
   }
   paint();
   const unsubscribe = subscribePhoneGameGeneration(({ scope: changedScope, busy, error }) => {
-    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || !current()) return;
+    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || changedScope.modeEpoch !== scope.modeEpoch || !current()) return;
     ui.busy = busy; ui.error = error; paint();
   });
   if (app==='phone' && initialContact && autoCall) dial(initialContact.number);

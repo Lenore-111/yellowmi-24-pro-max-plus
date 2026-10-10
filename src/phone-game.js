@@ -1,8 +1,8 @@
 import { DELIVERY_COLA } from './delivery-data.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
-import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.27';
+import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
-export { phoneGameActorPronoun } from './phone-game-actors.js?v=0.3.0-alpha.27';
+export { phoneGameActorPronoun } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
 export const PHONE_GAME_KEY = 'world_phone_game_v1';
 export const PHONE_GAME_GIFTS = Object.freeze([
@@ -37,7 +37,7 @@ function savePhoneMetadata(scope) {
   }
   if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
     metadataSaveTask.pending = true;
-    return;
+    return metadataSaveTask;
   }
   const task = { scope, pending: false };
   metadataSaveTask = task;
@@ -52,16 +52,20 @@ function savePhoneMetadata(scope) {
         if (!sameChat()) return;
         await scope.ctx.saveMetadata();
       } while (task.pending && sameChat());
-    } catch (error) { console.warn('[世界小手机] 手机存档保存失败', error); }
+    } catch (error) {
+      task.error = new Error(`手机存档保存失败：${error?.message || '请稍后重试'}`);
+      console.warn('[Echo 手机] 手机存档保存失败', error);
+    }
     finally { if (metadataSaveTask === task) metadataSaveTask = null; }
   })();
+  return task;
 }
 export function flushPhoneGameMetadata(scope) {
   requireScope(scope);
-  if (metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key) {
-    return metadataSaveTask.promise;
-  }
-  return null;
+  const task = metadataSaveTask?.scope.metadata === scope.metadata && metadataSaveTask.scope.key === scope.key
+    ? metadataSaveTask : savePhoneMetadata(scope);
+  if (!task) return null;
+  return task.promise.then(() => { if (task.error) throw task.error; });
 }
 export function subscribePhoneGameModeChange(listener) {
   modeListeners.add(listener);

@@ -9,8 +9,8 @@ import {
   submitWerewolfAction,
   viewForPlayer,
   WEREWOLF_PHASES,
-} from './werewolf-local-engine.js?v=0.3.0-alpha.27';
-import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, mergeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.27';
+} from './werewolf-local-engine.js?v=0.3.0-alpha.28';
+import { decideLocalWerewolfAi, fallbackLocalWerewolfAiDecision, mergeLocalWerewolfAiMemory } from './werewolf-local-ai.js?v=0.3.0-alpha.28';
 
 export const LOCAL_WEREWOLF_STORAGE_KEY = 'world_phone_werewolf_local_v1';
 export const LOCAL_WEREWOLF_AI_TIMEOUT_MS = 30000;

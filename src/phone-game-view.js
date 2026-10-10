@@ -6,8 +6,8 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameState, readPhoneGameMode,
   queuePhoneGameInteraction, togglePhoneGameLike, startPhoneGameShift, servePhoneGameCoffee,
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
-} from './phone-game.js?v=0.3.0-alpha.27';
-import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.27';
+} from './phone-game.js?v=0.3.0-alpha.28';
+import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const labels = { wechat: '微信', weibo: '微博', rednote: '小红书', wallet: '钱包', delivery: 'Echo快送' };
@@ -143,6 +143,11 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     paintedRoute = route;
     screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header><main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
+    const root = screen.querySelector('[data-phone-game-app]');
+    for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener?.(type, event => {
+      if (current() && screen.querySelector('[data-phone-game-app]') === root) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+    }, true);
     screen.querySelector('[data-pg-cancel]')?.addEventListener('click', () => cancelPhoneGameGeneration(scope));
     screen.querySelectorAll('[data-pg-view]').forEach(button => button.onclick = () => {
       ui.tab = button.dataset.pgView; ui.postId = ''; ui.actorId = ''; ui.contactId = ''; ui.discoveryView = ''; ui.draft = ''; ui.query = '';
@@ -224,7 +229,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   }
   paint();
   const unsubscribe = subscribePhoneGameGeneration(({ scope: changedScope, busy, error }) => {
-    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || !current()) return;
+    if (changedScope.key !== scope.key || changedScope.metadata !== scope.metadata || changedScope.modeEpoch !== scope.modeEpoch || !current()) return;
     ui.busy = busy; ui.error = error;
     paint();
   });

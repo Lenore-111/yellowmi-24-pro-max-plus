@@ -1,21 +1,21 @@
 import { mountSocialTools } from './src/social-tools.js';
-import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.27';
-import { mountPhoneInteractions } from './src/phone-interactions.js?v=0.3.0-alpha.27';
-import { mountNativeCommunicationApps } from './src/native-communication-apps.js?v=0.3.0-alpha.27';
+import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.28';
+import { mountPhoneInteractions } from './src/phone-interactions.js?v=0.3.0-alpha.28';
+import { mountNativeCommunicationApps } from './src/native-communication-apps.js?v=0.3.0-alpha.28';
 import { mountWorldPhoneUpdateManager } from './src/update-manager.js';
-import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.27';
-import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.27';
-import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.27';
-import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.27';
-import { mountDeviceRealism } from './src/device-realism.js?v=0.3.0-alpha.27';
+import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.28';
+import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.28';
+import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.28';
+import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.28';
+import { mountDeviceRealism } from './src/device-realism.js?v=0.3.0-alpha.28';
 import { mountSystemRealism } from './src/system-realism.js';
 import { mountBatteryRealism } from './src/battery-realism.js';
 import { mountAppSwitcherRealism } from './src/app-switcher-realism.js';
-import { mountInteractionRealism } from './src/interaction-realism.js?v=0.3.0-alpha.27';
+import { mountInteractionRealism } from './src/interaction-realism.js?v=0.3.0-alpha.28';
 import { mountAppExperienceRealism } from './src/app-experience-realism.js';
 import { mountFlightModeRealism } from './src/flight-mode-realism.js';
 import { loadCustomThemes } from './src/custom-phone-themes.js';
-import { mountShellLayout } from './src/shell-layout.js?v=0.3.0-alpha.27';
+import { mountShellLayout } from './src/shell-layout.js?v=0.3.0-alpha.28';
 import { mountPhoneAcceptanceGuards } from './src/phone-acceptance-guards.js';
 
 let phone = null;
@@ -100,7 +100,7 @@ function initWorldPhone() {
   unmountSocialTools = mountSocialTools({ phone });
   unmountCommunicationApps = mountNativeCommunicationApps({ phone });
   unmountUpdateManager = mountWorldPhoneUpdateManager();
-  console.info('[Echo 手机] 0.3.0-alpha.27 active · Phone Bridge v2 · SIM + local apps');
+  console.info('[Echo 手机] 0.3.0-alpha.28 active · Phone Bridge v2 · SIM + local apps');
 }
 
 function bindAppReadyRefresh() {
