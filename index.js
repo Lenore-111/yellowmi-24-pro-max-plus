@@ -79,7 +79,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-game-tables-style', './game-tables.css?build=alpha8');
   ensureExternalStyle('world-phone-social-polish-style', './social-polish.css?build=alpha9');
   ensureExternalStyle('world-phone-delivery-style', './delivery.css?build=delivery-v1');
-  ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=edge-tuck-v3');
+  ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=echo-icon-v1');
   ensureExternalStyle('world-phone-experience-baseline-style', './experience-baseline.css?build=alpha9');
   ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
   phone = mountWorldPhone();
