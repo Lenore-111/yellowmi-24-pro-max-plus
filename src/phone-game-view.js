@@ -43,6 +43,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   const scope = capturePhoneGameScope();
   const viewId = Math.random().toString(36).slice(2);
   let paintedRoute = '';
+  let requestPending = false;
   const ui = {
     tab: app === 'weibo' ? 'home' : app === 'rednote' ? 'discover' : 'chats',
     query: '', savedIds: [], actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
@@ -55,11 +56,12 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     paint();
   }
   async function generate(request) {
-    if (ui.busy) return;
+    if (requestPending || ui.busy) return;
+    requestPending = true;
     ui.busy = true; ui.error = ''; ui.info = ''; paint();
     try { await generatePhoneGameContent(request, scope); }
     catch (error) { ui.error = String(error.message || error); }
-    finally { ui.busy = false; if (current()) paint(); }
+    finally { requestPending = false; ui.busy = false; if (current()) paint(); }
   }
   function interact(values, onQueued = null) {
     if (ui.busy || isPhoneGameGenerating()) { ui.error = '还有一次手机生成进行中，稍等一下。'; paint(); return ''; }
@@ -77,7 +79,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     return wechatNested || ui.postId || deliveryNested ? '' : gameNav(app, ui.tab);
   };
   const relation = (state, actor) => state.relations[actor.id];
-  const replyMarkup = event => `<div class="wpg-reply">${event.status === 'replied' ? `<span>${esc(event.reply)}</span><small>熟悉度 ${event.affinityDelta > 0 ? '+' : ''}${event.affinityDelta}</small>` : `<span>等待回应</span><button type="button" data-pg-retry="${esc(event.id)}">重试回应</button>`}</div>`;
+  const replyMarkup = event => `<div class="wpg-reply">${event.status === 'replied' ? `<span>${esc(event.reply)}</span><small>熟悉度 ${event.affinityDelta > 0 ? '+' : ''}${event.affinityDelta}</small>` : `<span>等待回应</span><button type="button" data-pg-retry="${esc(event.id)}" ${ui.busy ? 'disabled' : ''}>${ui.busy ? '等待回应…' : '重试回应'}</button>`}</div>`;
   function postDetail(state, post) {
     if (app === 'rednote') return renderRedNoteGameDetail(state, post, { saved: ui.savedIds.includes(post.id), busy: ui.busy, draft: ui.draft, replyMarkup });
     const comments = state.events.filter(event => event.postId === post.id);
@@ -126,8 +128,8 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   function paint() {
     if (!isPhoneGameScopeCurrent(scope)) return;
     const generationStatus = phoneGameGenerationStatus(scope);
-    ui.busy = generationStatus.busy;
-    if (generationStatus.error && !ui.error) ui.error = generationStatus.error;
+    ui.busy = requestPending || generationStatus.busy;
+    if (!requestPending && generationStatus.error && !ui.error) ui.error = generationStatus.error;
     const state = readPhoneGameState(scope);
     if (ui.actorId && !state.actors.some(actor => actor.id === ui.actorId)) ui.actorId = '';
     if (ui.contactId && !state.actors.some(actor => actor.id === ui.contactId)) ui.contactId = '';
@@ -191,10 +193,11 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     });
     screen.querySelector('[data-pg-delivery-confirm]')?.addEventListener('click', () => {
       const gift = PHONE_GAME_GIFTS.find(item => item.id === ui.deliveryGiftId && item.delivery);
-      if (!gift || !ui.actorId) { ui.error = '先选择商品和收礼角色。'; paint(); return; }
+      const recipient = state.actors.find(item => item.id === ui.actorId) || (!ui.actorId ? state.actors[0] : null);
+      if (!gift || !recipient) { ui.error = '先选择商品和收礼角色。'; paint(); return; }
       const address = ui.deliveryAddress.trim();
       const note = [ui.note.trim(), address ? `配送地址：${address}` : ''].filter(Boolean).join('；');
-      interact({ actorId: ui.actorId, kind: 'gift', giftId: gift.id, note }, eventId => {
+      interact({ actorId: recipient.id, kind: 'gift', giftId: gift.id, note }, eventId => {
         ui.deliveryOrderId = eventId; ui.deliveryView = 'order'; ui.tab = 'chats'; ui.deliveryAddress = '';
       });
     });
