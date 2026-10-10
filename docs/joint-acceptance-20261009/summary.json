@@ -1,0 +1,31 @@
+{
+  "baselineAccepted": false,
+  "amendmentAccepted": true,
+  "amendment": "ed03deff0c4fc19ac88d66b633fab0e90323d024",
+  "social": {
+    "checks": 12,
+    "clicks": 43
+  },
+  "isolation": {
+    "checks": 18,
+    "clicks": 92
+  },
+  "viewports": [
+    [
+      390,
+      844
+    ],
+    [
+      820,
+      1180
+    ],
+    [
+      1440,
+      1000
+    ]
+  ],
+  "pageErrors": 0,
+  "updateRequests": 0,
+  "frozenRefsUnchanged": true,
+  "mainUnchanged": true
+}

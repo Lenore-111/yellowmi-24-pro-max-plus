@@ -1,0 +1,765 @@
+{
+  "fixed": {
+    "yellow": "cc55fc4353c07e4281957552548f7e293d825535",
+    "world": "e11f384c0634316888b9cb9d8da7c0f8ac4ed591",
+    "lab": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+    "sillytavern": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8"
+  },
+  "setup": "isolated ST character and JSONL fixtures via normal server endpoints; genuine plugin hosts",
+  "autoUpdate": false,
+  "clicks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "#rightNavHolder",
+      "at": "2026-10-09T16:00:09.823Z",
+      "state": {
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": ".character_select[data-chid=\"1\"]",
+      "at": "2026-10-09T16:00:10.494Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "#world-phone-launcher",
+      "at": "2026-10-09T16:00:11.205Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-unlock]",
+      "at": "2026-10-09T16:00:11.776Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-home"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app=\"settings\"]",
+      "at": "2026-10-09T16:00:12.632Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-native-app wp-settings-app wp-device-settings"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-game-mode=\"world\"]",
+      "at": "2026-10-09T16:00:12.803Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-settings-app wp-device-settings"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app-back]",
+      "at": "2026-10-09T16:00:15.460Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-home wp-enter-back"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app=\"wechat\"]",
+      "at": "2026-10-09T16:00:16.076Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-enter-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-tab=\"contacts\"]",
+      "at": "2026-10-09T16:00:16.365Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-friends]",
+      "at": "2026-10-09T16:00:16.450Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-accept-friend=\"p3\"]",
+      "at": "2026-10-09T16:00:16.533Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-decline-friend=\"p4\"]",
+      "at": "2026-10-09T16:00:16.684Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-close]",
+      "at": "2026-10-09T16:00:16.841Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-contact-person=\"p2\"]",
+      "at": "2026-10-09T16:00:17.022Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-direct=\"p2\"]",
+      "at": "2026-10-09T16:00:17.112Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-send]",
+      "at": "2026-10-09T16:00:17.548Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-wx-thread-view "
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app-back]",
+      "at": "2026-10-09T16:00:21.278Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-enter-back"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-tab=\"chats\"]",
+      "at": "2026-10-09T16:00:21.597Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-chat=\"direct-p1\"]",
+      "at": "2026-10-09T16:00:21.717Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-wx-thread-view wp-enter-thread"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app-back]",
+      "at": "2026-10-09T16:00:21.947Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-enter-back"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-tab=\"contacts\"]",
+      "at": "2026-10-09T16:00:22.266Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-group]",
+      "at": "2026-10-09T16:00:22.498Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-group-form] button[type=\"submit\"]",
+      "at": "2026-10-09T16:00:22.869Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-send]",
+      "at": "2026-10-09T16:00:23.181Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-wx-thread-view "
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-app-back]",
+      "at": "2026-10-09T16:00:28.370Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-enter-back"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-wx-tab=\"moments\"]",
+      "at": "2026-10-09T16:00:28.782Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-moment-like=\"moment-1\"]",
+      "at": "2026-10-09T16:00:28.863Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-social-comment=\"moment-1\"]",
+      "at": "2026-10-09T16:00:29.046Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "[data-moment-comment-form] button[type=\"submit\"]",
+      "at": "2026-10-09T16:00:29.252Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": "#rightNavHolder",
+      "at": "2026-10-09T16:00:39.802Z",
+      "state": {
+        "branch": "",
+        "epoch": 0,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "selector": ".character_select[data-chid=\"1\"]",
+      "at": "2026-10-09T16:00:40.125Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "#world-phone-launcher",
+      "at": "2026-10-09T16:00:43.048Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-lockscreen"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "[data-unlock]",
+      "at": "2026-10-09T16:00:43.503Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-home"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "[data-app=\"wechat\"]",
+      "at": "2026-10-09T16:00:44.031Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "[data-wx-tab=\"moments\"]",
+      "at": "2026-10-09T16:00:44.238Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "[data-moment-like=\"moment-1\"]",
+      "at": "2026-10-09T16:00:44.305Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "selector": "[data-stage-close]",
+      "at": "2026-10-09T16:00:44.531Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "#world-phone-launcher",
+      "at": "2026-10-09T16:00:45.448Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "[data-app-back]",
+      "at": "2026-10-09T16:00:45.650Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-home wp-enter-back"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "[data-app=\"wechat\"]",
+      "at": "2026-10-09T16:00:46.071Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app wp-enter-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "[data-wx-tab=\"moments\"]",
+      "at": "2026-10-09T16:00:46.452Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "[data-moment-like=\"moment-1\"]",
+      "at": "2026-10-09T16:00:46.583Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    },
+    {
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "selector": "[data-stage-close]",
+      "at": "2026-10-09T16:00:47.767Z",
+      "state": {
+        "chat": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+        "character": "1",
+        "branch": "",
+        "epoch": 1,
+        "screen": "wp-view wp-native-app wp-wx-app"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "真实双插件加载和世界背面连接",
+      "passed": true
+    },
+    {
+      "name": "世界模式 SIM 已插入",
+      "passed": true
+    },
+    {
+      "name": "未读初始为 1",
+      "passed": true
+    },
+    {
+      "name": "好友接受与拒绝已持久化",
+      "passed": true
+    },
+    {
+      "name": "新建私聊与发消息",
+      "passed": true
+    },
+    {
+      "name": "打开会话后未读归零",
+      "passed": true
+    },
+    {
+      "name": "建群与群聊发消息",
+      "passed": true
+    },
+    {
+      "name": "朋友圈点赞与评论",
+      "passed": true
+    },
+    {
+      "name": "刷新保留好友、私聊、群聊、已读、点赞和评论",
+      "passed": true
+    },
+    {
+      "name": "phone 真实点击朋友圈按钮",
+      "passed": true
+    },
+    {
+      "name": "tablet 真实点击朋友圈按钮",
+      "passed": true
+    },
+    {
+      "name": "Yellow Mi 自动更新关闭且没有更新请求",
+      "passed": true
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [],
+  "httpErrors": [
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 500
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 500
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 404
+    }
+  ],
+  "screenshots": [
+    "desktop-connected.png",
+    "desktop-private-message.png",
+    "desktop-group-message.png",
+    "desktop-moment.png",
+    "phone-real-click.png",
+    "tablet-real-click.png"
+  ],
+  "installed": {
+    "yellow": {
+      "sha": "ed03deff0c4fc19ac88d66b633fab0e90323d024",
+      "tree": "b56c70782776b2f4aba0b00e36c109b441bf3206",
+      "dirty": "",
+      "autoUpdate": false
+    },
+    "world": {
+      "sha": "e11f384c0634316888b9cb9d8da7c0f8ac4ed591",
+      "tree": "2f26f07c38daacbb471fe220d99044238f49a6b8",
+      "dirty": ""
+    },
+    "lab": {
+      "sha": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+      "tree": "df7691cdb5767f1949b6b49dff486b9360d17c8d",
+      "dirty": ""
+    },
+    "sillytavern": {
+      "sha": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+      "tree": "0749153cd0ace2ab7e6ac05d9cabc6ffeda78ef1",
+      "dirty": "?? public/lab-font/"
+    }
+  },
+  "scope": "Exact Yellow Mi amendment ed03deff0c4fc19ac88d66b633fab0e90323d024, with frozen World and Lab",
+  "baselineAccepted": false,
+  "startedAt": "2026-10-09T16:00:00.283Z",
+  "updateRequests": [],
+  "finishedAt": "2026-10-09T16:00:47.768Z",
+  "passed": true
+}

@@ -1,0 +1,23 @@
+{
+  "yellow": {
+    "sha": "ed03deff0c4fc19ac88d66b633fab0e90323d024",
+    "tree": "b56c70782776b2f4aba0b00e36c109b441bf3206",
+    "dirty": "",
+    "autoUpdate": false
+  },
+  "world": {
+    "sha": "e11f384c0634316888b9cb9d8da7c0f8ac4ed591",
+    "tree": "2f26f07c38daacbb471fe220d99044238f49a6b8",
+    "dirty": ""
+  },
+  "lab": {
+    "sha": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+    "tree": "df7691cdb5767f1949b6b49dff486b9360d17c8d",
+    "dirty": ""
+  },
+  "sillytavern": {
+    "sha": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+    "tree": "0749153cd0ace2ab7e6ac05d9cabc6ffeda78ef1",
+    "dirty": "?? public/lab-font/"
+  }
+}

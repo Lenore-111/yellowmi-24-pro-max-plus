@@ -1,0 +1,1264 @@
+{
+  "scope": "Exact Yellow Mi amendment ed03deff0c4fc19ac88d66b633fab0e90323d024, with frozen World and Lab",
+  "setup": "normal ST fixture endpoints, genuine two plugins, local deterministic OpenAI-compatible provider for timing only",
+  "checks": [
+    {
+      "name": "世界电话独立页面且没有伪造接通",
+      "passed": true
+    },
+    {
+      "name": "世界短信独立页面且缺少蜂窝能力时不回退生成",
+      "passed": true
+    },
+    {
+      "name": "独立与世界模式快速切换保持正确页面",
+      "passed": true
+    },
+    {
+      "name": "独立通话通过真实酒馆模型链路接通",
+      "passed": true
+    },
+    {
+      "name": "通话进行中切模式结束原通话",
+      "passed": true
+    },
+    {
+      "name": "独立电话没有写入世界社交数据",
+      "passed": true
+    },
+    {
+      "name": "生成前待处理短信已保存到原聊天",
+      "passed": true
+    },
+    {
+      "name": "短信生成中真实切聊天，迟到结果不写入新聊天",
+      "passed": true
+    },
+    {
+      "name": "切聊天后手机回到桌面",
+      "passed": true
+    },
+    {
+      "name": "原聊天短信保持待重试",
+      "passed": true
+    },
+    {
+      "name": "真实切分支后手机返回桌面并读取 B",
+      "passed": true
+    },
+    {
+      "name": "回到 A 恢复原分支消息",
+      "passed": true
+    },
+    {
+      "name": "真实切角色后手机清理旧页面和旧数据",
+      "passed": true
+    },
+    {
+      "name": "正文生成时手机生成被阻止",
+      "passed": true
+    },
+    {
+      "name": "正文开始后手机停止等待，旧结果不落入手机存档",
+      "passed": true
+    },
+    {
+      "name": "手机请求与正文请求没有同时在途",
+      "passed": true
+    },
+    {
+      "name": "通信验收未绕过世界 phoneAction 写入",
+      "passed": true
+    },
+    {
+      "name": "Yellow Mi 自动更新关闭且没有更新请求",
+      "passed": true
+    }
+  ],
+  "saveRequests": [
+    {
+      "at": 1791561679293,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": []
+    },
+    {
+      "at": 1791561680703,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": []
+    },
+    {
+      "at": 1791561683346,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": []
+    },
+    {
+      "at": 1791561684501,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": []
+    },
+    {
+      "at": 1791561685271,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561685387,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561686207,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561687055,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561687858,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561688835,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 1,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561689091,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 1,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561690122,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 1,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561690235,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 1,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561690945,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 1,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561691670,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561691783,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561694163,
+      "file": "LAB 第二聊天",
+      "avatar": "joint-acceptance-A.png",
+      "saves": []
+    },
+    {
+      "at": 1791561696816,
+      "file": "LAB 第二聊天",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 第二聊天\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561699211,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561699747,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561702464,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "world",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561707602,
+      "file": "LAB 联合验收 B - 2026-10-10@00h00m03s455ms",
+      "avatar": "joint-acceptance-B.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-B.png\",\"联调测试员\",\"LAB 联合验收 B - 2026-10-10@00h00m03s455ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561708180,
+      "file": "LAB 联合验收 B - 2026-10-10@00h00m03s455ms",
+      "avatar": "joint-acceptance-B.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-B.png\",\"联调测试员\",\"LAB 联合验收 B - 2026-10-10@00h00m03s455ms\"]",
+          "tick": 0,
+          "events": []
+        }
+      ]
+    },
+    {
+      "at": 1791561712873,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561713217,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561713554,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 2,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561714300,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561714449,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561717301,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561717317,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561718097,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561718367,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 3,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561719503,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 4,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_FIRST",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561719619,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 4,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_FIRST",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561723262,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 4,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_FIRST",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561726990,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 4,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_FIRST",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 1791561727092,
+      "file": "LAB 联合验收 A - 2026-10-10@00h00m03s363ms",
+      "avatar": "joint-acceptance-A.png",
+      "mode": "game",
+      "saves": [
+        {
+          "key": "[\"phone-game-v2\",\"card:joint-acceptance-A.png\",\"联调测试员\",\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+          "tick": 4,
+          "events": [
+            {
+              "text": "我拨打了LAB 联合验收 A的电话。",
+              "status": "replied"
+            },
+            {
+              "text": "ASYNC_LATE_CHAT",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_WHILE_MAIN",
+              "status": "pending"
+            },
+            {
+              "text": "ASYNC_PHONE_FIRST",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "clicks": [
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561678355
+    },
+    {
+      "selector": "#rm_button_characters",
+      "at": 1791561678518
+    },
+    {
+      "selector": ".character_select[data-chid=\"1\"]",
+      "at": 1791561678637
+    },
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561679444
+    },
+    {
+      "selector": "#API-status-top",
+      "at": 1791561679694
+    },
+    {
+      "selector": "#api_button_openai",
+      "at": 1791561679849
+    },
+    {
+      "selector": "#API-status-top",
+      "at": 1791561679947
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561680552
+    },
+    {
+      "selector": "[data-unlock]",
+      "at": 1791561681279
+    },
+    {
+      "selector": "[data-app=\"phone\"]",
+      "at": 1791561681813
+    },
+    {
+      "selector": "[data-phone-tab=\"keypad\"]",
+      "at": 1791561682071
+    },
+    {
+      "selector": "[data-keypad-digit=\"1\"]",
+      "at": 1791561682148
+    },
+    {
+      "selector": "[data-keypad-call]",
+      "at": 1791561682324
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561682584
+    },
+    {
+      "selector": "[data-app=\"messages\"]",
+      "at": 1791561682981
+    },
+    {
+      "selector": "[data-sms-new]",
+      "at": 1791561683067
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561683346
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561684220
+    },
+    {
+      "selector": "[data-game-mode=\"game\"]",
+      "at": 1791561684350
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561684501
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561684850
+    },
+    {
+      "selector": "[data-game-mode=\"world\"]",
+      "at": 1791561685248
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561685387
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561685786
+    },
+    {
+      "selector": "[data-game-mode=\"game\"]",
+      "at": 1791561686169
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561686311
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561686663
+    },
+    {
+      "selector": "[data-game-mode=\"world\"]",
+      "at": 1791561687019
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561687145
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561687463
+    },
+    {
+      "selector": "[data-game-mode=\"game\"]",
+      "at": 1791561687868
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561688011
+    },
+    {
+      "selector": "[data-app=\"phone\"]",
+      "at": 1791561688397
+    },
+    {
+      "selector": "[data-gpc-tab=\"contacts\"]",
+      "at": 1791561688496
+    },
+    {
+      "selector": "first actual call contact",
+      "at": 1791561688836
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561689293
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561689668
+    },
+    {
+      "selector": "[data-game-mode=\"world\"]",
+      "at": 1791561690062
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561690179
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561690562
+    },
+    {
+      "selector": "[data-game-mode=\"game\"]",
+      "at": 1791561690915
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561691012
+    },
+    {
+      "selector": "[data-app=\"messages\"]",
+      "at": 1791561691328
+    },
+    {
+      "selector": "[data-gpc-new]",
+      "at": 1791561691411
+    },
+    {
+      "selector": "[data-gpc-sms-form] button[type=\"submit\"]",
+      "at": 1791561691671
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561691959
+    },
+    {
+      "selector": "#options_button",
+      "at": 1791561692045
+    },
+    {
+      "selector": "#option_select_chat",
+      "at": 1791561692151
+    },
+    {
+      "selector": ".select_chat_block[file_name=\"LAB 第二聊天\"]",
+      "at": 1791561692636
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561696816
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561697144
+    },
+    {
+      "selector": "#options_button",
+      "at": 1791561697281
+    },
+    {
+      "selector": "#option_select_chat",
+      "at": 1791561697466
+    },
+    {
+      "selector": ".select_chat_block[file_name=\"LAB 联合验收 A - 2026-10-10@00h00m03s363ms\"]",
+      "at": 1791561697640
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561699106
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561699311
+    },
+    {
+      "selector": "[data-game-mode=\"world\"]",
+      "at": 1791561699699
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561699798
+    },
+    {
+      "selector": "[data-app=\"wechat\"]",
+      "at": 1791561700175
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561700275
+    },
+    {
+      "selector": ".mes[mesid=\"0\"] .swipe_right",
+      "at": 1791561700502
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561700837
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561701144
+    },
+    {
+      "selector": ".mes[mesid=\"0\"] .swipe_left",
+      "at": 1791561701211
+    },
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561705838
+    },
+    {
+      "selector": "#rm_button_characters",
+      "at": 1791561706298
+    },
+    {
+      "selector": ".character_select[data-chid=\"2\"]",
+      "at": 1791561706531
+    },
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561707137
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561707448
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561708465
+    },
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561711232
+    },
+    {
+      "selector": "#rm_button_characters",
+      "at": 1791561711484
+    },
+    {
+      "selector": ".character_select[data-chid=\"1\"]",
+      "at": 1791561711665
+    },
+    {
+      "selector": "#rightNavHolder",
+      "at": 1791561712114
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561712329
+    },
+    {
+      "selector": "[data-app=\"settings\"]",
+      "at": 1791561712485
+    },
+    {
+      "selector": "[data-game-mode=\"game\"]",
+      "at": 1791561712849
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561712999
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561713181
+    },
+    {
+      "selector": "#send_but",
+      "at": 1791561713476
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561713795
+    },
+    {
+      "selector": "[data-app=\"messages\"]",
+      "at": 1791561713912
+    },
+    {
+      "selector": "[data-gpc-new]",
+      "at": 1791561714012
+    },
+    {
+      "selector": "[data-gpc-sms-form] button[type=\"submit\"]",
+      "at": 1791561714300
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561718480
+    },
+    {
+      "selector": "[data-app-back]",
+      "at": 1791561718846
+    },
+    {
+      "selector": "[data-app=\"messages\"]",
+      "at": 1791561719161
+    },
+    {
+      "selector": "[data-gpc-new]",
+      "at": 1791561719246
+    },
+    {
+      "selector": "[data-gpc-sms-form] button[type=\"submit\"]",
+      "at": 1791561719491
+    },
+    {
+      "selector": "[data-stage-close]",
+      "at": 1791561719749
+    },
+    {
+      "selector": "#send_but",
+      "at": 1791561719950
+    },
+    {
+      "selector": "#world-phone-launcher",
+      "at": 1791561727499
+    }
+  ],
+  "provider": [
+    {
+      "at": 1791561688860,
+      "phone": true,
+      "delay": 100,
+      "tag": "",
+      "closed": true,
+      "respondedAt": 1791561688960,
+      "closedAt": 1791561688961
+    },
+    {
+      "at": 1791561691801,
+      "phone": true,
+      "delay": 3500,
+      "tag": "ASYNC_LATE_CHAT",
+      "closed": true,
+      "closedAt": 1791561692843,
+      "respondedAt": 1791561695301
+    },
+    {
+      "at": 1791561713664,
+      "phone": false,
+      "delay": 3500,
+      "tag": "ASYNC_MAIN_FIRST",
+      "closed": true,
+      "respondedAt": 1791561717167,
+      "closedAt": 1791561717168
+    },
+    {
+      "at": 1791561719643,
+      "phone": true,
+      "delay": 3500,
+      "tag": "ASYNC_PHONE_FIRST",
+      "closed": true,
+      "respondedAt": 1791561723144,
+      "closedAt": 1791561723144
+    },
+    {
+      "at": 1791561723352,
+      "phone": false,
+      "delay": 3500,
+      "tag": "ASYNC_MAIN_FIRST",
+      "closed": true,
+      "respondedAt": 1791561726854,
+      "closedAt": 1791561726854
+    }
+  ],
+  "phoneActions": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "pageErrors": [],
+  "httpErrors": [
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 500
+    },
+    {
+      "url": "http://127.0.0.1:8000/api/extensions/version",
+      "status": 500
+    }
+  ],
+  "screenshots": [
+    "phone-world-cellular-boundary.png",
+    "phone-connected-call.png",
+    "phone-sms-chat-switch.png",
+    "phone-branch-b.png",
+    "phone-character-b.png",
+    "phone-main-generation-boundary.png"
+  ],
+  "installed": {
+    "yellow": {
+      "sha": "ed03deff0c4fc19ac88d66b633fab0e90323d024",
+      "tree": "b56c70782776b2f4aba0b00e36c109b441bf3206",
+      "dirty": "",
+      "autoUpdate": false
+    },
+    "world": {
+      "sha": "e11f384c0634316888b9cb9d8da7c0f8ac4ed591",
+      "tree": "2f26f07c38daacbb471fe220d99044238f49a6b8",
+      "dirty": ""
+    },
+    "lab": {
+      "sha": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+      "tree": "df7691cdb5767f1949b6b49dff486b9360d17c8d",
+      "dirty": ""
+    },
+    "sillytavern": {
+      "sha": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+      "tree": "0749153cd0ace2ab7e6ac05d9cabc6ffeda78ef1",
+      "dirty": "?? public/lab-font/"
+    }
+  },
+  "baselineAccepted": false,
+  "startedAt": "2026-10-09T16:01:08.807Z",
+  "updateRequests": [],
+  "finishedAt": "2026-10-09T16:02:07.647Z",
+  "passed": true
+}
