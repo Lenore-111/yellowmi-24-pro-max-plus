@@ -8,7 +8,6 @@ const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai
 const sources = Object.fromEntries(await Promise.all(paths.map(async path =>
   [path, await readFile(new URL('../' + path, import.meta.url), 'utf8')])));
 
-
 function stripModule(source) {
   return source.replace(/^import[\s\S]*?;\s*/gm, '')
     .replace(/^export\s*\{[^\n]*\}(?:\s+from\s+[^;]+)?;\s*/gm, '')
@@ -56,7 +55,17 @@ function createHarness(sources) {
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,...game},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
   const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
-  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...appUi,...game,...ai}, ['renderPhoneGameApp']);
+  // The regression harness strips ESM imports. UI-closure views are covered by real-browser QA;
+  // these shims keep this existing lifecycle suite focused on the phone-game engine and renderer lifecycle.
+  const uiClosure = {
+    installPhoneGameUiClosureStyles(){},
+    renderRedNoteGameDetail(){ return ''; },
+    renderWechatContacts(){ return ''; },
+    renderWechatDiscovery(){ return ''; },
+    wrapWechatMoments(markup){ return markup; },
+    renderDeliveryGame(){ return ''; },
+  };
+  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...appUi,...uiClosure,...game,...ai}, ['renderPhoneGameApp']);
   const deferred = () => { let resolve,reject; const promise = new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject}; };
   function model(cooperative = true) {
     const task = deferred();
@@ -91,9 +100,7 @@ function createHarness(sources) {
 }
 async function flush() { for(let i=0;i<16;i++) await Promise.resolve(); }
 
-
 test("正文推进、编辑与候选切换不重置手机存档", async () => {
-
 const h=createHarness(sources);const s=h.game.readPhoneGameState();const actor=s.actors[0];
 h.game.startPhoneGameShift(undefined,()=>0);for(let i=0;i<3;i++)h.game.servePhoneGameCoffee(['咖啡','水']);
 const q=h.game.queuePhoneGameInteraction({actorId:actor.id,kind:'gift',giftId:'coffee'});
@@ -106,11 +113,9 @@ for(const sourceKey of ['12:0:new','12:1:swipe','12:1:edited']) {
 }
 h.ctx.chatId='other';assert(h.game.readPhoneGameState().events.length===0,'chat isolation failed');
 h.ctx.chatId='chat-one';h.ctx.name1='另一身份';assert(h.game.readPhoneGameState().events.length===0,'persona isolation failed');
-
 });
 
 test("旧存档恢复完整进度且保留所有原记录", async () => {
-
 const h=createHarness(sources), full=h.game.readPhoneGameState();
 full.tick=8;full.balance=245;full.earned=170;full.posts=[{id:'post',actorId:full.actors[0].id,platform:'weibo',text:'生活记录',tick:8}];
 const reset={...full,tick:0,balance:100,earned:0,posts:[]};
@@ -122,11 +127,9 @@ const migrated=h.game.readPhoneGameState();assert(migrated.balance===245&&migrat
 const saves=h.ctx.chatMetadata[h.game.PHONE_GAME_KEY].saves;assert(Object.keys(saves).length===4&&saves[key].balance===245,'legacy overwritten');
 migrated.balance=888;h.ctx.chatMetadata[h.game.PHONE_GAME_KEY].saves[h.game.capturePhoneGameScope().key]=migrated;
 assert(h.game.readPhoneGameState().balance===888,'stable save replaced');
-
 });
 
 test("超时能重试礼物，余额不会再次扣除", async () => {
-
 const h=createHarness(sources),actor=h.game.readPhoneGameState().actors[0];
 const q=h.game.queuePhoneGameInteraction({actorId:actor.id,kind:'gift',giftId:'coffee'});
 h.model();const pending=h.ai.generatePhoneGameContent({eventId:q.eventId});const caught=pending.catch(e=>e);
@@ -135,11 +138,9 @@ assert(error.message.includes('一分钟'),'timeout missing');assert(!h.ai.isPho
 assert(h.game.readPhoneGameState().balance===75&&h.game.readPhoneGameState().events[0].status==='pending','gift changed');
 h.ctx.generateRaw=async()=>JSON.stringify({text:'谢谢你的咖啡',affinityDelta:2});
 await h.ai.generatePhoneGameContent({eventId:q.eventId});assert(h.game.readPhoneGameState().balance===75&&h.game.readPhoneGameState().events[0].status==='replied','retry charged twice');
-
 });
 
 test("取消后迟到结果不结算、不并发新请求", async () => {
-
 const h=createHarness(sources),actor=h.game.readPhoneGameState().actors[0],q=h.game.queuePhoneGameInteraction({actorId:actor.id,text:'你好'});
 const task=h.model(false),pending=h.ai.generatePhoneGameContent({eventId:q.eventId}),caught=pending.catch(e=>e);
 h.ai.cancelPhoneGameGeneration();await caught;assert(!h.ai.isPhoneGameGenerating(),'UI locked');
@@ -148,11 +149,9 @@ task.resolve(JSON.stringify({text:'迟到的回应',affinityDelta:3}));await flu
 assert(h.game.readPhoneGameState().events[0].status==='pending','late response written');
 h.ctx.generateRaw=async()=>JSON.stringify({text:'重试成功',affinityDelta:1});await h.ai.generatePhoneGameContent({eventId:q.eventId});
 assert(h.game.readPhoneGameState().events[0].reply==='重试成功'&&h.game.readPhoneGameState().relations[actor.id].affinity===1,'duplicate settlement');
-
 });
 
 test("页面重开后自动显示已保存回应，注销后不再刷新", async () => {
-
 const h=createHarness(sources), actorId=h.game.readPhoneGameState().actors[0].id, screen=h.screenMock(),task=h.model();
 const unmountA=h.view.renderPhoneGameApp(screen,{app:'wechat',actorId,goHome(){},openApp(){}});
 screen.querySelector('[data-pg-draft]').input({target:{value:'晚上好'}});
@@ -164,11 +163,9 @@ assert(screen.innerHTML.includes('晚上好，玲')&&!screen.innerHTML.includes(
 unmountB();screen.innerHTML='desktop';
 h.ctx.generateRaw=async()=>JSON.stringify({posts:[{actorId,text:'动态'}]});await h.ai.generatePhoneGameContent({platform:'weibo'});
 assert(screen.innerHTML==='desktop','unmounted view refreshed');
-
 });
 
 test("流式、非流式及群聊正文生成时均不调用手机模型", async () => {
-
 const h=createHarness(sources),actorId=h.game.readPhoneGameState().actors[0].id;let calls=0;
 h.ctx.generateRaw=async()=>{calls++;return JSON.stringify({posts:[{actorId,text:'新动态'}]});};
 for(const kind of ['stream','plain','group','export']) {
@@ -180,11 +177,9 @@ for(const kind of ['stream','plain','group','export']) {
 }
 h.tavern.isGenerating=()=>false;h.ctx.streamingProcessor={isStopped:true};h.groupChats.is_group_generating=false;h.tavern.is_send_press=false;
 await h.ai.generatePhoneGameContent({platform:'weibo'});assert(calls===1,'stopped stream blocks forever');
-
 });
 
 test("切换聊天或手机模式会停止等待并保留原互动", async () => {
-
 for(const modeSwitch of [false,true]) {
  const h=createHarness(sources),actor=h.game.readPhoneGameState().actors[0],q=h.game.queuePhoneGameInteraction({actorId:actor.id,text:'你好'});
  h.model();const pending=h.ai.generatePhoneGameContent({eventId:q.eventId}),caught=pending.catch(e=>e);
@@ -194,11 +189,9 @@ for(const modeSwitch of [false,true]) {
  if(modeSwitch)h.game.setPhoneGameMode('game');else h.ctx.chatId='chat-one';
  assert(h.game.readPhoneGameState().events[0].status==='pending','original event lost');
 }
-
 });
 
 test("正文中途开始时不会向宿主广播停止事件", async () => {
-
 const h=createHarness(sources),actorId=h.game.readPhoneGameState().actors[0].id,task=h.model(false);let stops=0;
 h.ctx.eventSource.on('stopped',()=>stops++);
 const pending=h.ai.generatePhoneGameContent({platform:'weibo'}),caught=pending.catch(e=>e);
@@ -207,5 +200,4 @@ assert(stops===0&&!h.ai.isPhoneGameGenerating()&&h.timers.size===0,'main generat
 task.resolve(JSON.stringify({posts:[{actorId,text:'迟到动态'}]}));await flush();
 assert(h.game.readPhoneGameState().posts.length===0,'late posts written');
 assert((h.handlers.get('started')?.size||0)===0,'main-start listener leaked');
-
 });
