@@ -4,7 +4,7 @@ import {
   sendWorldBackstageMessage,
   subscribeWorldBackstage,
 } from './world-backstage-bridge.js';
-import { readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.27';
+import { readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.28';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -108,7 +108,7 @@ export function mountPhoneInteractions({ phone } = {}) {
     activeConversationId = document.querySelector('#world-phone-stage [data-conversation-id]')?.dataset.conversationId || '';
   };
 
-  const submitActiveCompose = () => {
+  const submitActiveCompose = async () => {
     syncConversation();
     if (sending || !activeConversationId) return;
     const compose = document.querySelector('.wp-wx-thread-view .wp-wx-compose[data-live-compose="1"]');
@@ -120,7 +120,11 @@ export function mountPhoneInteractions({ phone } = {}) {
     sending = true;
     send.disabled = true;
     try {
-      sendWorldBackstageMessage(activeConversationId, body);
+      const sendScope = draftContext;
+      const sentConversationId = activeConversationId;
+      await sendWorldBackstageMessage(sentConversationId, body);
+      syncConversation();
+      if (draftContext !== sendScope || activeConversationId !== sentConversationId) return;
       drafts.delete(activeConversationId);
       input.value = '';
       delete compose.dataset.error;
@@ -178,7 +182,7 @@ export function mountPhoneInteractions({ phone } = {}) {
     const chatButton = event.target?.closest?.('[data-wx-chat]');
     if (chatButton?.dataset?.wxChat) {
       activeConversationId = chatButton.dataset.wxChat;
-      markWorldBackstageConversationRead(activeConversationId);
+      void markWorldBackstageConversationRead(activeConversationId).catch(error => console.warn('[世界小手机] 标记已读失败：', error));
       setTimeout(queueRefresh, 0);
       return;
     }
@@ -186,7 +190,7 @@ export function mountPhoneInteractions({ phone } = {}) {
     const lockNotice = event.target?.closest?.('[data-notice-conversation]');
     if (lockNotice?.dataset?.noticeConversation) {
       activeConversationId = lockNotice.dataset.noticeConversation;
-      markWorldBackstageConversationRead(activeConversationId);
+      void markWorldBackstageConversationRead(activeConversationId).catch(error => console.warn('[世界小手机] 标记已读失败：', error));
       phone?.wakeScreen?.();
       if (phone?.openWechatConversation?.(activeConversationId)) {
         setTimeout(queueRefresh, 0);
@@ -220,7 +224,7 @@ export function mountPhoneInteractions({ phone } = {}) {
   const openConversationHandler = event => {
     if (phone?.openWechatConversation?.(event.detail?.conversationId)) {
       syncConversation();
-      markWorldBackstageConversationRead(activeConversationId);
+      void markWorldBackstageConversationRead(activeConversationId).catch(error => console.warn('[世界小手机] 标记已读失败：', error));
       refreshEnhancements();
     }
   };
@@ -228,7 +232,7 @@ export function mountPhoneInteractions({ phone } = {}) {
   const draftHandler = event => {
     syncConversation();
     if (!activeConversationId || event.detail?.conversationId !== activeConversationId) return;
-    markWorldBackstageConversationRead(activeConversationId);
+    void markWorldBackstageConversationRead(activeConversationId).catch(error => console.warn('[世界小手机] 标记已读失败：', error));
     const previous = drafts.get(activeConversationId) || '';
     drafts.set(activeConversationId, `${previous}${previous ? '\n' : ''}${event.detail.text}`.slice(0, 1600));
     refreshEnhancements();

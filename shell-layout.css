@@ -1,3 +1,7 @@
+#world-phone-stage.wp-stage.is-open {
+  z-index: 2147483647;
+}
+
 #world-phone-stage.wp-stage {
   position: fixed;
   translate: var(--phone-host-scroll-x, 0px) var(--phone-host-scroll-y, 0px);

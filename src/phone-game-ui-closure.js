@@ -1,5 +1,5 @@
 import { gameIcon } from './phone-game-app-ui.js';
-import { phoneGameClock, phoneGameRelationLabel, phoneGameActorPronoun, phoneGameEventDisplayText } from './phone-game.js?v=0.3.0-alpha.27';
+import { phoneGameClock, phoneGameRelationLabel, phoneGameActorPronoun, phoneGameEventDisplayText } from './phone-game.js?v=0.3.0-alpha.28';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
 const avatar = name => `<span class="wpg-avatar">${esc(String(name || '?').slice(0, 1))}</span>`;
