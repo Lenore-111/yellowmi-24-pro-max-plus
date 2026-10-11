@@ -8,6 +8,8 @@ import {
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
 } from './phone-game.js?v=0.3.0-alpha.28';
 import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
+import { phonePostImageStatus, subscribePhonePostImages, generatePhonePostImage, cancelPhonePostImage } from './phone-post-images.js';
+import { installPhoneImageStyles, openPhoneImageSheet, savePostImageToAlbum } from './phone-image-view.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const labels = { wechat: '微信', weibo: '微博', rednote: '小红书', wallet: '钱包', delivery: 'Echo快送' };
@@ -40,6 +42,7 @@ function exportSheet(screen, state, eventId, scope) {
 
 export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' }) {
   installPhoneGameUiClosureStyles();
+  installPhoneImageStyles();
   const scope = capturePhoneGameScope();
   const viewId = Math.random().toString(36).slice(2);
   let paintedRoute = '';
@@ -47,7 +50,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   const ui = {
     tab: app === 'weibo' ? 'home' : app === 'rednote' ? 'discover' : 'chats',
     query: '', savedIds: [], actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
-    contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '',
+    contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '', imageBusy: false,
   };
   try { ui.savedIds = JSON.parse(globalThis.localStorage?.getItem('echo_phone_saved:' + scope.key) || '[]'); if (!Array.isArray(ui.savedIds)) ui.savedIds = []; } catch {}
   function current() { return isPhoneGameScopeCurrent(scope) && readPhoneGameMode() === 'game' && screen.querySelector('[data-phone-game-app]')?.dataset.phoneGameView === viewId; }
@@ -81,12 +84,12 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   const relation = (state, actor) => state.relations[actor.id];
   const replyMarkup = event => `<div class="wpg-reply">${event.status === 'replied' ? `<span>${esc(event.reply)}</span><small>熟悉度 ${event.affinityDelta > 0 ? '+' : ''}${event.affinityDelta}</small>` : `<span>等待回应</span><button type="button" data-pg-retry="${esc(event.id)}" ${ui.busy ? 'disabled' : ''}>${ui.busy ? '等待回应…' : '重试回应'}</button>`}</div>`;
   function postDetail(state, post) {
-    if (app === 'rednote') return renderRedNoteGameDetail(state, post, { saved: ui.savedIds.includes(post.id), busy: ui.busy, draft: ui.draft, replyMarkup });
+    if (app === 'rednote') return renderRedNoteGameDetail(state, post, { saved: ui.savedIds.includes(post.id), busy: ui.busy, imageBusy: ui.imageBusy, draft: ui.draft, replyMarkup });
     const comments = state.events.filter(event => event.postId === post.id);
     return `<button type="button" class="wpg-text-button" data-pg-post-back>‹ 返回动态</button>${postCard(state, post, true)}<section class="wpg-comments"><h3>评论</h3>${comments.map(event => `<article><b>${esc(state.user)}</b><p>${esc(event.text)}</p>${replyMarkup(event)}<button type="button" class="wpg-text-button" data-pg-export="${esc(event.id)}">带入正文…</button></article>`).join('') || '<p>留一句话，开始这段互动。</p>'}</section><form data-pg-comment class="wpg-compose"><textarea maxlength="1200" aria-label="评论内容" data-pg-draft ${ui.busy ? 'readonly' : ''} placeholder="给${esc(phoneGameActorPronoun(state.actors.find(actor => actor.id === post.actorId)))}留一句话">${esc(ui.draft)}</textarea><button type="submit" ${ui.busy ? 'disabled' : ''}>评论</button></form>`;
   }
   function postCard(state, post, detail = false) {
-    return gamePost(state, post, app, ui.savedIds.includes(post.id), detail, phoneGameClock({ tick: post.tick }));
+    return gamePost(state, post, app, ui.savedIds.includes(post.id), detail, phoneGameClock({ tick: post.tick }), ui.imageBusy);
   }
   function feed(state, platform) {
     const selected = state.posts.find(post => post.id === ui.postId && post.platform === platform);
@@ -128,6 +131,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   function paint() {
     if (!isPhoneGameScopeCurrent(scope)) return;
     const generationStatus = phoneGameGenerationStatus(scope);
+    ui.imageBusy = phonePostImageStatus().busy;
     ui.busy = requestPending || generationStatus.busy;
     if (!requestPending && generationStatus.error && !ui.error) ui.error = generationStatus.error;
     const state = readPhoneGameState(scope);
@@ -143,7 +147,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     const scrollTop = keepPosition ? screen.querySelector('.wpg-main')?.scrollTop || 0 : 0;
     const recipeOpen = keepPosition && Boolean(screen.querySelector('.wpg-coffee details')?.open);
     paintedRoute = route;
-    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header><main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
+    const picture = phonePostImageStatus();
+    const pictureHere = picture.busy && picture.scope.key === scope.key && picture.scope.metadata === scope.metadata && picture.scope.modeEpoch === scope.modeEpoch;
+    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header><main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${pictureHere ? '<p class="wpg-generating" role="status">配图生成中… <button type="button" data-pg-image-cancel>取消配图</button></p>' : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
     const root = screen.querySelector('[data-phone-game-app]');
     for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener?.(type, event => {
@@ -151,6 +157,23 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
       event.preventDefault(); event.stopImmediatePropagation();
     }, true);
     screen.querySelector('[data-pg-cancel]')?.addEventListener('click', () => cancelPhoneGameGeneration(scope));
+    screen.querySelector('[data-pg-image-cancel]')?.addEventListener('click', cancelPhonePostImage);
+    screen.querySelectorAll('[data-pg-image]').forEach(button => button.onclick = () => {
+      const post = state.posts.find(item => item.id === button.dataset.pgImage);
+      if (!post) return;
+      openPhoneImageSheet(screen, state, post, { settings: () => openApp('image-settings'), generate: async prompt => {
+        ui.error = ''; ui.info = '';
+        try { await generatePhonePostImage(post.id, prompt, scope); ui.info = '配图已保存。'; }
+        catch (error) { ui.error = error.message; }
+        finally { if (current()) paint(); }
+      } });
+    });
+    screen.querySelectorAll('[data-pg-image-album]').forEach(button => button.onclick = async () => {
+      button.disabled = true;
+      try { await savePostImageToAlbum(state.posts.find(item => item.id === button.dataset.pgImageAlbum)); ui.info = '已保存到本机相册。'; }
+      catch (error) { ui.error = error.message; }
+      finally { if (current()) paint(); }
+    });
     screen.querySelectorAll('[data-pg-view]').forEach(button => button.onclick = () => {
       ui.tab = button.dataset.pgView; ui.postId = ''; ui.actorId = ''; ui.contactId = ''; ui.discoveryView = ''; ui.draft = ''; ui.query = '';
       if (app === 'delivery') { ui.deliveryView = ui.tab === 'orders' ? 'orders' : 'home'; ui.deliveryOrderId = ''; }
@@ -236,5 +259,6 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     ui.busy = busy; ui.error = error;
     paint();
   });
-  return unsubscribe;
+  const unsubscribeImages = subscribePhonePostImages(() => { if (current()) paint(); });
+  return () => { unsubscribe(); unsubscribeImages(); };
 }

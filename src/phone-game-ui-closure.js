@@ -1,4 +1,5 @@
-import { gameIcon } from './phone-game-app-ui.js';
+import { gameIcon, gameImageControls } from './phone-game-app-ui.js';
+import { phoneImagePath } from './phone-image-paths.js';
 import { phoneGameClock, phoneGameRelationLabel, phoneGameActorPronoun, phoneGameEventDisplayText } from './phone-game.js?v=0.3.0-alpha.28';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
@@ -48,18 +49,18 @@ function postTags(post) {
   return post.mood ? [String(post.mood).trim()].filter(Boolean) : [];
 }
 
-export function renderRedNoteGameDetail(state, post, { saved = false, busy = false, draft = '', replyMarkup = () => '' } = {}) {
+export function renderRedNoteGameDetail(state, post, { saved = false, busy = false, imageBusy = false, draft = '', replyMarkup = () => '' } = {}) {
   const actor = state.actors.find(item => item.id === post.actorId);
   const name = actor?.name || '角色';
   const comments = state.events.filter(event => event.postId === post.id);
-  const images = Array.isArray(post.imageUrls) ? post.imageUrls.filter(Boolean) : post.imageUrl ? [post.imageUrl] : [];
+  const images = [phoneImagePath(post.imageUrl)].filter(Boolean);
   const media = images.length
     ? `<div class="echo-rn-gallery" aria-label="笔记媒体，共${images.length}张">${images.map((src, index) => `<figure><img src="${esc(src)}" alt="${esc(post.title || '笔记配图')} ${index + 1}/${images.length}" loading="${index ? 'lazy' : 'eager'}" decoding="async"></figure>`).join('')}</div>`
     : `<div class="echo-rn-detail-cover"><span>生活记录</span><b>${esc(post.title || post.text.slice(0, 64) || '一条生活笔记')}</b><small>${esc(post.mood || '')}</small></div>`;
   const tags = postTags(post);
   return `<section class="echo-rn-detail">
     <header class="echo-rn-detail-top"><button type="button" data-pg-post-back aria-label="返回发现">‹</button>${avatar(name)}<div><b>${esc(name)}</b><small>${esc(phoneGameClock({ tick: post.tick }))}</small></div><button type="button" data-pg-chat="${esc(post.actorId)}" aria-label="私信${esc(name)}">···</button></header>
-    <div class="echo-rn-detail-scroll">${media}<article class="echo-rn-detail-copy"><h2>${esc(post.title || '生活记录')}</h2><p>${esc(post.text)}</p>${tags.length ? `<div class="echo-rn-tags">${tags.map(tag => `<span># ${esc(tag)}</span>`).join('')}</div>` : '<div class="echo-rn-tags" aria-label="暂无标签"></div>'}</article>
+    <div class="echo-rn-detail-scroll">${media}<article class="echo-rn-detail-copy"><h2>${esc(post.title || '生活记录')}</h2><p>${esc(post.text)}</p>${gameImageControls(post,imageBusy)}${tags.length ? `<div class="echo-rn-tags">${tags.map(tag => `<span># ${esc(tag)}</span>`).join('')}</div>` : '<div class="echo-rn-tags" aria-label="暂无标签"></div>'}</article>
     <section class="echo-rn-comments" id="echo-rn-comments"><header><b>评论</b><span>${comments.length}</span></header>${comments.length ? comments.map(event => `<article class="echo-rn-comment"><b>${esc(state.user)}</b><p>${esc(event.text)}</p>${replyMarkup(event)}<button type="button" class="wpg-text-button" data-pg-export="${esc(event.id)}">带入正文…</button></article>`).join('') : '<div class="echo-feed-empty"><b>还没有评论</b><p>留一句话，开始这段互动。</p></div>'}<form data-pg-comment class="echo-rn-comment-compose"><textarea rows="1" maxlength="1200" aria-label="评论内容" data-pg-draft ${busy ? 'readonly' : ''} placeholder="给${esc(phoneGameActorPronoun(actor))}留一句话">${esc(draft)}</textarea><button type="submit" ${busy ? 'disabled' : ''}>评论</button></form></section></div>
     <footer class="echo-rn-detail-actions"><button type="button" class="echo-rn-comment-jump" data-pg-comment-focus>写评论…</button><button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}" aria-label="${post.liked ? '取消点赞' : '点赞'}">${gameIcon('heart')}</button><button type="button" data-pg-save="${esc(post.id)}" aria-pressed="${saved}" aria-label="${saved ? '取消收藏' : '收藏'}">${gameIcon('save')}</button></footer>
   </section>`;

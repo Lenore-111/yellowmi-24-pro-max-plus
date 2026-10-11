@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { phoneImagePath } from '../src/phone-image-paths.js';
 
 // Run the actual module bodies with an isolated SillyTavern host, controllable
 // model promises and virtual time. No browser or model credentials are needed.
@@ -48,13 +49,13 @@ function createHarness(sources) {
     localStorage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)},
   };
   const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
-  const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors},
+  const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,phoneImagePath,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
      'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
-  const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,...game},
+  const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,readPhoneImageSettings:()=>({}),...game},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
-  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
+  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {phoneImagePath}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
   // The regression harness strips ESM imports. UI-closure views are covered by real-browser QA;
   // these shims keep this existing lifecycle suite focused on the phone-game engine and renderer lifecycle.
   const uiClosure = {
@@ -65,7 +66,8 @@ function createHarness(sources) {
     wrapWechatMoments(markup){ return markup; },
     renderDeliveryGame(){ return ''; },
   };
-  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...appUi,...uiClosure,...game,...ai}, ['renderPhoneGameApp']);
+  const imageUi = { installPhoneImageStyles(){}, phonePostImageStatus:()=>({busy:false}), subscribePhonePostImages:()=>()=>{}, openPhoneImageSheet(){}, cancelPhonePostImage(){} };
+  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...imageUi,...appUi,...uiClosure,...game,...ai}, ['renderPhoneGameApp']);
   const deferred = () => { let resolve,reject; const promise = new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject}; };
   function model(cooperative = true) {
     const task = deferred();

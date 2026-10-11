@@ -1,4 +1,5 @@
 import { DELIVERY_COLA } from './delivery-data.js';
+import { phoneImagePath } from './phone-image-paths.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
 import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
@@ -173,7 +174,8 @@ export function normalizePhoneGameState(raw) {
       affinityDelta: integer(event.affinityDelta, -3, 3) }));
   const posts = (Array.isArray(source.posts) ? source.posts : []).filter(post => post && actorIds.has(post.actorId) && platforms.includes(post.platform)).slice(-80)
     .map(post => ({ id: clean(post.id, 100), actorId: post.actorId, platform: post.platform, title: clean(post.title, 80), text: clean(post.text, 1000),
-      liked: Boolean(post.liked), tick: integer(post.tick), mood: clean(post.mood, 40) }));
+      liked: Boolean(post.liked), tick: integer(post.tick), mood: clean(post.mood, 40),
+      imageUrl: phoneImagePath(post.imageUrl), imagePrompt: clean(post.imagePrompt, 6000) }));
   const relations = Object.fromEntries(actors.map(actor => {
     const value = Object.hasOwn(source.relations || {}, actor.id) ? source.relations[actor.id] : {};
     return [actor.id, { affinity: integer(value?.affinity, 0, 100), memory: clean(value?.memory, 4000),
@@ -377,7 +379,17 @@ export function applyPhoneGamePosts(platform, responses, scope = capturePhoneGam
     const posts = (Array.isArray(responses) ? responses : []).filter(item => item && state.actors.some(actor => actor.id === item.actorId) && typeof item.text === 'string' && clean(item.text)).slice(0, 4);
     if (!posts.length) throw new Error('没有收到有效动态，请重试');
     state.tick += 1;
-    state.posts.push(...posts.map(item => ({ id: id(), actorId: item.actorId, platform, title: clean(item.title, 80), text: clean(item.text, 1000), mood: clean(item.mood, 40), tick: state.tick, liked: false })));
+    state.posts.push(...posts.map(item => ({ id: id(), actorId: item.actorId, platform, title: clean(item.title, 80), text: clean(item.text, 1000), mood: clean(item.mood, 40), imagePrompt: clean(item.imagePrompt, 6000), tick: state.tick, liked: false })));
+  });
+}
+export function attachPhoneGameImage(postId, imageUrl, prompt, scope = capturePhoneGameScope()) {
+  if (readPhoneGameMode() !== 'game') throw new Error('请回到独立手机模式后配图。');
+  const path = phoneImagePath(imageUrl);
+  if (!path) throw new Error('图片地址无效。');
+  return commit(scope, state => {
+    const post = state.posts.find(item => item.id === postId);
+    if (!post) throw new Error('这条动态已不存在。');
+    post.imageUrl = path; post.imagePrompt = clean(prompt, 6000);
   });
 }
 export function startPhoneGameShift(scope = capturePhoneGameScope(), rng = Math.random) {

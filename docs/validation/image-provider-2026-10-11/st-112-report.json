@@ -1,0 +1,176 @@
+{
+  "mode": "image-sillytavern-112",
+  "hostName": "sillytavern-112",
+  "host": {
+    "contextGenerator": "undefined",
+    "exportedGenerator": "function",
+    "fixedCode": false,
+    "onlineStatus": "Valid",
+    "character": "Feed QA"
+  },
+  "checks": [
+    {
+      "action": "configure-user-provider-and-select-model",
+      "settings": {
+        "baseUrl": "http://127.0.0.1:8001/v1",
+        "model": "fixture-image",
+        "size": "",
+        "style": "简洁插画",
+        "transport": "direct",
+        "credentialId": "1b5c2e52-c4b9-4085-8fd5-6a224ebfcba7",
+        "rememberKey": true
+      }
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "weibo",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "media": "/user/files/world-phone-image-4bced958-eb47-445b-87db-92d6db339bae.png"
+    },
+    {
+      "action": "save-image-to-album"
+    },
+    {
+      "action": "failure-preserves-image",
+      "same": true,
+      "error": [
+        "生图站点请求失败（HTTP 500），请检查接口和模型，稍后重试。"
+      ]
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "rednote",
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "media": "/user/files/world-phone-image-2817885c-8b9f-4795-b51c-5e381c470dd0.png"
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "moments",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "media": "/user/files/world-phone-image-2f69419f-6f4c-427e-9ce8-0f7bb4a816f2.png"
+    },
+    {
+      "action": "tavern-proxy-generation",
+      "image": "/user/files/world-phone-image-b2cabc75-47b5-4ed9-8a86-f6960105211a.png"
+    },
+    {
+      "action": "rapid-mode-switch-discards-late-image",
+      "same": true
+    },
+    {
+      "action": "switch-character-discards-late-image",
+      "same": true
+    },
+    {
+      "action": "return-to-original-character-preserves-media",
+      "same": true
+    },
+    {
+      "action": "reload-restores-media-and-config",
+      "images": 3,
+      "model": "fixture-image",
+      "metadataHasKey": false
+    },
+    {
+      "action": "remembered-device-key-works-after-reload",
+      "image": "/user/files/world-phone-image-232e8ef1-4db1-435b-870d-e646e9e9f1d7.png"
+    }
+  ],
+  "requests": [
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "weibo 配图实测",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "失败保留原图",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "rednote 配图实测",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/result.png?signature=fixture-signed",
+      "authorizationPresent": false
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "moments 配图实测",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "酒馆代理配图",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/result.png?signature=fixture-signed",
+      "authorizationPresent": false
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "酒馆代理配图",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "酒馆代理配图",
+        "n": 1
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "刷新后的密钥验证",
+        "n": 1
+      },
+      "authorizationPresent": true
+    }
+  ],
+  "errors": [
+    "500 http://127.0.0.1:8001/v1/images/generations",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "500 http://127.0.0.1:8000/api/extensions/version",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ]
+}
