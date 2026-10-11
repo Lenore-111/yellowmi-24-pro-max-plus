@@ -1,0 +1,146 @@
+[
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "before": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "after": {
+      "checked": true,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "textTap": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\" style=\"\">"
+    },
+    "persistence": {
+      "keyboardToggle": true,
+      "manualPaste": true,
+      "restored": true,
+      "rememberedKeyPresent": true,
+      "secretInSettings": false,
+      "cleared": true
+    },
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 820,
+      "height": 1180
+    },
+    "before": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "after": {
+      "checked": true,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "textTap": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\" style=\"\">"
+    },
+    "persistence": {
+      "keyboardToggle": true,
+      "manualPaste": true,
+      "restored": true,
+      "rememberedKeyPresent": true,
+      "secretInSettings": false,
+      "cleared": true
+    },
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "before": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "after": {
+      "checked": true,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\">"
+    },
+    "textTap": {
+      "checked": false,
+      "appearance": "auto",
+      "background": "rgb(220, 220, 210)",
+      "width": 22,
+      "height": 22,
+      "padding": "0px",
+      "tickColor": "rgb(0, 0, 0) 15px 15px 0px 0px inset",
+      "tickTransform": "none",
+      "hit": "<input type=\"checkbox\" data-image-remember=\"\" checked=\"\" style=\"\">"
+    },
+    "persistence": {
+      "keyboardToggle": true,
+      "manualPaste": true,
+      "restored": true,
+      "rememberedKeyPresent": true,
+      "secretInSettings": false,
+      "cleared": true
+    },
+    "errors": []
+  }
+]
