@@ -74,7 +74,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-battery-realism-style', './battery-realism.css?build=battery-realism-v1');
   ensureExternalStyle('world-phone-app-switcher-realism-style', './app-switcher-realism.css?build=interaction-realism-v1');
   ensureExternalStyle('world-phone-interaction-realism-style', './interaction-realism.css?build=interaction-realism-v2');
-  ensureExternalStyle('world-phone-shell-layout-style', './shell-layout.css?build=shell-layout-v2');
+  ensureExternalStyle('world-phone-shell-layout-style', './shell-layout.css?build=shell-layout-v3');
   ensureExternalStyle('world-phone-pocket-experience-style', './pocket-experience.css?build=alpha8');
   ensureExternalStyle('world-phone-game-tables-style', './game-tables.css?build=alpha8');
   ensureExternalStyle('world-phone-social-polish-style', './social-polish.css?build=alpha9');

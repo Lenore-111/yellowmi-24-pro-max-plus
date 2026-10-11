@@ -96,29 +96,32 @@
   background: rgba(255,255,255,.72);
 }
 
-/* Settings is a real vertical layout now. The old absolute body started at
-   162px and overlapped the profile card, which is why the top user block was
-   visibly clipped. */
-#world-phone-stage .wp-device-settings {
+/* 设置内容统一滚动，避免固定区域挤压电池与设备列表。 */
+#world-phone-stage .wp-settings-app {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-#world-phone-stage .wp-device-settings .wp-app-header {
+#world-phone-stage .wp-settings-app .wp-app-header {
   flex: 0 0 56px;
 }
 
-#world-phone-stage .wp-device-settings .wp-device-profile {
-  flex: 0 0 auto;
+#world-phone-stage .wp-settings-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 12px calc(36px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 #world-phone-stage .wp-device-settings .wp-device-settings-body {
-  position: relative;
+  position: static;
   inset: auto;
-  flex: 1 1 auto;
+  flex: none;
   min-height: 0;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 #world-phone-stage .wp-device-settings .wp-settings-foot {

@@ -581,6 +581,7 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
   screen.innerHTML = `
     <section class="wp-view wp-native-app wp-settings-app">
       ${renderAppHeader('设置', 'Echo 手机')}
+      <div class="wp-settings-content" data-settings-scroll>
       <div class="wp-settings-hero"><div class="wp-settings-device">Echo 手机</div><p>REAL PHONE SHELL · WORLD BACKSTAGE SIM</p></div>
       <div class="wpg-mode-settings">
         <b>手机玩法</b>
@@ -610,6 +611,7 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
         </button>
       </div>
       <div class="wp-settings-foot">World Phone · Alpha</div>
+      </div>
     </section>
   `;
   screen.querySelector('[data-app-back]')?.addEventListener('click', goHome);
