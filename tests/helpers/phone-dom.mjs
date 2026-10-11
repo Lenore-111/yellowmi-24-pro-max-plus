@@ -83,6 +83,7 @@ export class PhoneNode {
   focus() { if (globalThis.document) document.activeElement = this; }
   select() { this.selected = true; }
   scrollTo(_x, top) { this.scrollTop = top; }
+  scrollIntoView(options) { this.scrollIntoViewOptions = options; }
   getBoundingClientRect() { return this.rect || { left: 0, top: 0, width: 390, height: 844, right: 390, bottom: 844 }; }
   setPointerCapture(id) { this.capture = id; }
   releasePointerCapture() { this.capture = null; }

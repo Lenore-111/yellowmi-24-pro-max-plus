@@ -1,0 +1,71 @@
+{
+  "phase": "before",
+  "host": "sillytavern",
+  "reports": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 640
+      },
+      "dimensions": {
+        ".wp-settings-app": {
+          "top": 0,
+          "bottom": 640,
+          "height": 640,
+          "clientHeight": 640,
+          "scrollHeight": 661,
+          "overflow": "hidden"
+        },
+        ".wp-device-settings-body": {
+          "top": 426.1875,
+          "bottom": 444.1875,
+          "height": 18,
+          "clientHeight": 18,
+          "scrollHeight": 1117,
+          "overflow": "auto"
+        },
+        "[data-battery-settings-group]": {
+          "top": 426.1875,
+          "bottom": 549.1875,
+          "height": 123,
+          "clientHeight": 123,
+          "scrollHeight": 123,
+          "overflow": "visible"
+        },
+        "[data-image-settings-open]": {
+          "top": 480.1875,
+          "bottom": 534.1875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        },
+        "[data-reset-home]": {
+          "top": 570.1875,
+          "bottom": 624.1875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        }
+      },
+      "keyType": null,
+      "feedback": {
+        "text": "生图站点请求失败（HTTP 502），请检查接口和模型，稍后重试。",
+        "top": -10418,
+        "mainTop": 90,
+        "inViewport": false
+      },
+      "requests": [
+        {
+          "path": "/ai/generate-image",
+          "keyMatches": true,
+          "model": "nai-diffusion-4-5-full",
+          "steps": 28,
+          "samples": 1
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

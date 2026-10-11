@@ -50,7 +50,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   const ui = {
     tab: app === 'weibo' ? 'home' : app === 'rednote' ? 'discover' : 'chats',
     query: '', savedIds: [], actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
-    contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '', imageBusy: false,
+    contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '', imageBusy: false, imageFeedback: '', imageFailed: false,
   };
   try { ui.savedIds = JSON.parse(globalThis.localStorage?.getItem('echo_phone_saved:' + scope.key) || '[]'); if (!Array.isArray(ui.savedIds)) ui.savedIds = []; } catch {}
   function current() { return isPhoneGameScopeCurrent(scope) && readPhoneGameMode() === 'game' && screen.querySelector('[data-phone-game-app]')?.dataset.phoneGameView === viewId; }
@@ -149,7 +149,8 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     paintedRoute = route;
     const picture = phonePostImageStatus();
     const pictureHere = picture.busy && picture.scope.key === scope.key && picture.scope.metadata === scope.metadata && picture.scope.modeEpoch === scope.modeEpoch;
-    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header><main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${pictureHere ? '<p class="wpg-generating" role="status">配图生成中… <button type="button" data-pg-image-cancel>取消配图</button></p>' : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
+    const imageNotice = pictureHere || ui.imageFeedback ? `<div class="wpg-image-status${!pictureHere && ui.imageFailed ? ' is-error' : ''}" data-pg-image-status role="${!pictureHere && ui.imageFailed ? 'alert' : 'status'}" aria-live="polite"><span>${pictureHere ? '配图生成中…' : esc(ui.imageFeedback)}</span>${pictureHere ? '<button type="button" data-pg-image-cancel>取消配图</button>' : '<button type="button" data-pg-image-dismiss aria-label="关闭配图提示">关闭</button>'}</div>` : '';
+    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${imageNotice}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
     const root = screen.querySelector('[data-phone-game-app]');
     for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener?.(type, event => {
@@ -158,13 +159,14 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     }, true);
     screen.querySelector('[data-pg-cancel]')?.addEventListener('click', () => cancelPhoneGameGeneration(scope));
     screen.querySelector('[data-pg-image-cancel]')?.addEventListener('click', cancelPhonePostImage);
+    screen.querySelector('[data-pg-image-dismiss]')?.addEventListener('click', () => { ui.imageFeedback = ''; ui.imageFailed = false; paint(); });
     screen.querySelectorAll('[data-pg-image]').forEach(button => button.onclick = () => {
       const post = state.posts.find(item => item.id === button.dataset.pgImage);
       if (!post) return;
       openPhoneImageSheet(screen, state, post, { settings: () => openApp('image-settings'), generate: async prompt => {
-        ui.error = ''; ui.info = '';
-        try { await generatePhonePostImage(post.id, prompt, scope); ui.info = '配图已保存。'; }
-        catch (error) { ui.error = error.message; }
+        ui.error = ''; ui.info = ''; ui.imageFeedback = ''; ui.imageFailed = false;
+        try { await generatePhonePostImage(post.id, prompt, scope); ui.imageFeedback = '配图已保存。'; }
+        catch (error) { ui.imageFeedback = error.message; ui.imageFailed = true; }
         finally { if (current()) paint(); }
       } });
     });
