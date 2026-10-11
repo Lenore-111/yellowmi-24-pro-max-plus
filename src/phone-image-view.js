@@ -12,9 +12,12 @@ function styles() {
 #world-phone-stage .wp-image-settings>header{display:flex;flex-shrink:0;gap:12px;align-items:center;min-height:56px;padding:0 14px;border-bottom:1px solid #ddd}
 #world-phone-stage .wp-image-settings-body{min-height:0;overflow:auto;padding:14px}
 #world-phone-stage .wp-image-settings form{display:grid;gap:14px}#world-phone-stage .wp-image-settings label{display:grid;gap:6px;font-size:13px}
-#world-phone-stage .wp-image-settings input,#world-phone-stage .wp-image-settings select,#world-phone-stage .wp-image-settings textarea{width:100%;min-height:42px;padding:10px;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;color:#222;background:#fff}
+#world-phone-stage .wp-image-settings input:not([type=checkbox]),#world-phone-stage .wp-image-settings select,#world-phone-stage .wp-image-settings textarea{width:100%;min-height:42px;padding:10px;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;color:#222;background:#fff}
 #world-phone-stage .wp-image-settings small{font-size:11px;line-height:1.5;color:#777}#world-phone-stage .wp-image-settings p{font-size:13px;line-height:1.6}
-#world-phone-stage .wp-image-settings .wp-image-remember{display:flex;align-items:center;gap:8px}#world-phone-stage .wp-image-remember input{width:18px;min-height:18px}
+#world-phone-stage .wp-image-settings .wp-image-remember{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;touch-action:manipulation}
+#world-phone-stage .wp-image-settings .wp-image-remember input{appearance:auto!important;-webkit-appearance:auto!important;width:22px!important;height:22px!important;min-height:22px!important;padding:0!important;margin:0!important;flex:0 0 22px!important;box-sizing:border-box!important;border:0!important;box-shadow:none!important;outline:none!important;filter:none!important;transform:none!important;accent-color:#584573!important;color-scheme:light!important;display:inline-block!important}
+#world-phone-stage .wp-image-settings .wp-image-remember input::before{content:none!important}
+#world-phone-stage .wp-image-settings .wp-image-remember input:focus-visible{outline:2px solid #584573!important;outline-offset:3px}
 #world-phone-stage .wp-image-settings button,#world-phone-stage .wpg-image-actions button{min-height:38px;padding:8px 12px;border:1px solid #d4cce2;border-radius:8px;background:#f3edf9;color:#584573}
 #world-phone-stage .wpg-post-media{margin:10px 0}#world-phone-stage .wpg-post-media img{display:block;max-width:100%;max-height:360px;border-radius:9px;object-fit:contain}
 #world-phone-stage .wpg-image-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;font-size:12px}
@@ -36,7 +39,7 @@ export function renderPhoneImageSettings(screen, back) {
     <div class="wp-image-settings-body"><p>连接你自己的生图站点。小手机不提供模型、密钥或额度，只在你点击生成时请求一张图片。</p>
     <form data-image-settings-form>
       <label>接口地址<input data-image-url type="url" required placeholder="https://你的站点/v1" value="${esc(settings.baseUrl)}"><small>支持 OpenAI 兼容 images/generations 接口，可填 API 基础地址或完整生图地址。</small></label>
-      <label>密钥<input data-image-key type="password" autocomplete="new-password" placeholder="${hasPhoneImageKey() ? '已设置；留空保留，更换站点需重新填写' : '填写站点密钥；无需密钥的本地服务可留空'}"><small>不使用酒馆正文模型的密钥。</small></label>
+      <label>密钥<input data-image-key type="password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${hasPhoneImageKey() ? '已设置；留空保留，更换站点需重新填写' : '填写站点密钥；无需密钥的本地服务可留空'}"><small>可直接粘贴密钥，不使用酒馆正文模型的密钥。</small></label>
       <label class="wp-image-remember"><input type="checkbox" data-image-remember ${settings.rememberKey ? 'checked' : ''}>在此设备记住密钥</label><small>默认只在本次页面会话使用。勾选后保存在此浏览器，其他设备需重新填写。</small>
       <button type="button" data-image-forget>清除已保存密钥</button>
       <label>请求方式<select data-image-transport><option value="direct" ${settings.transport === 'direct' ? 'selected' : ''}>浏览器直连</option><option value="proxy" ${settings.transport === 'proxy' ? 'selected' : ''}>酒馆代理</option></select><small>直连需要站点允许跨域；酒馆代理需要在 config.yaml 开启 enableCorsProxy 后重启酒馆。</small></label>
