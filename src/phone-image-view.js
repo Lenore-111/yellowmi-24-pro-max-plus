@@ -14,6 +14,8 @@ function styles() {
 #world-phone-stage .wp-image-settings form{display:grid;gap:14px}#world-phone-stage .wp-image-settings label{display:grid;gap:6px;font-size:13px}
 #world-phone-stage .wp-image-settings input:not([type=checkbox]),#world-phone-stage .wp-image-settings select,#world-phone-stage .wp-image-settings textarea{width:100%;min-height:42px;padding:10px;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;color:#222;background:#fff}
 #world-phone-stage .wp-image-settings small{font-size:11px;line-height:1.5;color:#777}#world-phone-stage .wp-image-settings p{font-size:13px;line-height:1.6}
+#world-phone-stage .wp-image-key-field{display:grid;gap:6px;font-size:13px}#world-phone-stage .wp-image-key-row{display:flex;gap:8px;align-items:stretch}
+#world-phone-stage .wp-image-key-row input{flex:1;min-width:0}#world-phone-stage .wp-image-settings .wp-image-key-row button{flex-shrink:0;min-height:44px;touch-action:manipulation}
 #world-phone-stage .wp-image-settings .wp-image-remember{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;touch-action:manipulation}
 #world-phone-stage .wp-image-settings .wp-image-remember input{appearance:auto!important;-webkit-appearance:auto!important;width:22px!important;height:22px!important;min-height:22px!important;padding:0!important;margin:0!important;flex:0 0 22px!important;box-sizing:border-box!important;border:0!important;box-shadow:none!important;outline:none!important;filter:none!important;transform:none!important;accent-color:#584573!important;color-scheme:light!important;display:inline-block!important}
 #world-phone-stage .wp-image-settings .wp-image-remember input::before{content:none!important}
@@ -40,7 +42,7 @@ export function renderPhoneImageSettings(screen, back) {
     <form data-image-settings-form>
       <label>接口类型<select data-image-provider><option value="openai" ${settings.provider === 'openai' ? 'selected' : ''}>OpenAI 兼容</option><option value="novelai" ${settings.provider === 'novelai' ? 'selected' : ''}>NovelAI 生图</option></select><small>按站点的接入说明选择；两种类型的地址和请求格式不同。</small></label>
       <label>接口地址<input data-image-url type="url" required value="${esc(settings.baseUrl)}"><small data-image-url-help></small></label>
-      <label>密钥<input data-image-key type="password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${hasPhoneImageKey() ? '已设置；留空保留，更换站点需重新填写' : '填写站点密钥；无需密钥的本地服务可留空'}"><small>可直接粘贴密钥，不使用酒馆正文模型的密钥。</small></label>
+      <div class="wp-image-key-field"><label for="wp-image-key-${marker}">密钥</label><div class="wp-image-key-row"><input id="wp-image-key-${marker}" data-image-key type="password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${hasPhoneImageKey() ? '已设置；留空保留，更换站点需重新填写' : '填写站点密钥；无需密钥的本地服务可留空'}"><button type="button" data-image-paste aria-label="从剪贴板粘贴密钥">粘贴密钥</button></div><small>先复制密钥，再点“粘贴密钥”；也可长按输入框粘贴。不使用酒馆正文模型的密钥。</small></div>
       <label class="wp-image-remember"><input type="checkbox" data-image-remember ${settings.rememberKey ? 'checked' : ''}>在此设备记住密钥</label><small>默认只在本次页面会话使用。勾选后保存在此浏览器，其他设备需重新填写。</small>
       <button type="button" data-image-forget>清除已保存密钥</button>
       <label>请求方式<select data-image-transport><option value="direct" ${settings.transport === 'direct' ? 'selected' : ''}>浏览器直连</option><option value="proxy" ${settings.transport === 'proxy' ? 'selected' : ''}>酒馆代理</option></select><small>直连需要站点允许跨域；酒馆代理需要在 config.yaml 开启 enableCorsProxy 后重启酒馆。</small></label>
@@ -52,9 +54,13 @@ export function renderPhoneImageSettings(screen, back) {
     </form></div></section>`;
   const current = () => screen.querySelector('[data-image-settings]')?.dataset.imageSettings === marker;
   const status = message => { if (current()) screen.querySelector('[role=status]').textContent = message; };
+  const keyInput = screen.querySelector('[data-image-key]');
+  const pasteButton = screen.querySelector('[data-image-paste]');
+  let pasteVersion = 0;
+  const cancelPaste = () => { pasteVersion++; pasteButton.disabled = false; };
   let modelController, modelVersion = 0;
   const cancelModels = () => { modelVersion++; modelController?.abort(); };
-  controller.signal.addEventListener('abort', cancelModels, { once: true });
+  controller.signal.addEventListener('abort', () => { cancelModels(); cancelPaste(); }, { once: true });
   const updateProvider = () => {
     const novel = screen.querySelector('[data-image-provider]').value === 'novelai';
     screen.querySelector('[data-image-url]').placeholder = novel ? 'https://你的站点' : 'https://你的站点/v1';
@@ -67,7 +73,7 @@ export function renderPhoneImageSettings(screen, back) {
     screen.querySelector('[data-image-size-help]').textContent = novel ? '宽高须为 64 的倍数，总像素不超过 1024x1024。' : '';
   };
   const clearModels = () => {
-    cancelModels();
+    cancelModels(); cancelPaste();
     const select = screen.querySelector('[data-image-model-choice]'); select.hidden = true; select.innerHTML = '';
     screen.querySelector('[data-image-models]').disabled = false; status('');
   };
@@ -75,15 +81,33 @@ export function renderPhoneImageSettings(screen, back) {
   screen.querySelector('[data-image-url]').oninput = clearModels;
   screen.querySelector('[data-image-key]').oninput = clearModels;
   screen.querySelector('[data-image-transport]').onchange = clearModels;
+  pasteButton.onclick = async () => {
+    cancelPaste();
+    const version = pasteVersion, previousValue = keyInput.value;
+    const active = () => current() && !controller.signal.aborted && version === pasteVersion && keyInput.value === previousValue;
+    pasteButton.disabled = true; status('正在读取剪贴板…');
+    try {
+      // Read directly from the user click so the browser can request clipboard permission.
+      const text = (await navigator.clipboard.readText()).trim();
+      if (!active()) return;
+      if (!text) { status('剪贴板里没有文字，请先复制密钥。'); return; }
+      keyInput.value = text; clearModels(); keyInput.focus();
+      status('已粘贴密钥，保存设置后生效。');
+    } catch {
+      if (!active()) return;
+      keyInput.focus();
+      status('浏览器未允许读取剪贴板，请长按密钥输入框，选择“粘贴”。');
+    } finally { if (current() && version === pasteVersion) pasteButton.disabled = false; }
+  };
   updateProvider();
   const values = () => ({ provider: screen.querySelector('[data-image-provider]').value, baseUrl: screen.querySelector('[data-image-url]').value, apiKey: screen.querySelector('[data-image-key]').value,
     model: screen.querySelector('[data-image-model]').value, size: screen.querySelector('[data-image-size]').value,
     style: screen.querySelector('[data-image-style]').value, rememberKey: screen.querySelector('[data-image-remember]').checked,
     transport: screen.querySelector('[data-image-transport]').value });
-  const save = () => { savePhoneImageSettings(values()); screen.querySelector('[data-image-key]').value = ''; screen.querySelector('[data-image-key]').placeholder = hasPhoneImageKey() ? '已设置；留空保留' : '填写站点密钥'; };
+  const save = () => { cancelPaste(); savePhoneImageSettings(values()); keyInput.value = ''; keyInput.placeholder = hasPhoneImageKey() ? '已设置；留空保留' : '填写站点密钥'; };
   screen.querySelector('[data-image-back]').onclick = () => { controller.abort(); back(); };
   screen.querySelector('[data-image-settings-form]').onsubmit = event => { event.preventDefault(); try { save(); status('已保存。打开独立模式的动态，点“配图”即可生成。'); } catch (error) { status(error.message); } };
-  screen.querySelector('[data-image-forget]').onclick = () => { try { forgetPhoneImageKey(); screen.querySelector('[data-image-key]').value = ''; screen.querySelector('[data-image-key]').placeholder = '填写站点密钥'; status('已清除密钥。'); } catch { status('浏览器未能清除密钥，请检查浏览器存储权限。'); } };
+  screen.querySelector('[data-image-forget]').onclick = () => { cancelPaste(); try { forgetPhoneImageKey(); keyInput.value = ''; keyInput.placeholder = '填写站点密钥'; status('已清除密钥。'); } catch { status('浏览器未能清除密钥，请检查浏览器存储权限。'); } };
   screen.querySelector('[data-image-models]').onclick = async event => {
     cancelModels(); modelController = new AbortController();
     const version = modelVersion;
