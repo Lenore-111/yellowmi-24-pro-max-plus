@@ -1,0 +1,62 @@
+[
+  {
+    "host": "sillytavern-112",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "checks": [
+      "native clipboard paste via real button tap; masked input; no key in status; 44px touch target",
+      "empty native clipboard preserves filled key",
+      "controlled permission rejection preserves key, focuses input, offers long-press paste",
+      "unavailable clipboard API falls back without uncaught error",
+      "late clipboard result cannot overwrite later manual input",
+      "save invalidates pending paste; late result does not refill or replace save status",
+      "forget invalidates pending paste; late result cannot restore cleared key",
+      "changing endpoint invalidates pending paste",
+      "leave and reopen settings: late result cannot write into replacement page",
+      "pasted key saves and remains remembered after refresh; no raw key rendered"
+    ],
+    "pageErrors": []
+  },
+  {
+    "host": "sillytavern-112",
+    "viewport": {
+      "width": 820,
+      "height": 1180
+    },
+    "checks": [
+      "native clipboard paste via real button tap; masked input; no key in status; 44px touch target",
+      "empty native clipboard preserves filled key",
+      "controlled permission rejection preserves key, focuses input, offers long-press paste",
+      "unavailable clipboard API falls back without uncaught error",
+      "late clipboard result cannot overwrite later manual input",
+      "save invalidates pending paste; late result does not refill or replace save status",
+      "forget invalidates pending paste; late result cannot restore cleared key",
+      "changing endpoint invalidates pending paste",
+      "leave and reopen settings: late result cannot write into replacement page",
+      "pasted key saves and remains remembered after refresh; no raw key rendered"
+    ],
+    "pageErrors": []
+  },
+  {
+    "host": "sillytavern-112",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "checks": [
+      "native clipboard paste via real button tap; masked input; no key in status; 44px touch target",
+      "empty native clipboard preserves filled key",
+      "controlled permission rejection preserves key, focuses input, offers long-press paste",
+      "unavailable clipboard API falls back without uncaught error",
+      "late clipboard result cannot overwrite later manual input",
+      "save invalidates pending paste; late result does not refill or replace save status",
+      "forget invalidates pending paste; late result cannot restore cleared key",
+      "changing endpoint invalidates pending paste",
+      "leave and reopen settings: late result cannot write into replacement page",
+      "pasted key saves and remains remembered after refresh; no raw key rendered"
+    ],
+    "pageErrors": []
+  }
+]
