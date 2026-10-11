@@ -1,5 +1,6 @@
 // App-specific presentation for the independent save. All actions still use
 // phone-game-view's existing handlers and never reach the world bridge.
+import { phoneImagePath } from './phone-image-paths.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const paths = {
   chat:'M4 5h16v11H9l-5 4V5Z', contacts:'M8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 11v-3a6 6 0 0 1 12 0v3M17 5h5m-5 5h5m-5 5h5',
@@ -17,12 +18,16 @@ export function gameNav(app, tab) {
     : [['chats','wallet','钱包'],['gifts','bag','礼物']];
   return `<nav class="echo-app-nav is-${app}" aria-label="${esc(app)}导航">${entries.map(([id,icon,label]) => `<button type="button" data-pg-view="${id}" aria-current="${tab === id ? 'page' : 'false'}">${gameIcon(icon)}<span>${label}</span></button>`).join('')}</nav>`;
 }
-export function gamePost(state, post, app, saved, detail = false, clock = '') {
+export function gameImageControls(post, busy = false) {
+  return `<div class="wpg-image-actions"><button type="button" data-pg-image="${esc(post.id)}" ${busy ? 'disabled' : ''}>${phoneImagePath(post.imageUrl) ? '重新配图' : '配图'}</button>${phoneImagePath(post.imageUrl) ? `<button type="button" data-pg-image-album="${esc(post.id)}">保存到相册</button>` : ''}</div>`;
+}
+export function gamePost(state, post, app, saved, detail = false, clock = '', imageBusy = false) {
   const name = state.actors.find(a => a.id === post.actorId)?.name || '角色';
   const comments = state.events.filter(e => e.postId === post.id).length;
   const avatar = `<span class="wpg-avatar">${esc(name.slice(0,1))}</span>`;
-  if (app === 'rednote' && !detail) return `<article class="echo-note-card"><button type="button" data-pg-post="${esc(post.id)}" class="echo-note-cover"><span>生活记录</span><b>${esc(post.title || post.text.slice(0,38))}</b><small>${esc(post.mood || '')}</small></button><div class="echo-note-copy"><b>${esc(post.title || post.text.slice(0,48))}</b><div>${avatar}<span>${esc(name)}</span><button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}" aria-label="点赞">${gameIcon('heart')}</button></div></div></article>`;
-  return `<article class="wpg-post echo-post is-${app}"><header>${avatar}<div><b>${esc(name)}</b><small>${esc(clock)}${post.mood ? ` · ${esc(post.mood)}` : ''}</small></div><button type="button" data-pg-chat="${esc(post.actorId)}" class="echo-follow">私信</button></header>${post.title ? `<h3>${esc(post.title)}</h3>` : ''}<p>${esc(post.text)}</p><footer><button type="button" data-pg-chat="${esc(post.actorId)}">${gameIcon('chat')}<span>私信</span></button>${detail ? '' : `<button type="button" data-pg-post="${esc(post.id)}">${gameIcon('comment')}<span>${comments || '评论'}</span></button>`}<button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}">${gameIcon('heart')}<span>${post.liked ? '已赞' : '赞'}</span></button>${app === 'rednote' ? `<button type="button" data-pg-save="${esc(post.id)}" aria-pressed="${saved}">${gameIcon('save')}<span>${saved ? '已收藏' : '收藏'}</span></button>` : ''}</footer></article>`;
+  const src = phoneImagePath(post.imageUrl);
+  if (app === 'rednote' && !detail) return `<article class="echo-note-card"><button type="button" data-pg-post="${esc(post.id)}" class="echo-note-cover">${src ? `<img src="${esc(src)}" alt="${esc(post.title || '动态配图')}" loading="lazy">` : `<span>生活记录</span><b>${esc(post.title || post.text.slice(0,38))}</b><small>${esc(post.mood || '')}</small>`}</button><div class="echo-note-copy"><b>${esc(post.title || post.text.slice(0,48))}</b><div>${avatar}<span>${esc(name)}</span><button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}" aria-label="点赞">${gameIcon('heart')}</button></div>${gameImageControls(post,imageBusy)}</div></article>`;
+  return `<article class="wpg-post echo-post is-${app}"><header>${avatar}<div><b>${esc(name)}</b><small>${esc(clock)}${post.mood ? ` · ${esc(post.mood)}` : ''}</small></div><button type="button" data-pg-chat="${esc(post.actorId)}" class="echo-follow">私信</button></header>${post.title ? `<h3>${esc(post.title)}</h3>` : ''}<p>${esc(post.text)}</p>${src ? `<div class="wpg-post-media"><img src="${esc(src)}" alt="${esc(post.title || '动态配图')}" loading="lazy"></div>` : ''}${gameImageControls(post,imageBusy)}<footer><button type="button" data-pg-chat="${esc(post.actorId)}">${gameIcon('chat')}<span>私信</span></button>${detail ? '' : `<button type="button" data-pg-post="${esc(post.id)}">${gameIcon('comment')}<span>${comments || '评论'}</span></button>`}<button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}">${gameIcon('heart')}<span>${post.liked ? '已赞' : '赞'}</span></button>${app === 'rednote' ? `<button type="button" data-pg-save="${esc(post.id)}" aria-pressed="${saved}">${gameIcon('save')}<span>${saved ? '已收藏' : '收藏'}</span></button>` : ''}</footer></article>`;
 }
 export function gameFeed(state, platform, ui, cards) {
   const search = `<form class="echo-social-search" data-pg-search>${gameIcon('search')}<input data-pg-query value="${esc(ui.query || '')}" aria-label="搜索动态" placeholder="${platform === 'weibo' ? '搜索微博' : '搜索笔记'}"><button type="submit">搜索</button></form>`;

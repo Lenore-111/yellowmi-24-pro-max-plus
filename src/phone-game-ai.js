@@ -1,5 +1,6 @@
 import * as tavern from '/script.js';
 import * as groupChats from '/scripts/group-chats.js';
+import { readPhoneImageSettings } from './phone-image-provider.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
@@ -42,6 +43,9 @@ export function cancelPhoneGameGeneration(scope = capturePhoneGameScope()) {
 }
 
 export function buildPhoneGamePrompt(state, { platform = '', eventId = '' } = {}) {
+  const textPost = ({ imageUrl, imagePrompt, ...post }) => post;
+  const images = readPhoneImageSettings();
+  const imageField = images.baseUrl && images.model ? ',"imagePrompt":"可选配图描述：用简短中文描述动态中一个具体画面，物品动态不必画人；涉及人物时带上资料中已知的发色、发型、服装等外貌，不编造未知外貌。不画界面、文字、水印。不适合配图时留空"' : '';
   const event = state.events.find(item => item.id === eventId);
   if (eventId && (!event || event.status !== 'pending')) throw new Error('互动已处理或不存在');
   const actor = event ? state.actors.find(item => item.id === event.actorId) : null;
@@ -52,15 +56,15 @@ export function buildPhoneGamePrompt(state, { platform = '', eventId = '' } = {}
     actors: actor ? [actor] : state.actors,
     phoneTick: state.tick,
     relationships: actor ? { [actor.id]: state.relations[actor.id] } : state.relations,
-    recentPosts: state.posts.slice(-12),
+    recentPosts: state.posts.slice(-12).map(textPost),
     recentInteractions: history,
-    action: event || null, relatedPost,
+    action: event || null, relatedPost: relatedPost ? textPost(relatedPost) : null,
     activeCall: event?.callId ? state.communications.calls.find(call => call.id === event.callId) : null,
     gift: event?.giftId ? PHONE_GAME_GIFTS.find(item => item.id === event.giftId) : null,
   };
   const instruction = event
     ? '只输出 JSON：{"text":"角色对本次行动的直接回应，像手机上的真实短消息","affinityDelta":-3到3的整数,"memory":"保留旧记忆中的重要事实，更新为最多1000字的手机经历摘要","preferences":["通过角色设定或此次互动明确发现的喜好，未知就留空"]}。'
-    : `生成 ${platform === 'weibo' ? '微博：短动态、情绪或观点' : platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{"posts":[{"actorId":"必须使用给出的角色ID","title":"小红书标题，其他平台可留空","text":"一条符合角色性格的帖子","mood":"可选简短心情"}]}。生成1到3条新帖，避免重复旧帖。`;
+    : `生成 ${platform === 'weibo' ? '微博：短动态、情绪或观点' : platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{"posts":[{"actorId":"必须使用给出的角色ID","title":"小红书标题，其他平台可留空","text":"一条符合角色性格的帖子","mood":"可选简短心情"${imageField}}]}。生成1到3条新帖，避免重复旧帖。`;
   return [
     '你在扮演一个独立手机生活游戏里的角色。这是手机内的平行存档，正文只作为开局参考。',
     '后续发展以 PHONE_GAME 中的手机经历和角色记忆为准，不把此处经历描述成已经发生在正文里。',

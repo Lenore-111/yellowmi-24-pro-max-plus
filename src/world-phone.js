@@ -11,6 +11,7 @@ import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.28';
 import { renderDeliveryApp } from './lingqi-delivery.js';
 import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.28';
 import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.28';
+import { renderPhoneImageSettings } from './phone-image-view.js';
 import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.28';
 import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.28';
 import { findMessageMatches, highlightMessageText } from './message-search.js';
@@ -576,7 +577,7 @@ function renderWeChat(screen, snapshot, route, repaint, goHome, toggleMomentLike
   });
 }
 
-function renderSettings(screen, snapshot, goHome, onResetHome) {
+function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
   screen.innerHTML = `
     <section class="wp-view wp-native-app wp-settings-app">
       ${renderAppHeader('设置', 'Echo 手机')}
@@ -598,6 +599,10 @@ function renderSettings(screen, snapshot, goHome, onResetHome) {
         <div><span>当前会话消息</span><b>${snapshot.chatMessages}</b></div>
       </div>
       <div class="wp-settings-section">
+        <span class="wp-settings-section-label">动态配图</span>
+        <button type="button" class="wp-settings-reset-home" data-image-settings-open><span><b>连接自己的生图站点</b><small>填写接口、密钥，选择生图模型</small></span><i>›</i></button>
+      </div>
+      <div class="wp-settings-section">
         <span class="wp-settings-section-label">主屏幕</span>
         <button type="button" class="wp-settings-reset-home" data-reset-home>
           <span><b>恢复默认桌面布局</b><small>重置 App 与 Dock 的排列位置</small></span>
@@ -610,8 +615,9 @@ function renderSettings(screen, snapshot, goHome, onResetHome) {
   screen.querySelector('[data-app-back]')?.addEventListener('click', goHome);
   screen.querySelectorAll('[data-game-mode]').forEach(button => button.addEventListener('click', () => {
     setPhoneGameMode(button.dataset.gameMode);
-    renderSettings(screen, snapshot, goHome, onResetHome);
+    renderSettings(screen, snapshot, goHome, onResetHome, openImages);
   }));
+  screen.querySelector('[data-image-settings-open]')?.addEventListener('click', openImages);
   screen.querySelector('[data-reset-home]')?.addEventListener('click', (event) => {
     onResetHome?.();
     const button = event.currentTarget;
@@ -785,7 +791,8 @@ export function mountWorldPhone() {
     else if (app === 'delivery') renderDeliveryApp(screen, { goHome: showHome });
     else if (app === 'casino') renderCasinoApp(screen, { goHome: showHome });
     else if (app === 'music') renderMusicApp(screen, { goHome: showHome });
-    else if (app === 'settings') renderSettings(screen, snapshot, showHome, resetHomeLayout);
+    else if (app === 'settings') renderSettings(screen, snapshot, showHome, resetHomeLayout, () => openApp('image-settings'));
+    else if (app === 'image-settings') disposeApp = renderPhoneImageSettings(screen, () => openApp('settings'));
     else renderPlaceholder(screen, app, snapshot, showHome);
     paintStatusbar();
   }

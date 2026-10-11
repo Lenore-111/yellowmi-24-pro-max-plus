@@ -29,3 +29,7 @@ jobs:
           node --check src/phone-game-ai.js
           node --check src/phone-acceptance-guards.js
           node --check src/native-communication-apps.js
+          node --check src/phone-image-provider.js
+          node --check src/phone-image-view.js
+          node --check src/phone-post-images.js
+          node --check src/phone-image-paths.js
