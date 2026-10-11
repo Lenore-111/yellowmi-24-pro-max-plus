@@ -73,3 +73,21 @@ test('深滚动配图的等待和错误位于滚动区外；服务拒绝后保�
   assert.equal(readPhoneGameState().posts.find(p => p.id === post.id).imageUrl, '/user/files/world-phone-image-original.png');
   f.screen.querySelector('[data-pg-image-dismiss]').click(); assert.equal(f.screen.querySelector('[data-pg-image-status]'), null);
 });
+
+
+test('绘图模型区分常用选项和站点结果；换地址后丢弃迟到列表',async t=>{
+ const f=fixture(t);savePhoneImageSettings({provider:'novelai',baseUrl:'https://novel.example',model:'',apiKey:'fixture-ui-key'});
+ let release;f.set('fetch',()=>new Promise(resolve=>{release=resolve;}));
+ const stop=renderPhoneImageSettings(f.screen,()=>{});f.cleanup.push(stop);
+ const select=f.screen.querySelector('[data-image-model-choice]');
+ assert.equal(select.hidden,false);assert.equal(select.dataset.source,'builtin');assert.match(select.textContent,/未验证/);
+ const choice=select.querySelectorAll('option')[1];select.value=choice.value;select.fire('change');assert.equal(f.screen.querySelector('[data-image-model]').value,'nai-diffusion-4-5-full');
+ f.screen.querySelector('[data-image-models]').click();
+ f.screen.querySelector('[data-image-url]').value='https://new.example';f.screen.querySelector('[data-image-url]').fire('input');
+ release(new Response(JSON.stringify({data:[{id:'old-site-model'}]})));await settle();await settle();
+ assert.equal(select.dataset.source,'builtin');assert.ok(!select.textContent.includes('old-site-model'));
+ f.set('fetch',async()=>new Response(JSON.stringify({data:[{id:'new-site-model'}]})));
+ f.screen.querySelector('[data-image-models]').click();await settle();await settle();
+ assert.equal(select.dataset.source,'site');assert.match(select.textContent,/new-site-model/);assert.ok(!select.textContent.includes('nai-diffusion'));
+ assert.match(f.screen.querySelector('[data-image-model-status]').textContent,/站点返回/);
+});

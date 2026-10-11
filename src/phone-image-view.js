@@ -3,6 +3,8 @@ import { phonePostImagePrompt } from './phone-post-images.js';
 import { importLocalImage } from './local-images.js';
 import { phoneImagePath } from './phone-image-paths.js';
 
+const NOVEL_MODELS = ['nai-diffusion-4-5-full', 'nai-diffusion-4-5-curated', 'nai-diffusion-4-full', 'nai-diffusion-4-curated-preview', 'nai-diffusion-3', 'nai-diffusion-2', 'nai-diffusion-furry-3'];
+
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function styles() {
   if (document.getElementById('world-phone-image-style')) return;
@@ -51,13 +53,13 @@ export function renderPhoneImageSettings(screen, back) {
       <button type="button" data-image-forget>清除已保存密钥</button>
       <label>请求方式<select data-image-transport><option value="direct" ${settings.transport === 'direct' ? 'selected' : ''}>浏览器直连</option><option value="proxy" ${settings.transport === 'proxy' ? 'selected' : ''}>酒馆代理</option></select><small>直连需要站点允许跨域；酒馆代理需要在 config.yaml 开启 enableCorsProxy 后重启酒馆。</small></label>
       <label>模型名称<input data-image-model value="${esc(settings.model)}"><select data-image-model-choice aria-label="从站点模型列表选择" hidden></select><small data-image-model-help></small></label>
-      <button type="button" data-image-models>读取模型列表</button>
+      <button type="button" data-image-models>读取站点模型</button><small data-image-model-status role="status" aria-live="polite"></small>
       <label>尺寸（可选）<input data-image-size value="${esc(settings.size)}"><small data-image-size-help></small></label>
       <label>默认画风（可选）<textarea data-image-style maxlength="300" rows="2" placeholder="例如：简洁插画、像素风">${esc(settings.style)}</textarea></label>
       <button type="submit">保存设置</button><p role="status" aria-live="polite"></p>
     </form></div></section>`;
   const current = () => screen.querySelector('[data-image-settings]')?.dataset.imageSettings === marker;
-  const status = message => { if (current()) screen.querySelector('[data-image-settings-form] > [role=status]').textContent = message; };
+  const status = message => { if (current()) screen.querySelector('[data-image-settings-form] > p[role=status]').textContent = message; };
   const keyInput = screen.querySelector('[data-image-key]');
   const pasteButton = screen.querySelector('[data-image-paste]');
   const visibilityButton = screen.querySelector('[data-image-key-visibility]');
@@ -77,20 +79,32 @@ export function renderPhoneImageSettings(screen, back) {
   let modelController, modelVersion = 0;
   const cancelModels = () => { modelVersion++; modelController?.abort(); };
   controller.signal.addEventListener('abort', () => { cancelModels(); cancelPaste(); }, { once: true });
+  const modelStatus = message => { if (current()) screen.querySelector('[data-image-model-status]').textContent = message; };
+  const showModels = (models, source) => {
+    const select = screen.querySelector('[data-image-model-choice]');
+    select.innerHTML = `<option value="">${source === 'site' ? '站点返回的模型' : '常用模型（未验证本站支持）'}</option>` + models.map(id => `<option value="${esc(id)}">${esc(id)}</option>`).join('');
+    select.hidden = !models.length;
+    select.dataset.source = source;
+    select.setAttribute('aria-label', source === 'site' ? '从站点返回的模型中选择' : '从常用模型中选择（未验证本站支持）');
+    const selected = screen.querySelector('[data-image-model]').value;
+    select.value = models.includes(selected) ? selected : '';
+  };
+  const showDefaults = () => showModels(screen.querySelector('[data-image-provider]').value === 'novelai' ? NOVEL_MODELS : [], 'builtin');
   const updateProvider = () => {
     const novel = screen.querySelector('[data-image-provider]').value === 'novelai';
     screen.querySelector('[data-image-url]').placeholder = novel ? 'https://你的站点' : 'https://你的站点/v1';
     screen.querySelector('[data-image-url-help]').textContent = novel ? '填站点提供的 NovelAI 地址或完整 ai/generate-image 地址；不要填登录、注册页面，也不要自行加 /v1。' : '支持 OpenAI 兼容 images/generations 接口，可填 API 基础地址或完整生图地址。';
     screen.querySelector('[data-image-model]').placeholder = novel ? '例如 nai-diffusion-4-5-full，以站点说明为准' : '选择或填写站点的生图模型';
-    screen.querySelector('[data-image-model-help]').textContent = novel ? '此类型不读取通用模型列表，请直接填写站点提供的模型。每次只生成一张、28 步，不添加参考图或氛围图。' : '读取列表后可选择，也可直接填写。请选站点支持生图的模型。';
-    screen.querySelector('[data-image-models]').hidden = novel;
+    screen.querySelector('[data-image-model-help]').textContent = novel ? '常用选项未验证本站支持；读取成功后会换成站点返回的列表。每次一张、28 步。' : '读取列表后可选择，也可直接填写。请选站点支持生图的模型。';
+    screen.querySelector('[data-image-models]').hidden = false;
+    showDefaults();
     screen.querySelector('[data-image-models]').disabled = false;
     screen.querySelector('[data-image-size]').placeholder = novel ? '留空默认 1024x1024；如 768x768' : '留空使用站点默认；如 1024x1024';
     screen.querySelector('[data-image-size-help]').textContent = novel ? '宽高须为 64 的倍数，总像素不超过 1024x1024。' : '';
   };
   const clearModels = () => {
     cancelModels(); cancelPaste(); keyStatus('');
-    const select = screen.querySelector('[data-image-model-choice]'); select.hidden = true; select.innerHTML = '';
+    showDefaults(); modelStatus('');
     screen.querySelector('[data-image-models]').disabled = false; status('');
   };
   screen.querySelector('[data-image-provider]').onchange = () => { clearModels(); updateProvider(); };
@@ -124,18 +138,17 @@ export function renderPhoneImageSettings(screen, back) {
   const save = () => { cancelPaste(); savePhoneImageSettings(values()); keyInput.value = ''; keyInput.placeholder = hasPhoneImageKey() ? '已设置；留空保留' : '填写站点密钥'; keyStatus(''); keyVisible = false; updateKeyVisibility(); };
   screen.querySelector('[data-image-back]').onclick = () => { controller.abort(); back(); };
   screen.querySelector('[data-image-settings-form]').onsubmit = event => { event.preventDefault(); try { save(); status('已保存。打开独立模式的动态，点“配图”即可生成。'); } catch (error) { status(error.message); } };
-  screen.querySelector('[data-image-forget]').onclick = () => { cancelPaste(); keyStatus(''); try { forgetPhoneImageKey(); keyInput.value = ''; keyInput.placeholder = '填写站点密钥'; keyVisible = false; updateKeyVisibility(); status('已清除密钥。'); } catch { status('浏览器未能清除密钥，请检查浏览器存储权限。'); } };
+  screen.querySelector('[data-image-forget]').onclick = () => { clearModels(); try { forgetPhoneImageKey(); keyInput.value = ''; keyInput.placeholder = '填写站点密钥'; keyVisible = false; updateKeyVisibility(); status('已清除密钥。'); } catch { status('浏览器未能清除密钥，请检查浏览器存储权限。'); } };
   screen.querySelector('[data-image-models]').onclick = async event => {
     cancelModels(); modelController = new AbortController();
     const version = modelVersion;
-    const button = event.currentTarget; button.disabled = true; status('正在读取模型列表…');
+    const button = event.currentTarget; button.disabled = true; modelStatus('正在读取站点模型…');
     try {
       save(); const models = await listPhoneImageModels({ signal: modelController.signal });
       if (!current() || version !== modelVersion) return;
-      const select = screen.querySelector('[data-image-model-choice]');
-      select.innerHTML = '<option value="">从列表选择生图模型</option>' + models.map(id => `<option value="${esc(id)}">${esc(id)}</option>`).join(''); select.hidden = false;
-      status(`已读取 ${models.length} 个模型，在模型名称中选择或填写。`);
-    } catch (error) { if (version === modelVersion) status(error.message); }
+      showModels(models, 'site');
+      modelStatus(`站点返回了 ${models.length} 个模型，请选择其中支持生图的模型，选好后保存设置。`);
+    } catch (error) { if (current() && version === modelVersion) { showDefaults(); modelStatus(error.message); } }
     finally { if (current() && version === modelVersion) button.disabled = false; }
   };
   screen.querySelector('[data-image-model-choice]').onchange = event => { if (event.target.value) screen.querySelector('[data-image-model]').value = event.target.value; };

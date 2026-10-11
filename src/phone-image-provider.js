@@ -107,10 +107,10 @@ async function request(url, { settings, key = '', body, signal, timeout = 30000 
       if (response.status === 404) {
         const detail = proxy ? await boundedBody(response, 8192).then(bytes => new TextDecoder().decode(bytes)).catch(() => '') : '';
         if (proxy && /CORS proxy is disabled/i.test(detail)) throw new Error('酒馆代理尚未开启，请在 config.yaml 设置 enableCorsProxy: true 并重启酒馆，或改用浏览器直连。');
-        throw new Error('接口返回 404：请检查接口类型和站点提供的 API 地址，不要填写登录或注册页面。');
+        throw Object.assign(new Error('接口返回 404：请检查接口类型和站点提供的 API 地址，不要填写登录或注册页面。'), { status: 404 });
       }
       if ([401, 403].includes(response.status)) throw new Error('站点拒绝访问，请检查生图密钥及模型权限。');
-      throw new Error(`生图站点请求失败（HTTP ${response.status}），请检查接口和模型，稍后重试。`);
+      throw Object.assign(new Error(`生图站点请求失败（HTTP ${response.status}），请检查接口和模型，稍后重试。`), { status: response.status });
     }
     // Keep the timeout and abort listener alive while reading large responses.
     return await boundedBody(response, body ? MAX_IMAGE_BYTES * 1.4 : MAX_IMAGE_BYTES);
@@ -130,11 +130,28 @@ function configured() {
 }
 export async function listPhoneImageModels({ signal } = {}) {
   const settings = configured();
-  if (settings.provider === 'novelai') throw new Error('NovelAI 接口不使用通用模型列表，请按站点说明直接填写生图模型名称。');
-  const data = json(await request(settings.baseUrl + '/models', { settings, key: credential(settings), signal }));
-  const models = [...new Set((Array.isArray(data.data) ? data.data : []).map(x => String(x?.id || '').trim()).filter(Boolean))].slice(0, 500);
-  if (!models.length) throw new Error('站点未提供模型列表，请直接填写它的生图模型名称。');
-  return models;
+  const urls = [settings.baseUrl + '/models'];
+  // 部分绘图站另外提供通用模型列表；只在同一基础路径下查询，不改变生图地址。
+  if (settings.provider === 'novelai' && !/\/v1$/.test(settings.baseUrl)) urls.push(settings.baseUrl + '/v1/models');
+  for (let i = 0; i < urls.length; i++) {
+    if (signal?.aborted) throw new Error('已取消模型读取。');
+    let bytes;
+    try { bytes = await request(urls[i], { settings, key: credential(settings), signal }); }
+    catch (error) {
+      if ([404, 405].includes(error.status)) {
+        if (i + 1 < urls.length) continue;
+        throw new Error(`模型查询返回 ${error.status}：站点未在常用查询地址提供模型列表；这不代表不能生图，可按站点说明选择常用模型或填写名称。`);
+      }
+      throw error;
+    }
+    let data;
+    try { data = JSON.parse(new TextDecoder().decode(bytes)); }
+    catch { throw new Error('模型查询返回的不是有效列表，请核对站点地址；这不代表生图接口一定不可用。'); }
+    const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.models) ? data.models : [];
+    const models = [...new Set(rows.map(x => typeof x === 'string' ? x.trim() : typeof x?.id === 'string' ? x.id.trim() : '').filter(Boolean))].slice(0, 500);
+    if (!models.length) throw new Error('站点返回的模型列表为空或格式不受支持，请按站点说明选择模型。');
+    return models;
+  }
 }
 function imageBlob(bytes) {
   let type = '';

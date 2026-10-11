@@ -121,10 +121,9 @@ test('旧设置默认通用协议；NovelAI 根地址和完整生图地址均保
   assert.ok(!JSON.stringify(f.ctx.extensionSettings).includes('fixture-key'));
   f.config({provider:'novelai',baseUrl:'https://another.example',apiKey:''}); assert.equal(hasPhoneImageKey(),false);
 });
-test('NovelAI 不请求通用模型列表；手填模型即可生图，V4.5 请求遵循单张与小图限制',async t=>{
+test('NovelAI V4.5 生图请求遵循单张与小图限制',async t=>{
   const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});const requests=[];
   globalThis.fetch=async(url,options)=>{requests.push({url,options});return new Response(imageZip({'image_0.png':png}),{status:201,headers:{'Content-Type':'application/zip'}});};
-  await assert.rejects(listPhoneImageModels(),/直接填写/);assert.equal(requests.length,0);
   const image=await generatePhoneImage('simple crow, pixel art');assert.equal(image.type,'image/png');assert.deepEqual(Buffer.from(await image.arrayBuffer()),png);
   assert.equal(requests[0].url,'https://novel.example/ai/generate-image');assert.equal(requests[0].options.headers.Authorization,'Bearer fixture-key');assert.equal(requests[0].options.headers.Accept,'application/zip');
   const body=JSON.parse(requests[0].options.body),p=body.parameters;
@@ -196,4 +195,20 @@ test('NovelAI 迟到压缩包在切换聊天后不上传，不写入新存档',a
 test('NovelAI 解压过程中取消也会终止，不依赖请求还在运行',async()=>{
   const controller=new AbortController();const promise=readNovelImageZip(imageZip({'image.png':png}),{signal:controller.signal});
   controller.abort();await assert.rejects(promise,/取消/);
+});
+
+
+test('绘图站先查询原路径，仅不存在时查询同源通用列表，模型查询不改变生图地址',async t=>{
+ const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example/prefix',transport:'proxy',model:'nai-diffusion-4-5-full'});const calls=[];
+ globalThis.fetch=async(url,options)=>{calls.push({url,options});return decodeURIComponent(url).endsWith('/v1/models')?reply({models:['nai-diffusion-4-5-full',{id:'custom-image'},'nai-diffusion-4-5-full']}):new Response('',{status:404});};
+ assert.deepEqual(await listPhoneImageModels(),['nai-diffusion-4-5-full','custom-image']);
+ assert.deepEqual(calls.map(c=>decodeURIComponent(c.url)),['/proxy/https://novel.example/prefix/models','/proxy/https://novel.example/prefix/v1/models']);
+ assert.ok(calls.every(c=>c.options.method==='GET'&&c.options.headers.Authorization==='Bearer fixture-key'));
+ assert.equal(readPhoneImageSettings().baseUrl,'https://novel.example/prefix');
+});
+test('模型查询不在权限错误、服务异常、无效数据或取消后继续尝试其他路径',async t=>{
+ const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example'});
+ for(const status of [401,403,502]){let calls=0;globalThis.fetch=async()=>{calls++;return new Response('fixture-key',{status});};await assert.rejects(listPhoneImageModels(),e=>!e.message.includes('fixture-key'));assert.equal(calls,1);}
+ for(const value of ['<html>fixture-key</html>',JSON.stringify({data:[]}),JSON.stringify({models:[{},null,37]})]){let calls=0;globalThis.fetch=async()=>{calls++;return new Response(value);};await assert.rejects(listPhoneImageModels(),/列表/);assert.equal(calls,1);}
+ const stop=new AbortController();let calls=0;globalThis.fetch=async()=>{calls++;stop.abort();return new Response('',{status:404});};await assert.rejects(listPhoneImageModels({signal:stop.signal}),/取消/);assert.equal(calls,1);
 });

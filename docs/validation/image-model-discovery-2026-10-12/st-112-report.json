@@ -1,0 +1,152 @@
+{
+  "phase": "fixed",
+  "host": "sillytavern-112",
+  "reports": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 640
+      },
+      "dimensions": {
+        ".wp-settings-app": {
+          "top": 0,
+          "bottom": 640,
+          "height": 640,
+          "clientHeight": 640,
+          "scrollHeight": 640,
+          "overflow": "hidden"
+        },
+        ".wp-device-settings-body": {
+          "top": 416.1875,
+          "bottom": 1532.96875,
+          "height": 1116.78125,
+          "clientHeight": 1117,
+          "scrollHeight": 1117,
+          "overflow": "visible"
+        },
+        "[data-battery-settings-group]": {
+          "top": 416.1875,
+          "bottom": 539.1875,
+          "height": 123,
+          "clientHeight": 123,
+          "scrollHeight": 123,
+          "overflow": "visible"
+        },
+        "[data-image-settings-open]": {
+          "top": 1568.96875,
+          "bottom": 1622.96875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        },
+        "[data-reset-home]": {
+          "top": 1658.96875,
+          "bottom": 1712.96875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        }
+      },
+      "checks": [
+        "single settings scroll; battery/system/device/image/home controls unobstructed; charge and reset clicked",
+        "ordinary text keyboard with masked rendering; native paste; show/hide; denied API focuses field with nearby guidance",
+        "missing models shows labelled builtin choices; authenticated proxy query falls back to v1/models; actual model selected",
+        "deep-feed generate sends native protocol with key; waiting and success stay visible; returned ZIP image displayed",
+        "deep-feed controlled 502 immediately visible; original image preserved",
+        "full page reload preserves selected model, remembered key and displayed generated image"
+      ],
+      "requests": [
+        {
+          "path": "/ai/generate-image",
+          "keyMatches": true,
+          "model": "nai-diffusion-4-5-full",
+          "steps": 28,
+          "samples": 1
+        },
+        {
+          "path": "/ai/generate-image",
+          "keyMatches": true,
+          "model": "nai-diffusion-4-5-full",
+          "steps": 28,
+          "samples": 1
+        }
+      ],
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dimensions": {
+        ".wp-settings-app": {
+          "top": 0,
+          "bottom": 844,
+          "height": 844,
+          "clientHeight": 844,
+          "scrollHeight": 844,
+          "overflow": "hidden"
+        },
+        ".wp-device-settings-body": {
+          "top": 416.1875,
+          "bottom": 1532.96875,
+          "height": 1116.78125,
+          "clientHeight": 1117,
+          "scrollHeight": 1117,
+          "overflow": "visible"
+        },
+        "[data-battery-settings-group]": {
+          "top": 416.1875,
+          "bottom": 539.1875,
+          "height": 123,
+          "clientHeight": 123,
+          "scrollHeight": 123,
+          "overflow": "visible"
+        },
+        "[data-image-settings-open]": {
+          "top": 1568.96875,
+          "bottom": 1622.96875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        },
+        "[data-reset-home]": {
+          "top": 1658.96875,
+          "bottom": 1712.96875,
+          "height": 54,
+          "clientHeight": 54,
+          "scrollHeight": 54,
+          "overflow": "visible"
+        }
+      },
+      "checks": [
+        "single settings scroll; battery/system/device/image/home controls unobstructed; charge and reset clicked",
+        "ordinary text keyboard with masked rendering; native paste; show/hide; denied API focuses field with nearby guidance",
+        "missing models shows labelled builtin choices; authenticated proxy query falls back to v1/models; actual model selected",
+        "deep-feed generate sends native protocol with key; waiting and success stay visible; returned ZIP image displayed",
+        "deep-feed controlled 502 immediately visible; original image preserved",
+        "full page reload preserves selected model, remembered key and displayed generated image"
+      ],
+      "requests": [
+        {
+          "path": "/ai/generate-image",
+          "keyMatches": true,
+          "model": "nai-diffusion-4-5-full",
+          "steps": 28,
+          "samples": 1
+        },
+        {
+          "path": "/ai/generate-image",
+          "keyMatches": true,
+          "model": "nai-diffusion-4-5-full",
+          "steps": 28,
+          "samples": 1
+        }
+      ],
+      "errors": []
+    }
+  ]
+}
