@@ -111,7 +111,7 @@ function worldBridge(h, action) {
 }
 
 test('旧酒馆上下文缺少 generateRaw 时，三个动态平台使用宿主导出及旧参数生成', async () => {
-  const h=createHarness(sources), actor=h.game.readPhoneGameState().actors[0], calls=[];
+  const h=createHarness(sources), initial=h.game.readPhoneGameState(), actor=initial.actors[0], calls=[];
   assert.equal(h.ctx.generateRaw,undefined);
   h.tavern.generateRaw=async function(prompt,api,instructOverride,quietToLoud,systemPrompt,responseLength) {
     calls.push({prompt,api,instructOverride,quietToLoud,systemPrompt,responseLength,receiver:this});
@@ -123,7 +123,7 @@ test('旧酒馆上下文缺少 generateRaw 时，三个动态平台使用宿主�
   };
   for(const platform of ['weibo','rednote','moments'])await h.ai.generatePhoneGameContent({platform});
   assert.deepEqual(h.game.readPhoneGameState().posts.map(p=>p.platform),['weibo','rednote','moments']);
-  assert.equal(calls.length,3);assert.equal(h.game.readPhoneGameState().balance,100);
+  assert.equal(calls.length,3);assert.equal(h.game.readPhoneGameState().balance,initial.balance);
   assert.equal(h.ai.isPhoneGameGenerating(),false);assert.equal(h.timers.size,0);
 });
 
