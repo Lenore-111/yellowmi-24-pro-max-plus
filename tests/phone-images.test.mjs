@@ -5,6 +5,8 @@ import { imageApiBase, readPhoneImageSettings, savePhoneImageSettings, hasPhoneI
 import { capturePhoneGameScope, readPhoneGameState, applyPhoneGamePosts, attachPhoneGameImage, setPhoneGameMode, normalizePhoneGameState, queuePhoneGameInteraction } from '../src/phone-game.js';
 import { generatePhonePostImage, phonePostImageStatus } from '../src/phone-post-images.js';
 import { buildPhoneGamePrompt } from '../src/phone-game-ai.js';
+import { imageZip } from './helpers/image-zip.mjs';
+import { readNovelImageZip, MAX_PHONE_IMAGE_BYTES } from '../src/phone-image-novelai.js';
 
 const png = await readFile(new URL('../assets/echo-phone-icon.png', import.meta.url));
 const reply = value => new Response(JSON.stringify(value), {headers:{'Content-Type':'application/json'}});
@@ -105,4 +107,93 @@ test('素材上传期间切换分支会清理未挂载素材，不回写任一�
   f.ctx.chatId='new-branch';releaseUpload(reply({path:'user/files/world-phone-image-unattached.png'}));await caught;
   assert.deepEqual(removed,['user/files/world-phone-image-unattached.png']);
   assert.equal(Object.values(scope.metadata.world_phone_game_v1.saves)[0].posts[0].imageUrl,'');
+});
+test('旧设置默认通用协议；NovelAI 根地址和完整生图地址均保留正确路径，注册页拒绝保存',t=>{
+  const f=fixture(t); f.config();
+  delete f.ctx.extensionSettings.world_phone_images_v1.provider;
+  assert.equal(readPhoneImageSettings().provider,'openai');
+  assert.equal(imageApiBase('https://novel.example/','novelai'),'https://novel.example');
+  assert.equal(imageApiBase('https://novel.example/ai/generate-image/','novelai'),'https://novel.example');
+  assert.equal(imageApiBase('https://novel.example/prefix/ai/generate-image','novelai'),'https://novel.example/prefix');
+  assert.throws(()=>f.config({provider:'novelai',baseUrl:'https://novel.example/signup/v1'}),/注册/);
+  f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full',rememberKey:true});
+  assert.equal(readPhoneImageSettings().provider,'novelai'); assert.ok(hasPhoneImageKey());
+  assert.ok(!JSON.stringify(f.ctx.extensionSettings).includes('fixture-key'));
+  f.config({provider:'novelai',baseUrl:'https://another.example',apiKey:''}); assert.equal(hasPhoneImageKey(),false);
+});
+test('NovelAI 不请求通用模型列表；手填模型即可生图，V4.5 请求遵循单张与小图限制',async t=>{
+  const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});const requests=[];
+  globalThis.fetch=async(url,options)=>{requests.push({url,options});return new Response(imageZip({'image_0.png':png}),{status:201,headers:{'Content-Type':'application/zip'}});};
+  await assert.rejects(listPhoneImageModels(),/直接填写/);assert.equal(requests.length,0);
+  const image=await generatePhoneImage('simple crow, pixel art');assert.equal(image.type,'image/png');assert.deepEqual(Buffer.from(await image.arrayBuffer()),png);
+  assert.equal(requests[0].url,'https://novel.example/ai/generate-image');assert.equal(requests[0].options.headers.Authorization,'Bearer fixture-key');assert.equal(requests[0].options.headers.Accept,'application/zip');
+  const body=JSON.parse(requests[0].options.body),p=body.parameters;
+  assert.equal(body.action,'generate');assert.equal(body.model,'nai-diffusion-4-5-full');assert.equal(body.input,'simple crow, pixel art');
+  assert.equal(p.n_samples,1);assert.equal(p.width,1024);assert.equal(p.height,1024);assert.equal(p.steps,28);
+  assert.equal(p.v4_prompt.caption.base_caption,body.input);assert.deepEqual(p.v4_prompt.caption.char_captions,[]);
+  assert.ok(Number.isInteger(p.seed)&&p.seed>=0&&p.seed<0x100000000);
+  assert.ok(!Object.keys(p).some(key=>key.startsWith('reference_')||key==='image'||key==='mask'));
+  assert.ok(!('n' in body)&&!('size' in body)&&!('prompt' in body));
+});
+test('NovelAI 配图描述使用英文标签，动态正文保持中文，不额外请求提示词模型',t=>{
+  const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});
+  const prompt=buildPhoneGamePrompt(readPhoneGameState(),{platform:'weibo'});
+  assert.ok(prompt.includes('逗号分隔的简短英文标签'));assert.ok(prompt.includes('动态正文仍使用中文'));
+  assert.equal(globalThis.fetch.mock.callCount(),0);
+});
+test('NovelAI 支持存储、压缩、数据描述符和附带非图片文件的 ZIP，不依赖浏览器解压接口',async()=>{
+  for(const options of [{compressed:false},{compressed:true},{compressed:true,descriptor:true}]){
+    const bytes=await readNovelImageZip(imageZip({'README.txt':'fixture','images/image_0.png':png,'image_1.png':Buffer.from('unused')},options));
+    assert.deepEqual(Buffer.from(bytes),png);
+  }
+});
+test('NovelAI 的原生 JSON 图片返回也可解码；无图和 HTML 错误页给出协议提示',async t=>{
+  const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});
+  globalThis.fetch=async()=>reply({images:[{image:png.toString('base64'),seed:37,index:0}]});
+  assert.deepEqual(Buffer.from(await (await generatePhoneImage('crow')).arrayBuffer()),png);
+  globalThis.fetch=async()=>reply({images:[]});await assert.rejects(generatePhoneImage('crow'),/没有返回/);
+  globalThis.fetch=async()=>new Response('<html>fixture-key</html>');
+  await assert.rejects(generatePhoneImage('crow'),error=>/压缩包|JSON/.test(error.message)&&!error.message.includes('fixture-key'));
+});
+test('NovelAI 代理请求保留专用路径；更换尺寸后仍只生成一张',async t=>{
+  const f=fixture(t);f.config({provider:'novelai',transport:'proxy',baseUrl:'https://novel.example/ai/generate-image',model:'nai-diffusion-4-5-full',size:'768x768'});let request;
+  globalThis.fetch=async(url,options)=>{request={url,options};return new Response(imageZip({'image.png':png},{compressed:false}));};
+  await generatePhoneImage('crow');assert.equal(request.url,'/proxy/'+encodeURIComponent('https://novel.example/ai/generate-image'));
+  assert.equal(request.options.credentials,'same-origin');assert.equal(JSON.parse(request.options.body).parameters.width,768);
+  assert.equal(JSON.parse(request.options.body).parameters.n_samples,1);
+  assert.throws(()=>f.config({provider:'novelai',size:'2048x2048'}),/总像素/);
+  assert.throws(()=>f.config({provider:'novelai',size:'1000x1000'}),/64/);
+});
+test('代理关闭与上游路径 404 分开提示，不再把站点 404 当成代理未开',async t=>{
+  const f=fixture(t);f.config({transport:'proxy'});
+  globalThis.fetch=async()=>new Response('CORS proxy is disabled. Set enableCorsProxy to true.',{status:404});
+  await assert.rejects(listPhoneImageModels(),/代理尚未开启/);
+  globalThis.fetch=async()=>new Response('{"detail":"Not Found","key":"fixture-key"}',{status:404});
+  await assert.rejects(listPhoneImageModels(),error=>error.message.includes('404')&&!error.message.includes('尚未开启')&&!error.message.includes('fixture-key'));
+});
+test('NovelAI 损坏、空包、超限图片和未知长度的解压大图被拒绝',async()=>{
+  const good=imageZip({'image.png':png});
+  await assert.rejects(readNovelImageZip(good.subarray(0,good.length-22)),/无效/);
+  await assert.rejects(readNovelImageZip(imageZip({'README.txt':'no image'})),/没有可用图片/);
+  await assert.rejects(readNovelImageZip(imageZip({'image.png':png},{declaredSize:MAX_PHONE_IMAGE_BYTES+1})),/20 MB/);
+  await assert.rejects(readNovelImageZip(imageZip({'image.png':Buffer.alloc(MAX_PHONE_IMAGE_BYTES+1)},{descriptor:true})),/20 MB/);
+});
+test('NovelAI 保存图片和刷新恢复复用现有素材流程；失败重绘仍保留原图',async t=>{
+  const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});const post=f.post();let upload;
+  globalThis.fetch=async(url,options)=>{if(url==='/api/files/upload'){upload=JSON.parse(options.body);return reply({path:'user/files/'+upload.name});}return new Response(imageZip({'image.png':png}));};
+  const path=await generatePhonePostImage(post.id,'crow');assert.equal(upload.data,png.toString('base64'));
+  f.ctx.chatMetadata=JSON.parse(JSON.stringify(f.ctx.chatMetadata));assert.equal(readPhoneGameState().posts.at(-1).imageUrl,path);
+  globalThis.fetch=async()=>new Response('controlled failure',{status:502});await assert.rejects(generatePhonePostImage(post.id,'retry'),/502/);
+  assert.equal(readPhoneGameState().posts.at(-1).imageUrl,path);assert.equal(phonePostImageStatus().busy,false);
+});
+test('NovelAI 迟到压缩包在切换聊天后不上传，不写入新存档',async t=>{
+  const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});const post=f.post();let release,uploads=0;
+  globalThis.fetch=async url=>{if(url==='/api/files/upload'){uploads++;return reply({path:'user/files/world-phone-image-stale.png'});}return new Promise(resolve=>release=resolve);};
+  const pending=generatePhonePostImage(post.id,'crow'),caught=assert.rejects(pending,/切换|取消/);
+  f.ctx.chatId='another-chat';f.ctx.chatMetadata={};f.ctx.eventSource.emit('chat');release(new Response(imageZip({'image.png':png})));await caught;
+  assert.equal(uploads,0);assert.equal(readPhoneGameState().posts.length,0);
+});
+test('NovelAI 解压过程中取消也会终止，不依赖请求还在运行',async()=>{
+  const controller=new AbortController();const promise=readNovelImageZip(imageZip({'image.png':png}),{signal:controller.signal});
+  controller.abort();await assert.rejects(promise,/取消/);
 });
