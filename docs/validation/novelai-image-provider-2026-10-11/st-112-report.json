@@ -1,0 +1,497 @@
+{
+  "mode": "novelai-sillytavern-112",
+  "hostName": "sillytavern-112",
+  "host": {
+    "contextGenerator": "undefined",
+    "exportedGenerator": "function",
+    "fixedCode": false,
+    "onlineStatus": "Valid",
+    "character": "Feed QA"
+  },
+  "checks": [
+    {
+      "action": "configure-native-provider-with-manual-model",
+      "settings": {
+        "provider": "novelai",
+        "baseUrl": "http://127.0.0.1:8021",
+        "model": "nai-diffusion-4-5-full",
+        "size": "",
+        "style": "简洁插画",
+        "transport": "direct",
+        "credentialId": "1b5c2e52-c4b9-4085-8fd5-6a224ebfcba7",
+        "rememberKey": true
+      }
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "weibo",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "media": "/user/files/world-phone-image-1c45a629-bbef-4cd9-b43b-114f95da96c7.png"
+    },
+    {
+      "action": "save-image-to-album"
+    },
+    {
+      "action": "failure-preserves-image",
+      "same": true,
+      "error": [
+        "生图站点请求失败（HTTP 502），请检查接口和模型，稍后重试。"
+      ]
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "rednote",
+      "viewport": {
+        "width": 820,
+        "height": 1180
+      },
+      "media": "/user/files/world-phone-image-3f512358-d699-4b25-aa3c-b1478c7d5f2e.png"
+    },
+    {
+      "action": "generate-and-display",
+      "platform": "moments",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "media": "/user/files/world-phone-image-6db4c0bd-fc96-4845-a68d-41a3c429af57.png"
+    },
+    {
+      "action": "tavern-proxy-generation",
+      "image": "/user/files/world-phone-image-8dd02a46-f633-496b-93fc-bc27c2d98800.png"
+    },
+    {
+      "action": "rapid-mode-switch-discards-late-image",
+      "same": true
+    },
+    {
+      "action": "switch-character-discards-late-image",
+      "same": true
+    },
+    {
+      "action": "return-to-original-character-preserves-media",
+      "same": true
+    },
+    {
+      "action": "reload-restores-media-and-config",
+      "images": 6,
+      "model": "nai-diffusion-4-5-full",
+      "metadataHasKey": false
+    },
+    {
+      "action": "remembered-device-key-works-after-reload",
+      "image": "/user/files/world-phone-image-bc3c6804-9c4a-48f6-8110-6862f7fd0d0f.png"
+    },
+    {
+      "action": "native-provider-restored-without-model-list-request",
+      "provider": "novelai",
+      "browserHasDecompressionStream": false
+    },
+    {
+      "action": "changing-protocol-discards-late-model-list",
+      "same": true
+    },
+    {
+      "action": "existing-openai-generation-still-works",
+      "image": "/user/files/world-phone-image-b3d72c9c-8be8-40f9-830b-f7510379f07f.png"
+    }
+  ],
+  "requests": [
+    {
+      "url": "/v1/models",
+      "kind": "models"
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "weibo 配图实测",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 2401367891,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "weibo 配图实测",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "失败保留原图",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 1415146614,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "失败保留原图",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "rednote 配图实测",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 581945209,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "rednote 配图实测",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "moments 配图实测",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 310660594,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "moments 配图实测",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "酒馆代理配图",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 4264265644,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "酒馆代理配图",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "酒馆代理配图",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 2013735621,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "酒馆代理配图",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "酒馆代理配图",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 724288943,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "酒馆代理配图",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/ai/generate-image",
+      "body": {
+        "input": "刷新后的密钥验证",
+        "model": "nai-diffusion-4-5-full",
+        "action": "generate",
+        "parameters": {
+          "params_version": 3,
+          "width": 1024,
+          "height": 1024,
+          "n_samples": 1,
+          "steps": 28,
+          "scale": 5,
+          "sampler": "k_euler_ancestral",
+          "noise_schedule": "karras",
+          "seed": 3724577162,
+          "negative_prompt": "",
+          "ucPreset": 0,
+          "qualityToggle": false,
+          "sm": false,
+          "sm_dyn": false,
+          "dynamic_thresholding": false,
+          "legacy": false,
+          "legacy_v3_extend": false,
+          "deliberate_euler_ancestral_bug": false,
+          "prefer_brownian": true,
+          "add_original_image": false,
+          "uncond_scale": 1,
+          "v4_prompt": {
+            "caption": {
+              "base_caption": "刷新后的密钥验证",
+              "char_captions": []
+            },
+            "use_coords": false,
+            "use_order": true
+          },
+          "v4_negative_prompt": {
+            "caption": {
+              "base_caption": "",
+              "char_captions": []
+            }
+          }
+        }
+      },
+      "authorizationPresent": true
+    },
+    {
+      "url": "/v1/models",
+      "kind": "models"
+    },
+    {
+      "url": "/v1/models",
+      "kind": "models"
+    },
+    {
+      "url": "/v1/images/generations",
+      "body": {
+        "model": "fixture-image",
+        "prompt": "通用接口回归",
+        "n": 1
+      },
+      "authorizationPresent": true
+    }
+  ],
+  "errors": [
+    "502 http://127.0.0.1:8021/ai/generate-image",
+    "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+  ]
+}

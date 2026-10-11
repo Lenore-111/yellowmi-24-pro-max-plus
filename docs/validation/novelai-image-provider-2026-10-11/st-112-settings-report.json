@@ -1,0 +1,32 @@
+[
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "manualModel": true,
+    "noListButton": true,
+    "invalidSizeNotSaved": true,
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 820,
+      "height": 1180
+    },
+    "manualModel": true,
+    "noListButton": true,
+    "invalidSizeNotSaved": true,
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "manualModel": true,
+    "noListButton": true,
+    "invalidSizeNotSaved": true,
+    "errors": []
+  }
+]

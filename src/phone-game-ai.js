@@ -45,7 +45,8 @@ export function cancelPhoneGameGeneration(scope = capturePhoneGameScope()) {
 export function buildPhoneGamePrompt(state, { platform = '', eventId = '' } = {}) {
   const textPost = ({ imageUrl, imagePrompt, ...post }) => post;
   const images = readPhoneImageSettings();
-  const imageField = images.baseUrl && images.model ? ',"imagePrompt":"可选配图描述：用简短中文描述动态中一个具体画面，物品动态不必画人；涉及人物时带上资料中已知的发色、发型、服装等外貌，不编造未知外貌。不画界面、文字、水印。不适合配图时留空"' : '';
+  const imageLanguage = images.provider === 'novelai' ? '用逗号分隔的简短英文标签描述动态中一个具体画面，只有配图描述使用英文，动态正文仍使用中文' : '用简短中文描述动态中一个具体画面';
+  const imageField = images.baseUrl && images.model ? `,"imagePrompt":"可选配图描述：${imageLanguage}，物品动态不必画人；涉及人物时带上资料中已知的发色、发型、服装等外貌，不编造未知外貌。不画界面、文字、水印。不适合配图时留空"` : '';
   const event = state.events.find(item => item.id === eventId);
   if (eventId && (!event || event.status !== 'pending')) throw new Error('互动已处理或不存在');
   const actor = event ? state.actors.find(item => item.id === event.actorId) : null;
