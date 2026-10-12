@@ -59,7 +59,7 @@ test('模型请求使用绑定世界书，切书后迟到帖子不能保存',asy
  const{f,ctx}=setup(t);ctx.chatMetadata.world_info='公开设定';f.set('__phoneWorldbooks',{'公开设定':{entries:{0:{content:'青岚街靠月光晶石照明。'}}}});
  let resolve,called;ctx.generateRaw=options=>{called=options;return new Promise(r=>resolve=r);};
  const pending=generatePhoneGameContent({platform:'weibo'});const caught=pending.catch(e=>e);await settle();await settle();
- assert.match(called.prompt,/月光晶石/);assert.match(called.prompt,/passerby/);assert.equal(called.responseLength,2000);
+ assert.match(called.prompt,/月光晶石/);assert.match(called.prompt,/passerby/);assert.equal(called.responseLength,6144);
  ctx.chatMetadata.world_info='别的书';resolve(JSON.stringify({posts:[passerby]}));assert.match((await caught).message,/世界书已切换/);assert.equal(readPhoneGameState().posts.length,0);
 });
 

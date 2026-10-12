@@ -136,7 +136,7 @@ function createState(scope) {
     version: 3, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
     actors: collectActors(ctx),
     origin: clean((ctx?.chat || []).filter(message => !message.is_system).slice(-6).map(message => `${message.is_user ? ctx?.name1 || '你' : message.name || ctx?.name2 || '角色'}：${message.mes || ''}`).join('\n'), 7000),
-    tick: 0, balance: 1000, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
+    tick: 0, balance: 1000, startingFunds: 1000, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
   };
 }
 export const phoneGameDialNumber = value => String(value ?? '').replace(/[^0-9+*#]/g, '').slice(0, 24);
@@ -189,7 +189,7 @@ export function normalizePhoneGameState(raw) {
     && source.shift.orders.every(recipe => PHONE_GAME_RECIPES.some(item => item.id === recipe))
     ? { id: clean(source.shift.id, 100), orders: [...source.shift.orders], index: integer(source.shift.index, 0, 3), correct: integer(source.shift.correct, 0, 3), claimed: Boolean(source.shift.claimed) } : null;
   return { version: 3, user: clean(source.user || '你', 80), userProfile: clean(source.userProfile, 4000), actors,
-    origin: clean(source.origin, 7000), tick: integer(source.tick), balance: integer(source.balance), earned: integer(source.earned), spent: integer(source.spent),
+    origin: clean(source.origin, 7000), tick: integer(source.tick), balance: integer(source.balance), startingFunds: integer(source.startingFunds), earned: integer(source.earned), spent: integer(source.spent),
     ledger: (Array.isArray(source.ledger) ? source.ledger : []).slice(-50).map(item => ({ id: clean(item.id, 100), text: clean(item.text, 160), amount: integer(item.amount, -1000000, 1000000), tick: integer(item.tick) })),
     posts, events, relations, shift, communications: normalizeCommunications(source.communications, actors),
     actorArchive: Array.isArray(source.actorArchive) ? clone(source.actorArchive) : [] };
@@ -252,6 +252,16 @@ export function readPhoneGameState(scope = capturePhoneGameScope()) {
   const raw = hasStableSave ? store.saves[scope.key] : legacyPhoneGameSave(store, scope);
   if (raw) {
     const state = normalizePhoneGameState(reconcileActors(raw, scope.ctx));
+    // Upgrade the original 100-yuan grant once, preserving every purchase and
+    // wage. A current save that spent 900 already has a 1000-yuan principal.
+    const principal = state.balance + state.spent - state.earned;
+    if (state.startingFunds !== 1000 && principal === 100) {
+      state.balance += 900;
+      state.startingFunds = 1000;
+      state.ledger.push({ id: id(), text: '初始资金补发', amount: 900, tick: state.tick });
+    } else if (state.startingFunds !== 1000 && principal === 1000) {
+      state.startingFunds = 1000;
+    }
     if (!hasStableSave || JSON.stringify(state) !== JSON.stringify(raw)) persist(scope, { ...store, saves: { ...store.saves, [scope.key]: state } });
     return clone(state);
   }

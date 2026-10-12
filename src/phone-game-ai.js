@@ -3,6 +3,7 @@ import * as groupChats from '/scripts/group-chats.js';
 import { readPhoneImageSettings } from './phone-image-provider.js';
 import { readWeiboWorldbook, weiboWorldbookSignature } from './phone-weibo-lore.js';
 import { readWeiboTavernContext, weiboTavernContextSignature } from './phone-weibo-context.js';
+import { parsePhoneGameResponse } from './phone-game-response.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   applyPhoneGameReply, applyPhoneGamePosts, PHONE_GAME_GIFTS,
@@ -70,7 +71,7 @@ export function buildPhoneGamePrompt(state, { platform = '', eventId = '', world
     ? '只输出 JSON：{"text":"角色对本次行动的直接回应，像手机上的真实短消息","affinityDelta":-3到3的整数,"memory":"保留旧记忆中的重要事实，更新为最多1000字的手机经历摘要","preferences":["通过角色设定或此次互动明确发现的喜好，未知就留空"]}。'
     : platform === 'weibo'
       ? `生成一屏微博：混合角色短动态、世界里的路人吐槽、当地趣闻和角色相关的公开话题。通常生成3到5条，至少包含一条路人帖子；已有角色可以发自己的动态，也可以被别人讨论。只输出 JSON：{"posts":[{"actorId":"角色本人发帖才填已有角色ID，路人留空","authorKind":"character或passerby","authorName":"路人的自然网名，角色发帖可留空","category":"日常、趣闻、吐槽或话题","title":"可选话题标题","text":"有具体生活细节的中文帖子","claimStatus":"fact、mixed或rumor","heat":1,"replies":[{"author":"路人网名","text":"简短回复"}]${imageField}}]}。每个讨论可有0到4条自然回复，观点可以不同，不要排练式一问一答。不填未知角色ID；没有角色时仍可生成路人生活帖子。避免重复旧帖。`
-      : `生成 ${platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{"posts":[{"actorId":"必须使用给出的角色ID","title":"小红书标题，其他平台可留空","text":"一条符合角色性格的帖子","mood":"可选简短心情"${imageField}}]}。生成1到3条新帖，避免重复旧帖。`;
+      : `生成 ${platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{"posts":[{"actorId":"必须使用给出的角色ID","title":"小红书标题，其他平台可留空","text":"一条符合角色性格的帖子","mood":"可选简短心情"${imageField}}]}。生成1到2条新帖，每条正文80到220字，标题不超过30字；配图描述如有则不超过150字。优先完整闭合 JSON，避免重复旧帖。`;
   return [
     platform === 'weibo' && !event ? '为当前酒馆世界生成手机里的微博信息流，结合当前角色资料、最新正文、绑定世界书与已有帖子。' : '你在扮演一个独立手机生活游戏里的角色。这是手机内的平行存档，正文只作为开局参考。',
     platform === 'weibo' && !event ? 'tavernContext 是当前角色资料与最新可见正文，优先以它判断现在的场景、时代和已经发生的事情。最新正文不是公共公告：先判断哪些内容有公开传播渠道，再生成路人讨论；没有公开进展时可以只发符合设定的生活趣闻。手机私信、礼物和熟悉度是私人经历，路人不默认知道。' : '后续发展以 PHONE_GAME 中的手机经历和角色记忆为准，不把此处经历描述成已经发生在正文里。',
@@ -86,15 +87,6 @@ export function buildPhoneGamePrompt(state, { platform = '', eventId = '', world
     instruction,
     `PHONE_GAME:\n${JSON.stringify(view)}`,
   ].join('\n\n');
-}
-
-function parseResponse(raw) {
-  const value = String(raw ?? '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-  try { return JSON.parse(value); } catch {
-    const start = value.indexOf('{'), end = value.lastIndexOf('}');
-    if (start >= 0 && end > start) { try { return JSON.parse(value.slice(start, end + 1)); } catch {} }
-    throw new Error('模型没有返回有效内容，互动已保存，可重试回应。');
-  }
 }
 
 export async function generatePhoneGameContent(request, scope = capturePhoneGameScope()) {
@@ -141,7 +133,7 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     // Call immediately so generateRaw installs its stop listener before a cancel
     // button can fire. Keep the raw-task lease until the transport actually ends.
     const systemPrompt = '只运行独立手机游戏，按要求返回 JSON。';
-    const responseLength = request.eventId ? 900 : request.platform === 'weibo' ? 2000 : 1200;
+    const responseLength = request.eventId ? 900 : 6144;
     const invoke = text => generator.length > 1
       ? generator.call(scope.ctx, text, null, false, false, systemPrompt, responseLength, false)
       : generator.call(scope.ctx, { prompt:text, systemPrompt, responseLength, trimNames: false });
@@ -182,10 +174,12 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     }
     const raw = await Promise.race([task, cancelled]);
     if (operation.cancelled || !isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('已切换聊天或模式，本次结果未写入；原互动仍可重试。');
-    const response = parseResponse(raw);
+    const response = parsePhoneGameResponse(raw, { feed: !request.eventId });
     if (loreSignature && loreSignature !== weiboWorldbookSignature(scope.ctx)) throw new Error('世界书已切换，本次微博结果未保存，请重新刷新。');
     if (contextSignature && contextSignature !== weiboTavernContextSignature(capturePhoneGameScope().ctx)) throw new Error('正文已更新或编辑，本次微博结果未保存，请重新刷新。');
-    return request.eventId ? applyPhoneGameReply(request.eventId, response, scope) : applyPhoneGamePosts(request.platform, response.posts, scope);
+    const next = request.eventId ? applyPhoneGameReply(request.eventId, response.value, scope) : applyPhoneGamePosts(request.platform, response.value.posts, scope);
+    if (response.partial) errorText = '已保留完整返回的动态，后续内容被截断，可再次刷新。';
+    return next;
   } catch (error) {
     errorText = String(error.message || error);
     throw error;
