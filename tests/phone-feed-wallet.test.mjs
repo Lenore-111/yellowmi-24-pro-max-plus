@@ -49,18 +49,34 @@ test('完整 JSON 与代码块正常，截断只恢复闭合帖子，转义引�
   assert.throws(()=>parsePhoneGameResponse('{"text":"互动回复没有写完'),/互动已保存/);
 });
 
-test('小红书模型额度与紧凑提示生效；截断保留完整新笔记，不丢旧笔记和资产',async t=>{
-  const {ctx}=setup(t),state=readPhoneGameState(),actor=state.actors[0],key=capturePhoneGameScope().key;
+test('小红书和朋友圈不再固定 token，上限交给模型；条数可自定义且截断只保留完整帖子',async t=>{
+  const {f,ctx}=setup(t),state=readPhoneGameState(),actor=state.actors[0],key=capturePhoneGameScope().key;
+  const storage=new Map([['echo_phone_feed_count:rednote','7'],['echo_phone_feed_count:moments','5']]);
+  f.set('localStorage',{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))});
   state.posts=[{id:'old',actorId:actor.id,platform:'rednote',title:'昨天',text:'昨天修灯'}];ctx.chatMetadata[PHONE_GAME_KEY].saves[key]=state;
   const newPost={actorId:actor.id,title:'今天',text:'今天买了夜市的烤饼。'};
-  ctx.generateRaw=async options=>{assert.equal(options.responseLength,6144);assert.match(options.prompt,/正文80到220字/);return '{"posts":['+JSON.stringify(newPost)+',{"actorId":"'+actor.id+'","text":"后半篇';};
+  ctx.generateRaw=async options=>{
+    assert.equal(Object.hasOwn(options,'responseLength'),false);
+    assert.match(options.prompt,/本次目标生成7条新帖/);
+    assert.match(options.prompt,/正文80到220字/);
+    return '{"posts":['+JSON.stringify(newPost)+',{"actorId":"'+actor.id+'","text":"后半篇';
+  };
   await generatePhoneGameContent({platform:'rednote'});
   assert.equal(readPhoneGameState().posts.length,2);assert.equal(readPhoneGameState().posts.at(-1).title,'今天');
-  assert.equal(readPhoneGameState().balance,1000);assert.match(phoneGameGenerationStatus().error,/已保留完整返回/);
+  assert.equal(readPhoneGameState().balance,1000);assert.match(phoneGameGenerationStatus().error,/已保留完整返回的 1 条动态/);
+
+  ctx.generateRaw=async options=>{
+    assert.equal(Object.hasOwn(options,'responseLength'),false);
+    assert.match(options.prompt,/本次目标生成5条新帖/);
+    return JSON.stringify({posts:[{actorId:actor.id,text:'朋友圈完整一条'}]});
+  };
+  await generatePhoneGameContent({platform:'moments'});
+  assert.equal(readPhoneGameState().posts.filter(post=>post.platform==='moments').length,1);
+
   ctx.generateRaw=async()=>'{"posts":[{"actorId":"'+actor.id+'","text":"截断';
   await assert.rejects(generatePhoneGameContent({platform:'rednote'}),/动态内容被截断/);
-  assert.equal(readPhoneGameState().posts.length,2);assert.equal(readPhoneGameState().balance,1000);
+  assert.equal(readPhoneGameState().posts.filter(post=>post.platform==='rednote').length,2);assert.equal(readPhoneGameState().balance,1000);
   ctx.generateRaw=async()=>JSON.stringify({posts:[{...newPost,title:'重试成功'}]});await generatePhoneGameContent({platform:'rednote'});
-  assert.equal(readPhoneGameState().posts.at(-1).title,'重试成功');assert.equal(phoneGameGenerationStatus().error,'');
+  assert.equal(readPhoneGameState().posts.filter(post=>post.platform==='rednote').at(-1).title,'重试成功');assert.equal(phoneGameGenerationStatus().error,'');
   assert.equal(ctx.chatMetadata.world_backstage_v1,undefined);
 });
