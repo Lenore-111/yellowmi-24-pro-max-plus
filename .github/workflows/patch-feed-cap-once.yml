@@ -1,0 +1,43 @@
+name: Patch configurable feed cap once
+
+on:
+  push:
+    branches: [fix/feed-truncation-wallet-20261012]
+    paths: ['.github/workflows/patch-feed-cap-once.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/feed-truncation-wallet-20261012
+      - name: Remove legacy four-post cap
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/phone-game.js')
+          s = p.read_text()
+          old = ").slice(0, platform === 'weibo' ? 6 : 4);"
+          new = ");\n    if (platform === 'weibo') posts.splice(6);"
+          if old not in s:
+              raise SystemExit('legacy feed cap expression not found exactly once')
+          if s.count(old) != 1:
+              raise SystemExit(f'legacy feed cap expression count={s.count(old)}')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          node --check src/phone-game.js
+          node --import ./scripts/test-host-register.mjs --test tests/phone-feed-count-limit.test.mjs
+      - name: Commit source fix and remove one-time workflow
+        run: |
+          set -euo pipefail
+          git config user.name 'Lenore-111'
+          git config user.email '3757040076@qq.com'
+          git rm .github/workflows/patch-feed-cap-once.yml
+          git add src/phone-game.js
+          git commit -m 'Remove legacy four-post cap from configurable feeds'
+          git push origin HEAD:fix/feed-truncation-wallet-20261012
