@@ -47,7 +47,7 @@ test('路人详情只显示讨论，角色关注筛选、网名与回复搜索�
  f.screen.querySelector('[data-pg-like]').click();assert.equal(readPhoneGameState().posts.at(-1).liked,true);
  f.screen.querySelector('[data-pg-post-back]').click();f.screen.querySelector('[data-pg-view="following"]').click();
  assert.match(f.screen.textContent,/修灯日常/);assert.doesNotMatch(f.screen.textContent,/烤饼巡逻员/);
- f.screen.querySelector('[data-pg-view="home"]').click();const q=f.screen.querySelector('[data-pg-query]');q.value='芝麻';f.screen.querySelector('[data-pg-search]').fire('submit');
+ f.screen.querySelector('[data-pg-view="hot"]').click();const q=f.screen.querySelector('[data-pg-query]');q.value='芝麻';f.screen.querySelector('[data-pg-search]').fire('submit');
  assert.match(f.screen.textContent,/烤饼巡逻员/);assert.doesNotMatch(f.screen.textContent,/修灯日常/);
 });
 
