@@ -222,3 +222,15 @@ test('真实站点报告没有已启用上游时直说原因，其他错误正�
  globalThis.fetch=async()=>new Response('<html>fixture-key</html>',{status:503});
  await assert.rejects(generatePhoneImage('crow'),e=>e.message.includes('503')&&!e.message.includes('fixture-key'));
 });
+
+test('酒馆代理未解开的压缩模型列表和生图 JSON 均可读取，普通响应不受影响',async t=>{
+ const f=fixture(t);f.config({transport:'proxy'});const calls=[];
+ const models='KLUv/SA3hQEAhAJ7ImRhdGEiOlt7ImlkIjoiZml4dHVyZS1pbWFnZSJ9LHRleHQifV19AQDQbj4B';
+ const image='KLUv/SB2sQMAeyJkYXRhIjpbeyJiNjRfanNvbiI6ImlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFBRUFBQUFCQ0FRQUFBQzFIQXdDQUFBQUMwbEVRVlI0Mm1QOC94OEFBd01DQU8ramYya0FBQUFBU1VWT1JLNUNZSUk9In1dfQ==';
+ globalThis.fetch=async(url,options)=>{calls.push({url,options});return new Response(Buffer.from(decodeURIComponent(url).endsWith('/models')?models:image,'base64'));};
+ assert.deepEqual(await listPhoneImageModels(),['fixture-image','fixture-text']);
+ const blob=await generatePhoneImage('crow');assert.equal(blob.type,'image/png');assert.equal(blob.size,68);
+ assert.equal(calls[0].url,'/proxy/'+encodeURIComponent('https://image.example/v1/models'));
+ assert.equal(calls[1].options.headers.Authorization,'Bearer fixture-key');
+ assert.equal(JSON.parse(calls[1].options.body).n,1);
+});

@@ -1,0 +1,60 @@
+{
+  "testedAt": "2026-10-12T03:43:51.576Z",
+  "results": [
+    {
+      "requestedEncoding": "gzip, deflate, br, zstd",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "contentEncoding": "zstd",
+      "bytes": 982,
+      "prefix": "28b52ffd0058541e00e6af85",
+      "jsonParsed": false,
+      "zstdDecoded": true,
+      "modelCount": 82,
+      "imageCandidates": [
+        "grok-imagine-image",
+        "grok-imagine-image-2.0",
+        "grok-imagine-image-lite",
+        "grok-imagine-image-quality",
+        "grok-imagine-video",
+        "grok-imagine-video-1.5"
+      ]
+    },
+    {
+      "requestedEncoding": "gzip, deflate, br",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "contentEncoding": "br",
+      "bytes": 10184,
+      "prefix": "7b2264617461223a5b7b2269",
+      "jsonParsed": true,
+      "modelCount": 82,
+      "imageCandidates": [
+        "grok-imagine-image",
+        "grok-imagine-image-2.0",
+        "grok-imagine-image-lite",
+        "grok-imagine-image-quality",
+        "grok-imagine-video",
+        "grok-imagine-video-1.5"
+      ]
+    },
+    {
+      "requestedEncoding": "identity",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "contentEncoding": null,
+      "bytes": 10184,
+      "prefix": "7b2264617461223a5b7b2269",
+      "jsonParsed": true,
+      "modelCount": 82,
+      "imageCandidates": [
+        "grok-imagine-image",
+        "grok-imagine-image-2.0",
+        "grok-imagine-image-lite",
+        "grok-imagine-image-quality",
+        "grok-imagine-video",
+        "grok-imagine-video-1.5"
+      ]
+    }
+  ]
+}
