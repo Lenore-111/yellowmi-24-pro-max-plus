@@ -13,6 +13,18 @@ import {readWeiboTavernContext} from '../src/phone-weibo-context.js';
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 const ctxFor=()=>({name1:'玩家',characterId:0,characters:[{name:'陆祈',avatar:'lu.png',description:'成年修灯匠，住在青岚街'}],chatId:'weibo',chat:[{mes:'夜市上出现了偷烤饼的小龙。',name:'陆祈'}],chatMetadata:{},saveMetadataDebounced(){}});
 function setup(t){const f=phoneDom(t),ctx=ctxFor();f.set('SillyTavern',{getContext:()=>ctx});f.set('worldBackstageHost',undefined);return{f,ctx};}
+const requiredCapabilities=['social-open-direct','social-create-group','social-respond-friend','social-comment-moment','social-send-message','social-read-conversation','social-set-moment-like'];
+function connectWorld(f,{branchKey='world-1'}={}){
+ let connected=true,currentBranch=branchKey;
+ const host={
+  phoneBridgeVersion:2,
+  phoneAction(){},
+  getPhoneSurface:()=>({bridgeVersion:2,connected,capabilities:requiredCapabilities,branchKey:currentBranch,people:[],social:{},publicOpinion:{},events:[]}),
+  refreshPublicOpinion(){},
+ };
+ f.set('worldBackstageHost',host);
+ return{disconnect(){connected=false;},reconnect(){connected=true;},setBranch(value){currentBranch=value;},host};
+}
 const passerby={authorKind:'passerby',authorName:'烤饼巡逻员',title:'谁家的小龙',text:'刚出炉的饼又少了一块。',category:'趣闻',claimStatus:'mixed',heat:4,replies:[{author:'隔壁修灯的',text:'先看它嘴角有没有芝麻。'}]};
 
 test('微博路人帖子保存恢复，不生成联系人；其他平台继续拒绝未知作者',t=>{
@@ -55,36 +67,54 @@ test('读取期间切换绑定世界书或聊天使结果失效，读取失败�
  await assert.rejects(readWeiboWorldbook(ctx,{host,current:()=>false}),/切换/);
 });
 
-test('模型请求使用绑定世界书，切书后迟到帖子不能保存',async t=>{
+test('未连接世界背面时微博只保存已有角色动态，路人与世界内容被拦截',async t=>{
  const{f,ctx}=setup(t);ctx.chatMetadata.world_info='公开设定';f.set('__phoneWorldbooks',{'公开设定':{entries:{0:{content:'青岚街靠月光晶石照明。'}}}});
+ const actor=readPhoneGameState().actors[0];
+ ctx.generateRaw=async options=>{
+  assert.match(options.prompt,/月光晶石/);
+  assert.match(options.prompt,/当前未连接世界背面/);
+  assert.doesNotMatch(options.prompt,/至少包含一条路人帖子/);
+  assert.equal(options.responseLength,6144);
+  return JSON.stringify({posts:[passerby,{actorId:actor.id,authorKind:'character',text:'今天修好了青岚街口的旧灯。'}]});
+ };
+ await generatePhoneGameContent({platform:'weibo'});
+ const posts=readPhoneGameState().posts;
+ assert.equal(posts.length,1);assert.equal(posts[0].actorId,actor.id);assert.doesNotMatch(JSON.stringify(posts),/烤饼巡逻员/);
+});
+
+test('连接世界背面后才放行路人世界微博，生成中断线或切世界分支会作废',async t=>{
+ const{f,ctx}=setup(t);connectWorld(f);ctx.chatMetadata.world_info='公开设定';f.set('__phoneWorldbooks',{'公开设定':{entries:{0:{content:'青岚街靠月光晶石照明。'}}}});
  let resolve,called;ctx.generateRaw=options=>{called=options;return new Promise(r=>resolve=r);};
- const pending=generatePhoneGameContent({platform:'weibo'});const caught=pending.catch(e=>e);await settle();await settle();
- assert.match(called.prompt,/月光晶石/);assert.match(called.prompt,/passerby/);assert.equal(called.responseLength,6144);
- ctx.chatMetadata.world_info='别的书';resolve(JSON.stringify({posts:[passerby]}));assert.match((await caught).message,/世界书已切换/);assert.equal(readPhoneGameState().posts.length,0);
+ const pending=generatePhoneGameContent({platform:'weibo'}),caught=pending.catch(e=>e);await settle();await settle();
+ assert.match(called.prompt,/至少包含一条路人帖子/);assert.doesNotMatch(called.prompt,/当前未连接世界背面/);
+ globalThis.worldBackstageHost.getPhoneSurface=()=>({bridgeVersion:2,connected:false,capabilities:requiredCapabilities,branchKey:'world-1',people:[],social:{},publicOpinion:{},events:[]});
+ resolve(JSON.stringify({posts:[passerby]}));assert.match((await caught).message,/世界背面连接或世界分支已变化/);assert.equal(readPhoneGameState().posts.length,0);
+ connectWorld(f,{branchKey:'world-2'});ctx.generateRaw=async()=>JSON.stringify({posts:[passerby]});await generatePhoneGameContent({platform:'weibo'});
+ assert.equal(readPhoneGameState().posts.length,1);assert.equal(readPhoneGameState().posts[0].authorName,'烤饼巡逻员');
 });
 
-test('群像或场景卡没有联系人时，仍能依据世界书生成路人微博',async t=>{
- const{ctx}=setup(t);ctx.characters[0].name='夜市世界卡';ctx.characters[0].data={character_book:{entries:[{enabled:true,content:'月光集市住着会偷饼的小龙。'}]}};
- ctx.generateRaw=async options=>{assert.match(options.prompt,/月光集市/);return JSON.stringify({posts:[passerby]});};
- assert.equal(readPhoneGameState().actors.length,0);await generatePhoneGameContent({platform:'weibo'});
- assert.equal(readPhoneGameState().posts.length,1);assert.equal(readPhoneGameState().actors.length,0);
- assert.match(buildPhoneGamePrompt(readPhoneGameState(),{platform:'weibo'}),/不新增会改变主线的大事件/);
+test('没有角色且未连接世界背面时不生成路人微博，连接后才允许世界信息流',async t=>{
+ const{f,ctx}=setup(t);ctx.characters[0].name='夜市世界卡';ctx.characters[0].data={character_book:{entries:[{enabled:true,content:'月光集市住着会偷饼的小龙。'}]}};
+ let calls=0;ctx.generateRaw=async options=>{calls++;assert.match(options.prompt,/月光集市/);return JSON.stringify({posts:[passerby]});};
+ assert.equal(readPhoneGameState().actors.length,0);await assert.rejects(generatePhoneGameContent({platform:'weibo'}),/先在酒馆选择一张角色卡/);assert.equal(calls,0);
+ connectWorld(f);await generatePhoneGameContent({platform:'weibo'});assert.equal(calls,1);assert.equal(readPhoneGameState().posts.length,1);assert.equal(readPhoneGameState().actors.length,0);
+ assert.match(buildPhoneGamePrompt(readPhoneGameState(),{platform:'weibo'}),/禁止生成路人/);
 });
 
-test('每次微博刷新读取最新正文，排除系统及隐藏消息；编辑后迟到生成失效',async t=>{
- const{ctx}=setup(t);readPhoneGameState();ctx.chat.push({name:'陆祈',mes:'灯会刚刚公开宣布提前开始。'},{is_system:true,mes:'系统密钥不进入微博'},{name:'旁白',mes:'隐藏内容不可读取',extra:{isHidden:true}});
+test('每次微博刷新读取最新正文，但未连接世界背面时仍只允许角色帖；编辑后迟到生成失效',async t=>{
+ const{ctx}=setup(t);const actor=readPhoneGameState().actors[0];ctx.chat.push({name:'陆祈',mes:'灯会刚刚公开宣布提前开始。'},{is_system:true,mes:'系统密钥不进入微博'},{name:'旁白',mes:'隐藏内容不可读取',extra:{isHidden:true}});
  assert.match(JSON.stringify(readWeiboTavernContext(ctx)),/公开宣布/);assert.doesNotMatch(JSON.stringify(readWeiboTavernContext(ctx)),/系统密钥|隐藏内容/);
  let resolve,called;ctx.generateRaw=options=>{called=options;return new Promise(r=>resolve=r);};
  const pending=generatePhoneGameContent({platform:'weibo'}),caught=pending.catch(e=>e);await settle();await settle();
- assert.match(called.prompt,/灯会刚刚公开宣布提前开始/);ctx.chat[1].mes='选中的另一回复：灯会延期。';resolve(JSON.stringify({posts:[passerby]}));
+ assert.match(called.prompt,/灯会刚刚公开宣布提前开始/);assert.match(called.prompt,/禁止生成路人/);ctx.chat[1].mes='选中的另一回复：灯会延期。';resolve(JSON.stringify({posts:[passerby,{actorId:actor.id,text:'我听说灯会安排又改了。'}]}));
  assert.match((await caught).message,/正文已更新或编辑/);assert.equal(readPhoneGameState().posts.length,0);
- let nextPrompt;ctx.generateRaw=async options=>{nextPrompt=options.prompt;return JSON.stringify({posts:[passerby]});};await generatePhoneGameContent({platform:'weibo'});
- assert.match(nextPrompt,/灯会延期/);assert.doesNotMatch(nextPrompt,/灯会刚刚公开宣布/);
+ let nextPrompt;ctx.generateRaw=async options=>{nextPrompt=options.prompt;return JSON.stringify({posts:[passerby,{actorId:actor.id,text:'灯会延期，今晚先把工坊门口的灯修好。'}]});};await generatePhoneGameContent({platform:'weibo'});
+ assert.match(nextPrompt,/灯会延期/);assert.doesNotMatch(nextPrompt,/灯会刚刚公开宣布/);assert.equal(readPhoneGameState().posts.length,1);assert.equal(readPhoneGameState().posts[0].actorId,actor.id);
 });
 
 test('世界书读取卡住时可以取消和重试，迟到书本不会启动旧模型请求',async t=>{
- const{f,ctx}=setup(t);ctx.chatMetadata.world_info='等待的书';let release,calls=0;
- f.set('__phoneWorldbookLoader',()=>new Promise(resolve=>release=resolve));ctx.generateRaw=async()=>{calls++;return JSON.stringify({posts:[passerby]});};
+ const{f,ctx}=setup(t);const actor=readPhoneGameState().actors[0];ctx.chatMetadata.world_info='等待的书';let release,calls=0;
+ f.set('__phoneWorldbookLoader',()=>new Promise(resolve=>release=resolve));ctx.generateRaw=async()=>{calls++;return JSON.stringify({posts:[{actorId:actor.id,text:'今天照常修灯。'}]});};
  const pending=generatePhoneGameContent({platform:'weibo'}),caught=pending.catch(e=>e);await settle();assert.equal(isPhoneGameGenerating(),true);
  cancelPhoneGameGeneration();assert.match((await caught).message,/停止等待/);await settle();assert.equal(isPhoneGameGenerating(),false);assert.equal(calls,0);
  ctx.chatMetadata.world_info='';await generatePhoneGameContent({platform:'weibo'});assert.equal(calls,1);
@@ -103,8 +133,7 @@ test('原有微博热搜聚合、关联回复、收藏和小红书生活筛选�
 
 test('世界舆情刷新交给宿主，切模式后不接收迟到结果，独立模式不调用宿主',async t=>{
  const{f,ctx}=setup(t);let calls=0,resolve;
- const capabilities=['social-open-direct','social-create-group','social-respond-friend','social-comment-moment','social-send-message','social-read-conversation','social-set-moment-like'];
- f.set('worldBackstageHost',{phoneBridgeVersion:2,phoneAction(){throw Error('不得调用社交写入');},getPhoneSurface:()=>({bridgeVersion:2,connected:true,capabilities,branchKey:'1',people:[],social:{},publicOpinion:{}}),refreshPublicOpinion:()=>{calls++;return new Promise(r=>resolve=r);}});
+ f.set('worldBackstageHost',{phoneBridgeVersion:2,phoneAction(){throw Error('不得调用社交写入');},getPhoneSurface:()=>({bridgeVersion:2,connected:true,capabilities:requiredCapabilities,branchKey:'1',people:[],social:{},publicOpinion:{}}),refreshPublicOpinion:()=>{calls++;return new Promise(r=>resolve=r);}});
  await assert.rejects(refreshWorldBackstagePublicOpinion(),/世界模式/);assert.equal(calls,0);
  setPhoneGameMode('world');const pending=refreshWorldBackstagePublicOpinion();setPhoneGameMode('game');resolve();await assert.rejects(pending,/已切换/);assert.equal(calls,1);
  assert.equal(ctx.chatMetadata.world_backstage_v1,undefined);assert.equal(capturePhoneGameScope().ctx,ctx);
