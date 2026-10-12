@@ -212,3 +212,13 @@ test('模型查询不在权限错误、服务异常、无效数据或取消后�
  for(const value of ['<html>fixture-key</html>',JSON.stringify({data:[]}),JSON.stringify({models:[{},null,37]})]){let calls=0;globalThis.fetch=async()=>{calls++;return new Response(value);};await assert.rejects(listPhoneImageModels(),/列表/);assert.equal(calls,1);}
  const stop=new AbortController();let calls=0;globalThis.fetch=async()=>{calls++;stop.abort();return new Response('',{status:404});};await assert.rejects(listPhoneImageModels({signal:stop.signal}),/取消/);assert.equal(calls,1);
 });
+
+test('真实站点报告没有已启用上游时直说原因，其他错误正文与密钥不回显',async t=>{
+ const f=fixture(t);f.config({provider:'novelai',baseUrl:'https://novel.example',model:'nai-diffusion-4-5-full'});
+ globalThis.fetch=async()=>new Response(JSON.stringify({message:'当前没有可用的已启用上游',key:'fixture-key'}),{status:503});
+ await assert.rejects(generatePhoneImage('crow'),e=>e.message.includes('503')&&e.message.includes('启用上游')&&!e.message.includes('fixture-key'));
+ globalThis.fetch=async()=>new Response(JSON.stringify({message:'fixture-key'}),{status:503});
+ await assert.rejects(generatePhoneImage('crow'),e=>e.message.includes('503')&&!e.message.includes('fixture-key'));
+ globalThis.fetch=async()=>new Response('<html>fixture-key</html>',{status:503});
+ await assert.rejects(generatePhoneImage('crow'),e=>e.message.includes('503')&&!e.message.includes('fixture-key'));
+});

@@ -110,6 +110,14 @@ async function request(url, { settings, key = '', body, signal, timeout = 30000 
         throw Object.assign(new Error('接口返回 404：请检查接口类型和站点提供的 API 地址，不要填写登录或注册页面。'), { status: 404 });
       }
       if ([401, 403].includes(response.status)) throw new Error('站点拒绝访问，请检查生图密钥及模型权限。');
+      if (response.status === 503) {
+        // 只识别明确的上游停用状态，不把站点返回的密钥或完整错误正文显示出来。
+        const detail = await boundedBody(response, 8192).then(bytes => {
+          try { return JSON.parse(new TextDecoder().decode(bytes))?.message; } catch { return ''; }
+        }).catch(() => '');
+        if (detail === '当前没有可用的已启用上游')
+          throw new Error('生图站点当前没有可用的已启用上游（HTTP 503）。请等待站点恢复，或联系站点管理员启用上游服务。');
+      }
       throw Object.assign(new Error(`生图站点请求失败（HTTP ${response.status}），请检查接口和模型，稍后重试。`), { status: response.status });
     }
     // Keep the timeout and abort listener alive while reading large responses.
