@@ -1,0 +1,35 @@
+{
+  "testedAt": "2026-10-12T03:55:16.832Z",
+  "lab": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+  "sillytavern": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+  "site": "https://gensoukyou.xyz",
+  "model": "grok-imagine-image",
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://gensoukyou.xyz/v1/models",
+      "method": "GET",
+      "authorizationMatches": true
+    }
+  ],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://gensoukyou.xyz/v1/models",
+      "status": 200,
+      "cloudflare": false
+    }
+  ],
+  "console": [],
+  "blockedBackground": [
+    "/api/sd/comfy/workflows"
+  ],
+  "generationPassed": false,
+  "modelFeedback": "站点返回了 82 个模型，请选择其中支持生图的模型，选好后保存设置。",
+  "modelsPassed": true,
+  "baseYellowMi": "a880ac76c500241191750bca0330ca7792e84995",
+  "siteModelCount": 82,
+  "candidateFiles": {
+    "src/phone-image-provider.js": "031b587a5820cbc10355515aaa919c6dc65b5014ce05a653524fb9ef0033f0b4",
+    "src/phone-image-response.js": "b4e8d9a261c05a395454186c60d73ec5963e95d5bce3bee781aea70cceed94ec",
+    "src/vendor/fzstd.js": "1b14feed617b3a89516221ff854d29b94c1ab89657d02e89f785407bc08b2768"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "testedAt": "2026-10-12T03:55:18.566Z",
+  "endpoint": "https://gensoukyou.xyz/v1/images/generations",
+  "model": "grok-imagine-image",
+  "n": 1,
+  "route": "直接站点请求，不经过小手机或酒馆跨域代理",
+  "requestedEncoding": "gzip, deflate, br",
+  "status": 502,
+  "contentType": "application/json; charset=utf-8",
+  "contentEncoding": null,
+  "bytes": 868,
+  "message": "",
+  "hasImage": false
+}

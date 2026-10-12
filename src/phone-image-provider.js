@@ -1,5 +1,6 @@
 import { phoneImagePath } from './phone-image-paths.js';
 import { MAX_PHONE_IMAGE_BYTES, novelImageSize, novelImageBody, readNovelImageZip } from './phone-image-novelai.js';
+import { decodePhoneImageResponse } from './phone-image-response.js';
 
 const SETTINGS_KEY = 'world_phone_images_v1';
 const DEVICE_KEY = 'world-phone-image-key:';
@@ -112,7 +113,7 @@ async function request(url, { settings, key = '', body, signal, timeout = 30000 
       if ([401, 403].includes(response.status)) throw new Error('站点拒绝访问，请检查生图密钥及模型权限。');
       if (response.status === 503) {
         // 只识别明确的上游停用状态，不把站点返回的密钥或完整错误正文显示出来。
-        const detail = await boundedBody(response, 8192).then(bytes => {
+        const detail = await boundedBody(response, 8192).then(bytes => decodePhoneImageResponse(bytes, { maximum: 8192, signal: controller.signal })).then(bytes => {
           try { return JSON.parse(new TextDecoder().decode(bytes))?.message; } catch { return ''; }
         }).catch(() => '');
         if (detail === '当前没有可用的已启用上游')
@@ -121,7 +122,8 @@ async function request(url, { settings, key = '', body, signal, timeout = 30000 
       throw Object.assign(new Error(`生图站点请求失败（HTTP ${response.status}），请检查接口和模型，稍后重试。`), { status: response.status });
     }
     // Keep the timeout and abort listener alive while reading large responses.
-    return await boundedBody(response, body ? MAX_IMAGE_BYTES * 1.4 : MAX_IMAGE_BYTES);
+    const maximum = body ? MAX_IMAGE_BYTES * 1.4 : MAX_IMAGE_BYTES;
+    return await decodePhoneImageResponse(await boundedBody(response, maximum), { maximum, signal: controller.signal });
   } catch (error) {
     if (controller.signal.aborted) throw new Error(signal?.aborted ? '已取消配图。' : '生图站点响应超时，请稍后重试。');
     if (error instanceof TypeError) throw new Error('无法连接生图站点。浏览器直连需要站点允许跨域（CORS）；也可选择酒馆代理。');
