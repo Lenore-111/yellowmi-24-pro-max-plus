@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { phoneImagePath } from '../src/phone-image-paths.js';
+import * as weiboOpinion from '../src/phone-weibo-opinion.js';
+import * as weiboContext from '../src/phone-weibo-context.js';
 
 // Run the actual module bodies with an isolated SillyTavern host, controllable
 // model promises and virtual time. No browser or model credentials are needed.
@@ -49,13 +51,13 @@ function createHarness(sources) {
     localStorage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)},
   };
   const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
-  const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,phoneImagePath,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors},
+  const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,phoneImagePath,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors,...weiboOpinion},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
      'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
-  const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,readPhoneImageSettings:()=>({}),...game},
+  const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,readPhoneImageSettings:()=>({}),readWeiboWorldbook:async()=>({entries:[],unavailableBooks:[],signature:'test'}),weiboWorldbookSignature:()=> 'test',...game,...weiboContext},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
-  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {phoneImagePath}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
+  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {phoneImagePath,...weiboOpinion}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
   // The regression harness strips ESM imports. UI-closure views are covered by real-browser QA;
   // these shims keep this existing lifecycle suite focused on the phone-game engine and renderer lifecycle.
   const uiClosure = {
@@ -67,7 +69,7 @@ function createHarness(sources) {
     renderDeliveryGame(){ return ''; },
   };
   const imageUi = { installPhoneImageStyles(){}, phonePostImageStatus:()=>({busy:false}), subscribePhonePostImages:()=>()=>{}, openPhoneImageSheet(){}, cancelPhonePostImage(){} };
-  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...imageUi,...appUi,...uiClosure,...game,...ai}, ['renderPhoneGameApp']);
+  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...imageUi,...appUi,...uiClosure,...game,...ai,...weiboOpinion}, ['renderPhoneGameApp']);
   const deferred = () => { let resolve,reject; const promise = new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject}; };
   function model(cooperative = true) {
     const task = deferred();
@@ -120,7 +122,7 @@ test('旧酒馆上下文缺少 generateRaw 时，三个动态平台使用宿主�
     assert.equal(typeof prompt,'string');
     assert.match(prompt,/PHONE_GAME/);
     assert.equal(api,null);assert.equal(instructOverride,false);assert.equal(quietToLoud,false);
-    assert.match(systemPrompt,/JSON/);assert.equal(responseLength,1200);assert.equal(this,h.ctx);
+    assert.match(systemPrompt,/JSON/);assert.equal(responseLength,calls.length===1?2000:1200);assert.equal(this,h.ctx);
     return JSON.stringify({posts:[{actorId:actor.id,text:'旧宿主动态'}]});
   };
   for(const platform of ['weibo','rednote','moments'])await h.ai.generatePhoneGameContent({platform});
@@ -133,7 +135,7 @@ test('宿主导出的新版 generateRaw 保持对象参数，已有上下文接�
   const h=createHarness(sources), actor=h.game.readPhoneGameState().actors[0];let moduleCalls=0,contextCalls=0;
   h.tavern.generateRaw=async function({prompt,systemPrompt,responseLength,trimNames}={}) {
     moduleCalls++;assert.match(prompt,/PHONE_GAME/);assert.match(systemPrompt,/JSON/);
-    assert.equal(responseLength,1200);assert.equal(trimNames,false);
+    assert.equal(responseLength,2000);assert.equal(trimNames,false);
     return JSON.stringify({posts:[{actorId:actor.id,text:'宿主新版动态'}]});
   };
   await h.ai.generatePhoneGameContent({platform:'weibo'});

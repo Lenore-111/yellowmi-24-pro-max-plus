@@ -1,7 +1,7 @@
 import { readSocialBucket, writeSocialBucket, socialScope } from './social-storage.js';
 import { buildCommunicationRegistry } from './communication-registry.js';
-import { readWorldBackstage, subscribeWorldBackstage } from './world-backstage-bridge.js';
-import { readPhoneGameMode } from './phone-game.js?v=0.3.0-alpha.28';
+import { readWorldBackstage, subscribeWorldBackstage, refreshWorldBackstagePublicOpinion } from './world-backstage-bridge.js';
+import { readPhoneGameMode, capturePhoneGameScope, isPhoneGameScopeCurrent } from './phone-game.js?v=0.3.0-alpha.28';
 
 const STORAGE_KEY = 'world_phone_social_realism_v1';
 const APPS = {
@@ -510,6 +510,7 @@ export function mountSocialRealism({ phone } = {}) {
   let refreshQueued = false;
   let paintedShell = null;
   let renderedMarkup = '';
+  let opinionRefresh = null;
   let snapshot = readWorldBackstage();
   let state = loadState();
   let scope = socialScope();
@@ -571,7 +572,7 @@ export function mountSocialRealism({ phone } = {}) {
   const markup = active === 'weibo' ? renderWeiboMarkup(snapshot, state.weibo) : renderRedNoteMarkup(snapshot, state.rednote);
   section.classList.add('wp-social-realism-app', `is-${active}`);
   headerCopy(section, active === 'weibo' ? (state.weibo.detailId ? '微博正文' : { home: '微博', hot: '发现', me: '我' }[state.weibo.tab]) : '小红书', active === 'weibo' ? '' : snapshot.connected ? 'SIM 已插入 · 世界公开网络' : '未插入世界背面 SIM');
-  if (preserveScroll && old === paintedShell && markup === renderedMarkup) return;
+  if (preserveScroll && old === paintedShell && markup === renderedMarkup) { bindOpinionRefresh(section); return; }
   const focused = old.querySelector('[data-social-search] input:focus');
   const selection = focused ? [focused.selectionStart, focused.selectionEnd] : null;
   const previousScrollTop = Number.isFinite(options.scrollTop)
@@ -601,7 +602,54 @@ function mutate(mutator, options = {}) {
   paint(options.preserveScroll ?? true, options);
 }
 
+  function bindOpinionRefresh(section) {
+    const header = section.querySelector('.wp-app-header');
+    if (header) {
+      let refreshButton = header.querySelector('[data-social-opinion-refresh]');
+      if (!refreshButton) {
+        refreshButton = document.createElement('button');
+        refreshButton.type = 'button';
+        refreshButton.dataset.socialOpinionRefresh = '1';
+        header.append(refreshButton);
+      }
+      const opened = capturePhoneGameScope(), openedSocialScope = socialScope(), openedApp = active;
+      const current = () => !destroyed && readPhoneGameMode() === 'world'
+        && isPhoneGameScopeCurrent(opened) && socialScope() === openedSocialScope
+        && active === openedApp && phone?.current?.() === `app:${openedApp}`
+        && document.querySelector('#world-phone-stage .wp-native-app') === section;
+      const busy = opinionRefresh && isPhoneGameScopeCurrent(opinionRefresh.scope)
+        && opinionRefresh.socialScope === openedSocialScope;
+      refreshButton.disabled = Boolean(busy || !snapshot.connected);
+      refreshButton.textContent = busy ? '正在刷新…' : '刷新舆情';
+      refreshButton.onclick = async () => {
+        if (!current() || refreshButton.disabled) return;
+        const task = { scope: opened, socialScope: openedSocialScope };
+        opinionRefresh = task;
+        refreshButton.disabled = true;
+        refreshButton.textContent = '正在刷新…';
+        section.querySelector('[data-social-opinion-error]')?.remove();
+        try {
+          const next = await refreshWorldBackstagePublicOpinion();
+          if (current()) { snapshot = next; paint(true); }
+        } catch (error) {
+          if (current()) {
+            const message = document.createElement('p');
+            message.dataset.socialOpinionError = '1';
+            message.setAttribute('role', 'alert');
+            message.textContent = error.message;
+            header.after(message);
+          }
+        } finally {
+          if (opinionRefresh === task) opinionRefresh = null;
+          if (!destroyed && readPhoneGameMode() === 'world' && isPhoneGameScopeCurrent(opened)
+            && socialScope() === openedSocialScope) queueRefresh();
+        }
+      };
+    }
+  }
+
   function bind(section) {
+    bindOpinionRefresh(section);
     section.querySelectorAll('[data-social-profile]').forEach((button) => button.addEventListener('click', () => {
       mutate((bucket) => { bucket.profileView = button.dataset.socialProfile; }, { preserveScroll: false });
     }));
