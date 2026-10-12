@@ -1,0 +1,58 @@
+{
+  "lab": "3c45f56ee7bc3b5742b57a9d4b54c0f950d7e01b",
+  "sillytavern": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+  "yellowMi": "a880ac76c500241191750bca0330ca7792e84995",
+  "site": "https://novelai-ln.minijiu.cfd",
+  "model": "nai-diffusion-4-5-full",
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://novelai-ln.minijiu.cfd/models",
+      "method": "GET",
+      "authorizationMatches": true
+    },
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://novelai-ln.minijiu.cfd/ai/generate-image",
+      "method": "POST",
+      "authorizationMatches": true,
+      "model": "nai-diffusion-4-5-full",
+      "steps": 28,
+      "samples": 1,
+      "width": 1024,
+      "height": 1024
+    }
+  ],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://novelai-ln.minijiu.cfd/models",
+      "status": 403,
+      "cloudflare": false
+    },
+    {
+      "url": "http://127.0.0.1:8036/proxy/https://novelai-ln.minijiu.cfd/ai/generate-image",
+      "status": 503,
+      "message": "当前没有可用的已启用上游"
+    }
+  ],
+  "console": [
+    {
+      "kind": "console",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "kind": "console",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    },
+    {
+      "kind": "console",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    }
+  ],
+  "blockedBackground": [
+    "/api/sd/comfy/workflows"
+  ],
+  "generationPassed": false,
+  "modelFeedback": "站点拒绝访问，请检查生图密钥及模型权限。",
+  "imageFeedback": "生图站点当前没有可用的已启用上游（HTTP 503）。请等待站点恢复，或联系站点管理员启用上游服务。关闭",
+  "requestedAt": "2026-10-12T11:02:10+08:00",
+  "testedAt": "2026-10-12T03:10:57.035Z"
+}
