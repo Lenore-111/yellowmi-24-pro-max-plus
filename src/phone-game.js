@@ -1,5 +1,6 @@
 import { DELIVERY_COLA } from './delivery-data.js';
 import { phoneImagePath } from './phone-image-paths.js';
+import { normalizeWeiboAuthor, normalizeWeiboDiscussion } from './phone-weibo-opinion.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
 import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
@@ -172,10 +173,12 @@ export function normalizePhoneGameState(raw) {
       text: clean(event.text, 1200), postId: clean(event.postId, 100), giftId: clean(event.giftId, 80), note: clean(event.note, 200),
       tick: integer(event.tick), status: ['replied', 'cancelled'].includes(event.status) ? event.status : 'pending', callId: clean(event.callId, 100), reply: clean(event.reply, 1200),
       affinityDelta: integer(event.affinityDelta, -3, 3) }));
-  const posts = (Array.isArray(source.posts) ? source.posts : []).filter(post => post && actorIds.has(post.actorId) && platforms.includes(post.platform)).slice(-80)
+  const posts = (Array.isArray(source.posts) ? source.posts : []).filter(post => post && platforms.includes(post.platform)
+      && (post.platform === 'weibo' ? normalizeWeiboAuthor(post, actors) : actorIds.has(post.actorId))).slice(-80)
     .map(post => ({ id: clean(post.id, 100), actorId: post.actorId, platform: post.platform, title: clean(post.title, 80), text: clean(post.text, 1000),
       liked: Boolean(post.liked), tick: integer(post.tick), mood: clean(post.mood, 40),
-      imageUrl: phoneImagePath(post.imageUrl), imagePrompt: clean(post.imagePrompt, 6000) }));
+      imageUrl: phoneImagePath(post.imageUrl), imagePrompt: clean(post.imagePrompt, 6000),
+      ...(post.platform === 'weibo' ? {...normalizeWeiboAuthor(post, actors),...normalizeWeiboDiscussion(post)} : {}) }));
   const relations = Object.fromEntries(actors.map(actor => {
     const value = Object.hasOwn(source.relations || {}, actor.id) ? source.relations[actor.id] : {};
     return [actor.id, { affinity: integer(value?.affinity, 0, 100), memory: clean(value?.memory, 4000),
@@ -376,10 +379,12 @@ export function applyPhoneGameReply(eventId, response, scope = capturePhoneGameS
 export function applyPhoneGamePosts(platform, responses, scope = capturePhoneGameScope()) {
   if (!platforms.includes(platform)) throw new Error('未知平台');
   return commit(scope, state => {
-    const posts = (Array.isArray(responses) ? responses : []).filter(item => item && state.actors.some(actor => actor.id === item.actorId) && typeof item.text === 'string' && clean(item.text)).slice(0, 4);
+    const posts = (Array.isArray(responses) ? responses : []).filter(item => item && typeof item.text === 'string' && clean(item.text)
+      && (platform === 'weibo' ? normalizeWeiboAuthor(item, state.actors) : state.actors.some(actor => actor.id === item.actorId))).slice(0, platform === 'weibo' ? 6 : 4);
     if (!posts.length) throw new Error('没有收到有效动态，请重试');
     state.tick += 1;
-    state.posts.push(...posts.map(item => ({ id: id(), actorId: item.actorId, platform, title: clean(item.title, 80), text: clean(item.text, 1000), mood: clean(item.mood, 40), imagePrompt: clean(item.imagePrompt, 6000), tick: state.tick, liked: false })));
+    state.posts.push(...posts.map(item => ({ id: id(), actorId: item.actorId, platform, title: clean(item.title, 80), text: clean(item.text, 1000), mood: clean(item.mood, 40), imagePrompt: clean(item.imagePrompt, 6000), tick: state.tick, liked: false,
+      ...(platform === 'weibo' ? {...normalizeWeiboAuthor(item, state.actors),...normalizeWeiboDiscussion(item)} : {}) })));
   });
 }
 export function attachPhoneGameImage(postId, imageUrl, prompt, scope = capturePhoneGameScope()) {

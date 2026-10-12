@@ -10,6 +10,7 @@ import {
 import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 import { phonePostImageStatus, subscribePhonePostImages, generatePhonePostImage, cancelPhonePostImage } from './phone-post-images.js';
 import { installPhoneImageStyles, openPhoneImageSheet, savePostImageToAlbum } from './phone-image-view.js';
+import { weiboAuthorName, weiboRepliesMarkup } from './phone-weibo-opinion.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const labels = { wechat: '微信', weibo: '微博', rednote: '小红书', wallet: '钱包', delivery: 'Echo快送' };
@@ -51,6 +52,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     tab: app === 'weibo' ? 'home' : app === 'rednote' ? 'discover' : 'chats',
     query: '', savedIds: [], actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
     contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '', imageBusy: false, imageFeedback: '', imageFailed: false,
+    canGenerateWeibo:Boolean(scope.ctx?.characters?.[scope.ctx.characterId]),
   };
   try { ui.savedIds = JSON.parse(globalThis.localStorage?.getItem('echo_phone_saved:' + scope.key) || '[]'); if (!Array.isArray(ui.savedIds)) ui.savedIds = []; } catch {}
   function current() { return isPhoneGameScopeCurrent(scope) && readPhoneGameMode() === 'game' && screen.querySelector('[data-phone-game-app]')?.dataset.phoneGameView === viewId; }
@@ -85,8 +87,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
   const replyMarkup = event => `<div class="wpg-reply">${event.status === 'replied' ? `<span>${esc(event.reply)}</span><small>熟悉度 ${event.affinityDelta > 0 ? '+' : ''}${event.affinityDelta}</small>` : `<span>等待回应</span><button type="button" data-pg-retry="${esc(event.id)}" ${ui.busy ? 'disabled' : ''}>${ui.busy ? '等待回应…' : '重试回应'}</button>`}</div>`;
   function postDetail(state, post) {
     if (app === 'rednote') return renderRedNoteGameDetail(state, post, { saved: ui.savedIds.includes(post.id), busy: ui.busy, imageBusy: ui.imageBusy, draft: ui.draft, replyMarkup });
+    if (app==='weibo' && !state.actors.some(actor=>actor.id===post.actorId)) return `<button type="button" class="wpg-text-button" data-pg-post-back>‹ 返回微博</button>${postCard(state,post,true)}${weiboRepliesMarkup(post)||'<div class="echo-feed-empty"><p>暂时还没有回复。</p></div>'}`;
     const comments = state.events.filter(event => event.postId === post.id);
-    return `<button type="button" class="wpg-text-button" data-pg-post-back>‹ 返回动态</button>${postCard(state, post, true)}<section class="wpg-comments"><h3>评论</h3>${comments.map(event => `<article><b>${esc(state.user)}</b><p>${esc(event.text)}</p>${replyMarkup(event)}<button type="button" class="wpg-text-button" data-pg-export="${esc(event.id)}">带入正文…</button></article>`).join('') || '<p>留一句话，开始这段互动。</p>'}</section><form data-pg-comment class="wpg-compose"><textarea maxlength="1200" aria-label="评论内容" data-pg-draft ${ui.busy ? 'readonly' : ''} placeholder="给${esc(phoneGameActorPronoun(state.actors.find(actor => actor.id === post.actorId)))}留一句话">${esc(ui.draft)}</textarea><button type="submit" ${ui.busy ? 'disabled' : ''}>评论</button></form>`;
+    return `<button type="button" class="wpg-text-button" data-pg-post-back>‹ 返回动态</button>${postCard(state, post, true)}${app==='weibo'?weiboRepliesMarkup(post):''}<section class="wpg-comments"><h3>评论</h3>${comments.map(event => `<article><b>${esc(state.user)}</b><p>${esc(event.text)}</p>${replyMarkup(event)}<button type="button" class="wpg-text-button" data-pg-export="${esc(event.id)}">带入正文…</button></article>`).join('') || '<p>留一句话，开始这段互动。</p>'}</section><form data-pg-comment class="wpg-compose"><textarea maxlength="1200" aria-label="评论内容" data-pg-draft ${ui.busy ? 'readonly' : ''} placeholder="给${esc(phoneGameActorPronoun(state.actors.find(actor => actor.id === post.actorId)))}留一句话">${esc(ui.draft)}</textarea><button type="submit" ${ui.busy ? 'disabled' : ''}>评论</button></form>`;
   }
   function postCard(state, post, detail = false) {
     return gamePost(state, post, app, ui.savedIds.includes(post.id), detail, phoneGameClock({ tick: post.tick }), ui.imageBusy);
@@ -95,9 +98,10 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     const selected = state.posts.find(post => post.id === ui.postId && post.platform === platform);
     if (selected) return postDetail(state, selected);
     let posts = state.posts.filter(post => post.platform === platform && (!ui.filter || post.actorId === ui.filter)
-      && (!ui.query || [post.title,post.text,actorName(state,post.actorId)].join(' ').includes(ui.query))
+      && (!ui.query || [post.title,post.text,weiboAuthorName(state,post),...(post.replies || []).map(reply=>reply.text)].join(' ').includes(ui.query))
+      && (ui.tab !== 'following' || state.actors.some(actor=>actor.id===post.actorId))
       && (ui.tab !== 'saved' || ui.savedIds.includes(post.id))).slice().reverse();
-    if (ui.tab === 'hot') posts.sort((a,b)=>Number(b.liked)-Number(a.liked));
+    if (ui.tab === 'hot') posts.sort((a,b)=>(b.heat || 0)-(a.heat || 0)||Number(b.liked)-Number(a.liked));
     return gameFeed(state, platform, ui, posts.map(post=>postCard(state,post)).join(''));
   }
   function chats(state) {

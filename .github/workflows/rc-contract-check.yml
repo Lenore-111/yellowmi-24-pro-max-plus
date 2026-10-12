@@ -33,3 +33,6 @@ jobs:
           node --check src/phone-image-view.js
           node --check src/phone-post-images.js
           node --check src/phone-image-paths.js
+          node --check src/phone-weibo-context.js
+          node --check src/phone-weibo-lore.js
+          node --check src/phone-weibo-opinion.js

@@ -378,6 +378,20 @@ export async function performWorldBackstageSocialAction(action, payload) {
   return { snapshot: next, conversationId: text(surface?.social?.activeConversationId) };
 }
 
+// Public-opinion generation belongs to the world engine's existing controller.
+// The phone only requests a refresh and reads the filtered phone projection.
+export async function refreshWorldBackstagePublicOpinion() {
+  const before=readWorldBackstage();
+  if(!before.connected)throw new Error(before.connectionMessage || '世界背面未连接');
+  if(readPhoneGameMode()!=='world')throw new Error('请在世界模式刷新舆情。');
+  const scope=activePhoneScope(before),host=getHost();
+  if(typeof host?.refreshPublicOpinion==='function')await host.refreshPublicOpinion();
+  const next=readWorldBackstage();
+  if(!samePhoneScope(scope,activePhoneScope(next)))throw new Error('聊天、角色、分支或手机模式已切换，本次舆情结果已丢弃。');
+  if(!next.connected)throw new Error(next.connectionMessage || '世界背面连接已断开');
+  return next;
+}
+
 export async function sendWorldBackstageMessage(conversationId, body) {
   const id = text(conversationId);
   const content = text(body).slice(0, 1600);
