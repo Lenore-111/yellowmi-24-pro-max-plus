@@ -90,10 +90,13 @@ function initWorldPhone() {
   phone = mountWorldPhone();
   unmountAcceptanceGuards = mountPhoneAcceptanceGuards({ phone });
   unmountShellLayout = mountShellLayout({ phone });
+  // Register the lazy feed capture before App Store/social UI capture handlers.
+  // Managed social icons stopImmediatePropagation on click, so the feed bridge
+  // must hear the user's explicit open/refresh intent first.
+  unmountWorldPhoneFeedIntegration = mountWorldPhoneFeedIntegration({ phone });
   unmountAppStore = mountAppStoreIntegration({ phone });
   unmountLocalWerewolf = mountLocalWerewolfIntegration({ phone });
   unmountSocialRealism = mountSocialRealism({ phone });
-  unmountWorldPhoneFeedIntegration = mountWorldPhoneFeedIntegration({ phone });
   unmountUtilityRealism = mountUtilityRealism({ phone });
   unmountDeviceRealism = mountDeviceRealism({ phone });
   unmountSystemRealism = mountSystemRealism({ phone });
