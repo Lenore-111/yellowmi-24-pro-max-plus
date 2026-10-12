@@ -104,7 +104,9 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   if (generation || rawInFlight) throw new Error('手机里还有一次生成进行中，等角色回应后再继续。');
   if (!isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('请回到原聊天的独立游戏模式继续。');
   if (isMainGenerationActive()) throw new Error('正文正在生成，等正文结束后再玩手机。');
-  const generator = scope.ctx?.generateRaw;
+  // Older supported hosts export generateRaw from script.js without putting it
+  // on getContext(). Their generator also uses positional arguments.
+  const generator = typeof scope.ctx?.generateRaw === 'function' ? scope.ctx.generateRaw : tavern.generateRaw;
   if (typeof generator !== 'function') throw new Error('请先连接酒馆模型。手机互动已保存，连接后可以重试。');
   const state = readPhoneGameState(scope);
   if (!state.actors.length) throw new Error('先在酒馆选择一张角色卡，再打开手机。');
@@ -131,10 +133,11 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   try {
     // Call immediately so generateRaw installs its stop listener before a cancel
     // button can fire. Keep the raw-task lease until the transport actually ends.
-    const task = Promise.resolve(generator.call(scope.ctx, {
-      prompt, systemPrompt: '只运行独立手机游戏，按要求返回 JSON。',
-      responseLength: request.eventId ? 900 : 1200, trimNames: false,
-    }));
+    const systemPrompt = '只运行独立手机游戏，按要求返回 JSON。';
+    const responseLength = request.eventId ? 900 : 1200;
+    const task = Promise.resolve(generator.length > 1
+      ? generator.call(scope.ctx, prompt, null, false, false, systemPrompt, responseLength, false)
+      : generator.call(scope.ctx, { prompt, systemPrompt, responseLength, trimNames: false }));
     rawInFlight = task;
     const release = () => { if (rawInFlight === task) rawInFlight = null; };
     task.then(release, release);

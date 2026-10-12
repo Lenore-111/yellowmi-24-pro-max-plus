@@ -112,6 +112,42 @@ function worldBridge(h, action) {
   return {surface,bridge};
 }
 
+test('旧酒馆上下文缺少 generateRaw 时，三个动态平台使用宿主导出及旧参数生成', async () => {
+  const h=createHarness(sources), initial=h.game.readPhoneGameState(), actor=initial.actors[0], calls=[];
+  assert.equal(h.ctx.generateRaw,undefined);
+  h.tavern.generateRaw=async function(prompt,api,instructOverride,quietToLoud,systemPrompt,responseLength) {
+    calls.push({prompt,api,instructOverride,quietToLoud,systemPrompt,responseLength,receiver:this});
+    assert.equal(typeof prompt,'string');
+    assert.match(prompt,/PHONE_GAME/);
+    assert.equal(api,null);assert.equal(instructOverride,false);assert.equal(quietToLoud,false);
+    assert.match(systemPrompt,/JSON/);assert.equal(responseLength,1200);assert.equal(this,h.ctx);
+    return JSON.stringify({posts:[{actorId:actor.id,text:'旧宿主动态'}]});
+  };
+  for(const platform of ['weibo','rednote','moments'])await h.ai.generatePhoneGameContent({platform});
+  assert.deepEqual(h.game.readPhoneGameState().posts.map(p=>p.platform),['weibo','rednote','moments']);
+  assert.equal(calls.length,3);assert.equal(h.game.readPhoneGameState().balance,initial.balance);
+  assert.equal(h.ai.isPhoneGameGenerating(),false);assert.equal(h.timers.size,0);
+});
+
+test('宿主导出的新版 generateRaw 保持对象参数，已有上下文接口优先使用', async () => {
+  const h=createHarness(sources), actor=h.game.readPhoneGameState().actors[0];let moduleCalls=0,contextCalls=0;
+  h.tavern.generateRaw=async function({prompt,systemPrompt,responseLength,trimNames}={}) {
+    moduleCalls++;assert.match(prompt,/PHONE_GAME/);assert.match(systemPrompt,/JSON/);
+    assert.equal(responseLength,1200);assert.equal(trimNames,false);
+    return JSON.stringify({posts:[{actorId:actor.id,text:'宿主新版动态'}]});
+  };
+  await h.ai.generatePhoneGameContent({platform:'weibo'});
+  h.ctx.generateRaw=async function(options) { contextCalls++;assert.equal(this,h.ctx);assert.equal(typeof options.prompt,'string');return JSON.stringify({posts:[{actorId:actor.id,text:'上下文动态'}]}); };
+  await h.ai.generatePhoneGameContent({platform:'rednote'});
+  assert.equal(moduleCalls,1);assert.equal(contextCalls,1);assert.equal(h.game.readPhoneGameState().posts.length,2);
+});
+
+test('上下文与宿主都没有生成接口时，提示错误且不产生虚假动态', async () => {
+  const h=createHarness(sources);
+  await assert.rejects(h.ai.generatePhoneGameContent({platform:'weibo'}),/请先连接酒馆模型/);
+  assert.equal(h.game.readPhoneGameState().posts.length,0);assert.equal(h.ai.isPhoneGameGenerating(),false);
+});
+
 test('新建世界会话等待保存确认并返回确认后的会话编号', async () => {
   const h=createHarness(sources);h.game.setPhoneGameMode('world');let confirm;
   const {surface,bridge}=worldBridge(h,()=>new Promise(resolve=>confirm=resolve));
