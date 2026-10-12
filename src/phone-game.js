@@ -390,7 +390,8 @@ export function applyPhoneGamePosts(platform, responses, scope = capturePhoneGam
   if (!platforms.includes(platform)) throw new Error('未知平台');
   return commit(scope, state => {
     const posts = (Array.isArray(responses) ? responses : []).filter(item => item && typeof item.text === 'string' && clean(item.text)
-      && (platform === 'weibo' ? normalizeWeiboAuthor(item, state.actors) : state.actors.some(actor => actor.id === item.actorId))).slice(0, platform === 'weibo' ? 6 : 4);
+      && (platform === 'weibo' ? normalizeWeiboAuthor(item, state.actors) : state.actors.some(actor => actor.id === item.actorId)));
+    if (platform === 'weibo') posts.splice(6);
     if (!posts.length) throw new Error('没有收到有效动态，请重试');
     state.tick += 1;
     state.posts.push(...posts.map(item => ({ id: id(), actorId: item.actorId, platform, title: clean(item.title, 80), text: clean(item.text, 1000), mood: clean(item.mood, 40), imagePrompt: clean(item.imagePrompt, 6000), tick: state.tick, liked: false,
