@@ -28,6 +28,14 @@ function feedCount(platform) {
   return 2;
 }
 
+function readPhoneWorldSnapshot() {
+  try {
+    const reader = typeof readWorldBackstage === 'function' ? readWorldBackstage : null;
+    if (reader) return reader();
+  } catch {}
+  return { connected:false, branchKey:'', connectionMessage:'世界背面未连接' };
+}
+
 export function isPhoneGameGenerating() { return Boolean(generation); }
 export function phoneGameGenerationStatus(scope = capturePhoneGameScope()) {
   return {
@@ -118,7 +126,7 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   if (typeof generator !== 'function') throw new Error('请先连接酒馆模型。手机互动已保存，连接后可以重试。');
   const state = readPhoneGameState(scope);
   const weiboFeed = request.platform === 'weibo' && !request.eventId;
-  const worldSnapshot = weiboFeed ? readWorldBackstage() : null;
+  const worldSnapshot = weiboFeed ? readPhoneWorldSnapshot() : null;
   const worldConnected = Boolean(worldSnapshot?.connected);
   const worldBranchKey = worldConnected ? String(worldSnapshot?.branchKey || '') : '';
   if (!state.actors.length && !(weiboFeed && worldConnected && scope.ctx?.characters?.[scope.ctx.characterId])) throw new Error('先在酒馆选择一张角色卡，再打开手机。');
@@ -191,7 +199,7 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
     const raw = await Promise.race([task, cancelled]);
     if (operation.cancelled || !isPhoneGameScopeCurrent(scope) || readPhoneGameMode() !== 'game') throw new Error('已切换聊天或模式，本次结果未写入；原互动仍可重试。');
     if (worldConnected) {
-      const latestWorld = readWorldBackstage();
+      const latestWorld = readPhoneWorldSnapshot();
       if (!latestWorld.connected || String(latestWorld.branchKey || '') !== worldBranchKey) throw new Error('世界背面连接或世界分支已变化，本次微博结果未保存，请重新刷新。');
     }
     const response = parsePhoneGameResponse(raw, { feed: !request.eventId });
