@@ -83,6 +83,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-launcher-polish-style', './launcher-polish.css?build=echo-icon-v1');
   ensureExternalStyle('world-phone-experience-baseline-style', './experience-baseline.css?build=alpha9');
   ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
+  ensureExternalStyle('echo-social-ui-realism-v2-style', './social-ui-realism-v2.css?build=echo-social-ui-v2');
   phone = mountWorldPhone();
   unmountAcceptanceGuards = mountPhoneAcceptanceGuards({ phone });
   unmountShellLayout = mountShellLayout({ phone });
