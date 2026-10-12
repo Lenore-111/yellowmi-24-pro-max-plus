@@ -135,7 +135,7 @@ function createState(scope) {
     version: 3, user: clean(ctx?.name1 || '你', 80), userProfile: clean(power.persona_descriptions?.[persona]?.description, 4000),
     actors: collectActors(ctx),
     origin: clean((ctx?.chat || []).filter(message => !message.is_system).slice(-6).map(message => `${message.is_user ? ctx?.name1 || '你' : message.name || ctx?.name2 || '角色'}：${message.mes || ''}`).join('\n'), 7000),
-    tick: 0, balance: 100, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
+    tick: 0, balance: 1000, earned: 0, spent: 0, ledger: [], posts: [], events: [], relations: {}, shift: null,
   };
 }
 export const phoneGameDialNumber = value => String(value ?? '').replace(/[^0-9+*#]/g, '').slice(0, 24);

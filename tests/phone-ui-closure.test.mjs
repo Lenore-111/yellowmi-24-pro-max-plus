@@ -18,5 +18,5 @@ test('快送默认收礼人可支付，保存和生成期间禁用重试，失�
  releaseSave();await settle();await settle();assert.match(f.screen.textContent,/模型没有返回有效内容/);assert.equal(get('[data-pg-retry]').disabled,false);
  get('[data-pg-retry]').click();assert.equal(get('[data-pg-retry]').disabled,true);await settle();await settle();
  assert.match(f.screen.textContent,/已送达/);assert.match(f.screen.textContent,/已收到饮料/);assert.equal(f.screen.querySelector('.wpg-error'),null);
- const state=readPhoneGameState();assert.equal(state.balance,82);assert.equal(state.events.filter(e=>e.kind==='gift').length,1);assert.equal(state.ledger.length,1);assert.equal(calls,2);
+ const state=readPhoneGameState();assert.equal(state.balance,982);assert.equal(state.events.filter(e=>e.kind==='gift').length,1);assert.equal(state.ledger.length,1);assert.equal(calls,2);
 });

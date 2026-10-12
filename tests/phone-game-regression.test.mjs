@@ -243,7 +243,7 @@ const before=h.game.readPhoneGameState(), key=h.game.capturePhoneGameScope().key
 for(const sourceKey of ['12:0:new','12:1:swipe','12:1:edited']) {
  h.ctx.chatMetadata.world_backstage_v1={currentState:{lastCommit:{sourceKey}}};
  assert(h.game.capturePhoneGameScope().key===key,'scope changed');
- const after=h.game.readPhoneGameState();assert(after.balance===145&&after.events.length===1&&after.relations[actor.id].affinity===3,'save reset');
+ const after=h.game.readPhoneGameState();assert(after.balance===1045&&after.events.length===1&&after.relations[actor.id].affinity===3,'save reset');
 }
 h.ctx.chatId='other';assert(h.game.readPhoneGameState().events.length===0,'chat isolation failed');
 h.ctx.chatId='chat-one';h.ctx.name1='另一身份';assert(h.game.readPhoneGameState().events.length===0,'persona isolation failed');
@@ -269,9 +269,9 @@ const q=h.game.queuePhoneGameInteraction({actorId:actor.id,kind:'gift',giftId:'c
 h.model();const pending=h.ai.generatePhoneGameContent({eventId:q.eventId});const caught=pending.catch(e=>e);
 h.clock.advance(h.ai.PHONE_GAME_GENERATION_TIMEOUT_MS);const error=await caught;await flush();
 assert(error.message.includes('一分钟'),'timeout missing');assert(!h.ai.isPhoneGameGenerating()&&h.timers.size===0,'lock/timer leak');
-assert(h.game.readPhoneGameState().balance===75&&h.game.readPhoneGameState().events[0].status==='pending','gift changed');
+assert(h.game.readPhoneGameState().balance===975&&h.game.readPhoneGameState().events[0].status==='pending','gift changed');
 h.ctx.generateRaw=async()=>JSON.stringify({text:'谢谢你的咖啡',affinityDelta:2});
-await h.ai.generatePhoneGameContent({eventId:q.eventId});assert(h.game.readPhoneGameState().balance===75&&h.game.readPhoneGameState().events[0].status==='replied','retry charged twice');
+await h.ai.generatePhoneGameContent({eventId:q.eventId});assert(h.game.readPhoneGameState().balance===975&&h.game.readPhoneGameState().events[0].status==='replied','retry charged twice');
 });
 
 test("取消后迟到结果不结算、不并发新请求", async () => {
