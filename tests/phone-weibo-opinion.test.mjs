@@ -4,7 +4,7 @@ import {phoneDom} from './helpers/phone-dom.mjs';
 import {readPhoneGameState,applyPhoneGamePosts,normalizePhoneGameState,setPhoneGameMode,capturePhoneGameScope} from '../src/phone-game.js';
 import {buildPhoneGamePrompt,generatePhoneGameContent,cancelPhoneGameGeneration,isPhoneGameGenerating} from '../src/phone-game-ai.js';
 import {weiboWorldbookBindings,readWeiboWorldbook} from '../src/phone-weibo-lore.js';
-import {worldWeiboItems,renderWorldWeibo} from '../src/phone-weibo-opinion.js';
+import {buildWeiboItems,buildWeiboHotItems,buildRedNoteItems,renderWeiboMarkup,renderRedNoteMarkup,sanitizeSocialRealismState} from '../src/social-realism.js';
 import {renderPhoneGameApp} from '../src/phone-game-view.js';
 import {refreshWorldBackstagePublicOpinion} from '../src/world-backstage-bridge.js';
 import * as wi from './helpers/world-info-host.mjs';
@@ -91,16 +91,14 @@ test('世界书读取卡住时可以取消和重试，迟到书本不会启动�
  release({entries:{a:{content:'迟到的旧世界设定'}}});await settle();await settle();assert.equal(calls,1);assert.equal(readPhoneGameState().posts.length,1);
 });
 
-test('世界微博显示新闻、独立论坛和传闻回复；断线清空且旧控件失效',t=>{
- const{f}=setup(t),route={tab:'home',query:'',selected:''};let live=true,refreshes=0,homes=0;
- const snapshot={connected:true,news:[{id:'n',headline:'灯会开始',summary:'街上的月光灯亮了',source:'镇报',heat:2,worldMinute:9}],forums:[{id:'f',title:'小龙是谁家的',summary:'没看到主人',board:'夜市',heat:5,claimStatus:'rumor',replies:[{author:'路过',text:'饼摊老板说的'}],worldMinute:10}]};
- assert.equal(worldWeiboItems(snapshot).length,2);
- const view=renderWorldWeibo(f.screen,{snapshot,route,current:()=>live,goHome:()=>homes++,refreshOpinion:async()=>{refreshes++;return snapshot;}});
- assert.match(f.screen.textContent,/灯会开始/);assert.match(f.screen.textContent,/小龙是谁家的/);
- f.screen.querySelector('[data-world-weibo-open="forum:f"]').click();assert.match(f.screen.textContent,/饼摊老板说的/);assert.match(f.screen.textContent,/传闻/);
- f.screen.querySelector('[data-app-back]').click();f.screen.querySelector('[data-world-weibo-tab="news"]').click();assert.doesNotMatch(f.screen.textContent,/小龙是谁家的/);
- view.refresh({connected:false,news:[],forums:[],connectionMessage:'已断线'});assert.doesNotMatch(f.screen.textContent,/灯会开始/);
- const old=f.screen.querySelector('[data-app-back]');view.dispose();old.click();assert.equal(homes,0);assert.equal(refreshes,0);
+test('原有微博热搜聚合、关联回复、收藏和小红书生活筛选、多图详情保留',()=>{
+ const snapshot={connected:true,news:[{id:'n',headline:'灯会开始',summary:'街上的月光灯亮了',source:'镇报',heat:2,worldMinute:9,relatedEventId:'public'}],forums:[{id:'f',title:'夜市烤饼探店',summary:'这家饼很香',board:'夜市',heat:5,claimStatus:'rumor',relatedEventId:'public',replies:[{author:'路过',text:'饼摊老板说的'}],worldMinute:10,raw:{images:['https://example.test/a.jpg','https://example.test/b.jpg']}},{id:'politics',title:'议会争议',summary:'严肃政治讨论',board:'政务',heat:3}]};
+ const items=buildWeiboItems(snapshot);assert.equal(items.length,3);assert.equal(items.find(i=>i.id==='news:n').replies[0].text,'饼摊老板说的');
+ const hot=buildWeiboHotItems(items);assert.equal(hot.length,2);assert.equal(hot[0].sourceCount,2);assert.equal(hot[0].id,'news:n');
+ const state=sanitizeSocialRealismState({weibo:{tab:'me',saved:{'forum:f':true}},rednote:{detailId:'forum:f'}});
+ assert.match(renderWeiboMarkup(snapshot,state.weibo),/夜市烤饼探店/);assert.match(renderWeiboMarkup(snapshot,state.weibo),/我的收藏/);
+ assert.equal(buildRedNoteItems(snapshot).length,1);const note=renderRedNoteMarkup(snapshot,state.rednote);
+ assert.match(note,/饼摊老板说的/);assert.match(note,/a\.jpg/);assert.match(note,/b\.jpg/);assert.doesNotMatch(note,/严肃政治讨论/);
 });
 
 test('世界舆情刷新交给宿主，切模式后不接收迟到结果，独立模式不调用宿主',async t=>{

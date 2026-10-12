@@ -3,7 +3,6 @@ import {
   readWorldBackstage,
   setWorldBackstageMomentLiked,
   subscribeWorldBackstage,
-  refreshWorldBackstagePublicOpinion,
 } from './world-backstage-bridge.js';
 import { renderCasinoApp } from './casino-app.js';
 import { renderWalletApp } from './wallet-app.js';
@@ -12,8 +11,6 @@ import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.28';
 import { renderDeliveryApp } from './lingqi-delivery.js';
 import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.28';
 import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.28';
-import { renderWorldWeibo } from './phone-weibo-opinion.js';
-import { installPhoneGameUiClosureStyles } from './phone-game-ui-closure.js';
 import { renderPhoneImageSettings } from './phone-image-view.js';
 import { renderPhoneGameCommunicationApp } from './phone-game-communication-view.js?v=0.3.0-alpha.28';
 import { renderNativeCommunicationApp } from './native-communication-apps.js?v=0.3.0-alpha.28';
@@ -675,8 +672,6 @@ export function mountWorldPhone() {
   const power = stage.querySelector('[data-power]');
   const close = stage.querySelector('[data-stage-close]');
   const wechatRoute = { tab: 'chats', conversationId: '' };
-  const weiboRoute = {tab:'home',query:'',selected:''};
-  let worldWeibo=null;
   let closeTimer = 0;
   let current = 'lock';
   let snapshot = readWorldBackstage();
@@ -698,7 +693,7 @@ export function mountWorldPhone() {
   let pendingRefresh = false;
   let statusMarkup = '';
   let disposeApp = () => {};
-  function disposeCurrentApp() { disposeApp(); disposeApp = () => {}; worldWeibo=null; }
+  function disposeCurrentApp() { disposeApp(); disposeApp = () => {}; }
 
   function paintStatusbar() {
     const now = presentationTime(snapshot);
@@ -792,13 +787,6 @@ export function mountWorldPhone() {
     }
     else if (app === 'phone' || app === 'messages') renderNativeCommunicationApp(screen, { app, goHome: showHome });
     else if (app === 'wechat') repaintWechat();
-    else if (app === 'weibo') {
-      installPhoneGameUiClosureStyles();
-      const opened=capturePhoneGameScope(),openedWorld=worldScopeKey();
-      worldWeibo=renderWorldWeibo(screen,{snapshot,route:weiboRoute,goHome:showHome,refreshOpinion:refreshWorldBackstagePublicOpinion,
-        current:()=>current==='app:weibo'&&readPhoneGameMode()==='world'&&opened.metadata===capturePhoneGameScope().metadata&&opened.key===capturePhoneGameScope().key&&opened.modeEpoch===capturePhoneGameScope().modeEpoch&&openedWorld===worldScopeKey()});
-      const view=worldWeibo;disposeApp=()=>view.dispose();
-    }
     else if (app === 'news') renderNews(screen, snapshot, showHome, shareNews);
     else if (app === 'puzzle') renderPocketGame(screen, { goHome: showHome });
     else if (app === 'wallet') renderWalletApp(screen, { goHome: showHome });
@@ -826,9 +814,8 @@ export function mountWorldPhone() {
       scopeKey = nextScopeKey;
       wechatRoute.conversationId = '';
       wechatRoute.tab = 'chats';
-      weiboRoute.tab='home';weiboRoute.query='';weiboRoute.selected='';
       composing = false;
-      if (screen.querySelector('[data-phone-game-app]') || ['app:wechat', 'app:weibo', 'app:delivery', 'app:phone', 'app:messages'].includes(current)) current = 'home';
+      if (screen.querySelector('[data-phone-game-app]') || ['app:wechat', 'app:delivery', 'app:phone', 'app:messages'].includes(current)) current = 'home';
     }
     if (sameScope && composing && current === 'app:wechat') { pendingRefresh = true; return; }
     snapshot = nextSnapshot || readWorldBackstage();
@@ -842,7 +829,6 @@ export function mountWorldPhone() {
       else showHome();
     }
     else if (current === 'app:wechat' && readPhoneGameMode() !== 'game') repaintWechat();
-    else if (current === 'app:weibo' && readPhoneGameMode() === 'world') worldWeibo?.refresh(snapshot);
     else if (current === 'app:news' || current === 'app:settings') openApp(current.slice(4));
     else paintStatusbar();
     if (sheet) { screen.append(sheet); focused?.focus({ preventScroll: true }); }

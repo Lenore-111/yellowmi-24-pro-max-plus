@@ -22,6 +22,7 @@ jobs:
         run: |
           node --check src/world-backstage-bridge.js
           node --check src/social-tools.js
+          node --check src/social-realism.js
           node --check src/phone-interactions.js
           node --check src/world-phone.js
           node --check src/phone-game-communication-view.js
