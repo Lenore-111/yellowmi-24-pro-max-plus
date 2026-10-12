@@ -54,7 +54,7 @@ export function gameNav(app, tab) {
     ${navButton({id:'me',icon:'me',label:'我',active:tab==='me'})}
   </nav>`;
   if (app === 'rednote') return `<nav class="echo-app-nav is-rednote echo-real-social-nav" aria-label="小红书导航">
-    ${navButton({id:'discover',icon:'home',label:'首页',active:['discover','following'].includes(tab)})}
+    ${navButton({id:'discover',icon:'home',label:'首页',active:['discover','following','nearby'].includes(tab)})}
     ${navButton({id:'saved',icon:'save',label:'收藏',active:tab==='saved'})}
     ${navButton({app:'wechat',icon:'chat',label:'消息'})}
     ${navButton({id:'me',icon:'me',label:'我',active:tab==='me'})}
@@ -88,7 +88,7 @@ export function gamePost(state, post, app, saved, detail = false, clock = '', im
   const src = phoneImagePath(post.imageUrl);
   const isWeibo = app === 'weibo';
   const headerAction = canMessage ? `<button type="button" data-pg-chat="${esc(post.actorId)}" class="echo-post-more" aria-label="私信${esc(name)}">•••</button>` : '<span class="echo-post-more is-static">•••</span>';
-  const title = post.title ? (isWeibo ? `<div class="echo-wb-topic"># ${esc(post.title)}</div>` : `<h3>${esc(post.title)}</h3>`) : '';
+  const title = post.title ? (isWeibo ? `<div class="echo-wb-topic">#${esc(post.title)}#</div>` : `<h3>${esc(post.title)}</h3>`) : '';
   const meta = isWeibo ? `${esc(clock)} · 来自 Echo 手机` : `${esc(clock)}${post.mood ? ` · ${esc(post.mood)}` : ''}`;
   const media = src ? `<div class="wpg-post-media"><img src="${esc(src)}" alt="${esc(post.title || '动态配图')}" loading="lazy" decoding="async"></div>` : '';
   const tools = gameImageControls(post, imageBusy);
@@ -109,6 +109,14 @@ function feedTools(platform, ui, canGenerate) {
   return { count, refresh, popover:`<details class="echo-feed-tools"><summary aria-label="动态设置">•••</summary><div>${count}${refresh}</div></details>` };
 }
 
+function weiboSubchannels() {
+  return `<div class="echo-wb-subchannels" aria-label="微博频道"><span class="is-active">热门</span><span>实时</span><span>同城</span><span>榜单</span><span>视频</span><span>短剧</span></div>`;
+}
+
+function redNoteSubchannels() {
+  return `<div class="echo-rn-subchannels" aria-label="小红书频道"><span class="is-active">推荐</span><span>视频</span><span>穿搭</span><span>美食</span><span>旅行</span><span>情感</span></div>`;
+}
+
 export function gameFeed(state, platform, ui, cards) {
   const canGenerate = state.actors.length || platform === 'weibo' && ui.canGenerateWeibo;
   const tools = feedTools(platform, ui, canGenerate);
@@ -119,13 +127,15 @@ export function gameFeed(state, platform, ui, cards) {
   if (platform === 'weibo') {
     const tabs = `<div class="echo-wb-tabs echo-wb-homebar"><div class="echo-wb-channel"><button type="button" data-pg-view="home" class="${ui.tab === 'home' ? 'is-active' : ''}">推荐</button><button type="button" data-pg-view="following" class="${ui.tab === 'following' ? 'is-active' : ''}">关注</button></div>${tools.popover}</div>`;
     const hotHead = ui.tab === 'hot' ? '<section class="echo-wb-hot-head"><b>微博热搜</b><span>正在发生的新鲜事</span></section>' : '';
-    return `${tabs}${searchMarkup('weibo', ui)}${hotHead}<div class="echo-feed echo-weibo-feed${ui.tab === 'hot' ? ' is-hot' : ''}">${cards || empty}</div>`;
+    const discovery = ui.tab === 'hot' ? `${searchMarkup('weibo', ui)}${hotHead}` : weiboSubchannels();
+    return `${tabs}${discovery}<div class="echo-feed echo-weibo-feed${ui.tab === 'hot' ? ' is-hot' : ''}">${cards || empty}</div>`;
   }
 
   const header = ui.tab === 'saved'
     ? `<div class="echo-rn-tabs echo-rn-homebar is-collection"><b>我的收藏</b>${tools.popover}</div>`
-    : `<div class="echo-rn-tabs echo-rn-homebar"><div class="echo-rn-channel"><button type="button" data-pg-view="following" class="${ui.tab === 'following' ? 'is-active' : ''}">关注</button><button type="button" data-pg-view="discover" class="${ui.tab === 'discover' ? 'is-active' : ''}">发现</button></div>${tools.popover}</div>`;
-  return `${header}${searchMarkup('rednote', ui)}<div class="echo-feed echo-note-grid">${cards || empty}</div>`;
+    : `<div class="echo-rn-tabs echo-rn-homebar"><div class="echo-rn-channel"><button type="button" data-pg-view="following" class="${ui.tab === 'following' ? 'is-active' : ''}">关注</button><button type="button" data-pg-view="discover" class="${ui.tab === 'discover' ? 'is-active' : ''}">发现</button><button type="button" data-pg-view="nearby" class="${ui.tab === 'nearby' ? 'is-active' : ''}">附近</button></div>${tools.popover}</div>`;
+  const categoryStrip = ui.tab === 'saved' ? '' : redNoteSubchannels();
+  return `${header}${searchMarkup('rednote', ui)}${categoryStrip}<div class="echo-feed echo-note-grid">${cards || empty}</div>`;
 }
 
 export function gameWechatMe(state) {
