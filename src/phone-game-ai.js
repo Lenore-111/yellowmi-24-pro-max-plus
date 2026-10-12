@@ -59,7 +59,7 @@ export function buildPhoneGamePrompt(state, { platform = '', eventId = '', world
   const textPost = ({ imageUrl, imagePrompt, ...post }) => post;
   const images = readPhoneImageSettings();
   const imageLanguage = images.provider === 'novelai' ? '用逗号分隔的简短英文标签描述动态中一个具体画面，只有配图描述使用英文，动态正文仍使用中文' : '用简短中文描述动态中一个具体画面';
-  const imageField = images.baseUrl && images.model ? `,"imagePrompt":"可选配图描述：${imageLanguage}，物品动态不必画人；涉及人物时带上资料中已知的发色、发型、服装等外貌，不编造未知外貌。不画界面、文字、水印。不适合配图时留空"` : '';
+  const imageField = images.baseUrl && images.model ? `,\"imagePrompt\":\"可选配图描述：${imageLanguage}，物品动态不必画人；涉及人物时带上资料中已知的发色、发型、服装等外貌，不编造未知外貌。不画界面、文字、水印。不适合配图时留空\"` : '';
   const event = state.events.find(item => item.id === eventId);
   if (eventId && (!event || event.status !== 'pending')) throw new Error('互动已处理或不存在');
   const actor = event ? state.actors.find(item => item.id === event.actorId) : null;
@@ -79,10 +79,10 @@ export function buildPhoneGamePrompt(state, { platform = '', eventId = '', world
   };
   const requestedPosts = feedCount(platform);
   const instruction = event
-    ? '只输出 JSON：{"text":"角色对本次行动的直接回应，像手机上的真实短消息","affinityDelta":-3到3的整数,"memory":"保留旧记忆中的重要事实，更新为最多1000字的手机经历摘要","preferences":["通过角色设定或此次互动明确发现的喜好，未知就留空"]}。'
+    ? '只输出 JSON：{\"text\":\"角色对本次行动的直接回应，像手机上的真实短消息\",\"affinityDelta\":-3到3的整数,\"memory\":\"保留旧记忆中的重要事实，更新为最多1000字的手机经历摘要\",\"preferences\":[\"通过角色设定或此次互动明确发现的喜好，未知就留空\"]}。'
     : platform === 'weibo'
-      ? `生成一屏微博：混合角色短动态、世界里的路人吐槽、当地趣闻和角色相关的公开话题。通常生成3到5条，至少包含一条路人帖子；已有角色可以发自己的动态，也可以被别人讨论。只输出 JSON：{"posts":[{"actorId":"角色本人发帖才填已有角色ID，路人留空","authorKind":"character或passerby","authorName":"路人的自然网名，角色发帖可留空","category":"日常、趣闻、吐槽或话题","title":"可选话题标题","text":"有具体生活细节的中文帖子","claimStatus":"fact、mixed或rumor","heat":1,"replies":[{"author":"路人网名","text":"简短回复"}]${imageField}}]}。每个讨论可有0到4条自然回复，观点可以不同，不要排练式一问一答。不填未知角色ID；没有角色时仍可生成路人生活帖子。避免重复旧帖。`
-      : `生成 ${platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{"posts":[{"actorId":"必须使用给出的角色ID","title":"小红书标题，其他平台可留空","text":"一条符合角色性格的帖子","mood":"可选简短心情"${imageField}}]}。本次目标生成${requestedPosts}条新帖；如果模型自身输出上限不足，优先保证前面的帖子完整闭合，不要为了凑够条数补写残缺 JSON。每条正文80到220字，标题不超过30字；配图描述如有则不超过150字。避免重复旧帖。`;
+      ? `生成一屏微博：混合角色短动态、世界里的路人吐槽、当地趣闻和角色相关的公开话题。通常生成3到5条，至少包含一条路人帖子；已有角色可以发自己的动态，也可以被别人讨论。只输出 JSON：{\"posts\":[{\"actorId\":\"角色本人发帖才填已有角色ID，路人留空\",\"authorKind\":\"character或passerby\",\"authorName\":\"路人的自然网名，角色发帖可留空\",\"category\":\"日常、趣闻、吐槽或话题\",\"title\":\"可选话题标题\",\"text\":\"有具体生活细节的中文帖子\",\"claimStatus\":\"fact、mixed或rumor\",\"heat\":1,\"replies\":[{\"author\":\"路人网名\",\"text\":\"简短回复\"}]${imageField}}]}。每个讨论可有0到4条自然回复，观点可以不同，不要排练式一问一答。不填未知角色ID；没有角色时仍可生成路人生活帖子。避免重复旧帖。`
+      : `生成 ${platform === 'rednote' ? '小红书：有标题的生活记录、体验或分享' : '朋友圈：给熟人的日常片段'}。只输出 JSON：{\"posts\":[{\"actorId\":\"必须使用给出的角色ID\",\"title\":\"小红书标题，其他平台可留空\",\"text\":\"一条符合角色性格的帖子\",\"mood\":\"可选简短心情\"${imageField}}]}。本次目标生成${requestedPosts}条新帖；如果模型自身输出上限不足，优先保证前面的帖子完整闭合，不要为了凑够条数补写残缺 JSON。每条正文80到220字，标题不超过30字；配图描述如有则不超过150字。避免重复旧帖。`;
   return [
     platform === 'weibo' && !event ? '为当前酒馆世界生成手机里的微博信息流，结合当前角色资料、最新正文、绑定世界书与已有帖子。' : '你在扮演一个独立手机生活游戏里的角色。这是手机内的平行存档，正文只作为开局参考。',
     platform === 'weibo' && !event ? 'tavernContext 是当前角色资料与最新可见正文，优先以它判断现在的场景、时代和已经发生的事情。最新正文不是公共公告：先判断哪些内容有公开传播渠道，再生成路人讨论；没有公开进展时可以只发符合设定的生活趣闻。手机私信、礼物和熟悉度是私人经历，路人不默认知道。' : '后续发展以 PHONE_GAME 中的手机经历和角色记忆为准，不把此处经历描述成已经发生在正文里。',
@@ -143,9 +143,10 @@ export async function generatePhoneGameContent(request, scope = capturePhoneGame
   try {
     // Feed generation for RedNote and Moments deliberately omits responseLength:
     // SillyTavern then uses the active model/provider's own configured output
-    // ceiling instead of an Echo-specific token cap.
+    // ceiling instead of an Echo-specific token cap. Weibo keeps its existing
+    // 6144 budget from the truncation fix.
     const systemPrompt = '只运行独立手机游戏，按要求返回 JSON。';
-    const responseLength = request.eventId ? 900 : request.platform === 'weibo' ? 2000 : undefined;
+    const responseLength = request.eventId ? 900 : request.platform === 'weibo' ? 6144 : undefined;
     const invoke = text => {
       if (generator.length > 1) return generator.call(scope.ctx, text, null, false, false, systemPrompt, responseLength, false);
       const options = { prompt:text, systemPrompt, trimNames:false };
