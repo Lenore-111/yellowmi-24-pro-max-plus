@@ -3,6 +3,30 @@
 import { phoneImagePath } from './phone-image-paths.js';
 import { weiboAuthorName, weiboClaimLabel } from './phone-weibo-opinion.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const FEED_COUNT_PREFIX = 'echo_phone_feed_count:';
+function feedCount(platform) {
+  if (!['rednote', 'moments'].includes(platform)) return 0;
+  try {
+    const value = Number(globalThis.localStorage?.getItem(FEED_COUNT_PREFIX + platform));
+    if (Number.isSafeInteger(value) && value > 0) return value;
+  } catch {}
+  return 2;
+}
+function installFeedCountInput() {
+  const doc = globalThis.document;
+  if (!doc?.addEventListener || globalThis.__echoPhoneFeedCountInputInstalled) return;
+  globalThis.__echoPhoneFeedCountInputInstalled = true;
+  doc.addEventListener('input', event => {
+    const input = event.target?.closest?.('[data-pg-feed-count]');
+    if (!input) return;
+    const platform = input.dataset.pgFeedCount;
+    if (!['rednote', 'moments'].includes(platform)) return;
+    const value = Math.trunc(Number(input.value));
+    if (!Number.isSafeInteger(value) || value < 1) return;
+    try { globalThis.localStorage?.setItem(FEED_COUNT_PREFIX + platform, String(value)); } catch {}
+  });
+}
+installFeedCountInput();
 const paths = {
   chat:'M4 5h16v11H9l-5 4V5Z', contacts:'M8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 11v-3a6 6 0 0 1 12 0v3M17 5h5m-5 5h5m-5 5h5',
   discover:'m12 3 9 9-9 9-9-9 9-9Zm3 6-6 2-2 6 6-2 2-6Z', me:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9v-2a7 7 0 0 1 14 0v2',
@@ -35,10 +59,11 @@ export function gameFeed(state, platform, ui, cards) {
   const search = `<form class="echo-social-search" data-pg-search>${gameIcon('search')}<input data-pg-query value="${esc(ui.query || '')}" aria-label="搜索动态" placeholder="${platform === 'weibo' ? '搜索微博' : '搜索笔记'}"><button type="submit">搜索</button></form>`;
   const canGenerate = state.actors.length || platform==='weibo' && ui.canGenerateWeibo;
   const refresh = `<button type="button" data-pg-refresh="${platform}" class="echo-refresh" ${ui.busy || !canGenerate ? 'disabled' : ''}>${ui.busy ? '更新中…' : platform==='weibo'?'刷新微博':'刷新动态'}</button>`;
-  const empty = `<div class="echo-feed-empty">${gameIcon(platform === 'rednote' ? 'save' : 'chat')}<b>${ui.tab === 'saved' ? '还没有收藏的笔记' : '这里还没有动态'}</b><p>${state.actors.length ? '刷新动态，看看关注的人最近在做什么。' : '打开一位人物的聊天后，可以查看对方的动态。'}</p>${refresh}</div>`;
-  if (platform === 'moments') return `<div class="echo-moments-cover"><div><b>朋友圈</b><span>${esc(state.user)}</span></div><span class="wpg-avatar">${esc(state.user?.slice(0,1) || '我')}</span></div><div class="echo-moments-actions">${refresh}</div><div class="echo-moments-feed">${cards || empty}</div>`;
+  const countControl = ['rednote','moments'].includes(platform) ? `<label class="echo-feed-count" style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;color:#999;font-size:10px">每次<input type="number" inputmode="numeric" min="1" step="1" data-pg-feed-count="${platform}" value="${feedCount(platform)}" aria-label="每次生成条数" ${ui.busy ? 'disabled' : ''} style="width:46px;min-height:28px;padding:3px 5px;border:1px solid #ddd;border-radius:8px;text-align:center;background:#fff;color:#555">条</label>` : '';
+  const empty = `<div class="echo-feed-empty">${gameIcon(platform === 'rednote' ? 'save' : 'chat')}<b>${ui.tab === 'saved' ? '还没有收藏的笔记' : '这里还没有动态'}</b><p>${state.actors.length ? '刷新动态，看看关注的人最近在做什么。' : '打开一位人物的聊天后，可以查看对方的动态。'}</p>${countControl}${refresh}</div>`;
+  if (platform === 'moments') return `<div class="echo-moments-cover"><div><b>朋友圈</b><span>${esc(state.user)}</span></div><span class="wpg-avatar">${esc(state.user?.slice(0,1) || '我')}</span></div><div class="echo-moments-actions">${countControl}${refresh}</div><div class="echo-moments-feed">${cards || empty}</div>`;
   if (ui.tab === 'me') return `<section class="echo-social-profile"><span class="wpg-avatar">${esc(state.user?.slice(0,1) || '我')}</span><div><b>${esc(state.user || '我')}</b><small>${platform === 'weibo' ? '我的微博' : '我的小红书'}</small></div></section><div class="echo-profile-stats"><span><b>${state.actors.length}</b>关注</span><span><b>${state.posts.filter(p=>p.platform === platform && p.liked).length}</b>赞过</span></div><h3 class="echo-section-title">我的互动</h3><div class="echo-account-actions"><button type="button" data-pg-view="${platform === 'weibo' ? 'home' : 'discover'}">浏览动态 ›</button><button type="button" data-pg-app="wechat">消息 ›</button></div>`;
-  return `${platform === 'weibo' ? `<div class="echo-wb-tabs"><button type="button" data-pg-view="home" class="${ui.tab === 'home' ? 'is-active' : ''}">推荐</button><button type="button" data-pg-view="following" class="${ui.tab === 'following' ? 'is-active' : ''}">关注</button><button type="button" data-pg-view="hot" class="${ui.tab === 'hot' ? 'is-active' : ''}">热议</button>${refresh}</div>` : `<div class="echo-rn-tabs"><b>${ui.tab === 'saved' ? '我的收藏' : '发现'}</b><span>世界里的生活笔记</span>${refresh}</div>`}${search}<div class="echo-feed ${platform === 'rednote' ? 'echo-note-grid' : 'echo-weibo-feed'}">${cards || empty}</div>`;
+  return `${platform === 'weibo' ? `<div class="echo-wb-tabs"><button type="button" data-pg-view="home" class="${ui.tab === 'home' ? 'is-active' : ''}">推荐</button><button type="button" data-pg-view="following" class="${ui.tab === 'following' ? 'is-active' : ''}">关注</button><button type="button" data-pg-view="hot" class="${ui.tab === 'hot' ? 'is-active' : ''}">热议</button>${refresh}</div>` : `<div class="echo-rn-tabs"><b>${ui.tab === 'saved' ? '我的收藏' : '发现'}</b>${countControl}${refresh}</div>`}${search}<div class="echo-feed ${platform === 'rednote' ? 'echo-note-grid' : 'echo-weibo-feed'}">${cards || empty}</div>`;
 }
 export function gameWechatMe(state) {
   return `<section class="echo-wx-profile"><span class="wpg-avatar">${esc(state.user?.slice(0,1) || '我')}</span><div><b>${esc(state.user || '我')}</b><small>个人资料</small></div><span>›</span></section><div class="echo-wx-me-list"><button type="button" data-pg-app="wallet">${gameIcon('wallet')}<span>服务</span><i>›</i></button><button type="button" data-pg-tab="relations">${gameIcon('contacts')}<span>通讯录</span><i>›</i></button><button type="button" data-pg-tab="moments">${gameIcon('discover')}<span>朋友圈</span><i>›</i></button></div>`;
