@@ -76,7 +76,7 @@ function redNoteGridCard(state, post, imageBusy) {
   const cover = src
     ? `<img src="${esc(src)}" alt="${esc(post.title || '笔记配图')}" loading="lazy" decoding="async">`
     : `<span class="echo-note-text-kicker">文字笔记</span><b>${esc(post.title || post.text.slice(0,44))}</b><small>${esc(post.mood || post.text.slice(44,92))}</small>`;
-  return `<article class="echo-note-card${src ? ' has-image' : ' is-text-note'}"><button type="button" data-pg-post="${esc(post.id)}" class="echo-note-cover">${cover}</button><div class="echo-note-copy"><b>${esc(post.title || post.text.slice(0,48))}</b><div>${avatar}<span>${esc(name)}</span><button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}" aria-label="点赞">${gameIcon('heart')}</button></div></div></article>`;
+  return `<article class="echo-note-card${src ? ' has-image' : ' is-text-note'}"><button type="button" data-pg-post="${esc(post.id)}" class="echo-note-cover">${cover}</button><div class="echo-note-copy"><b>${esc(post.title || post.text.slice(0,48))}</b><div>${avatar}<span>${esc(name)}</span><button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}" aria-label="点赞">${gameIcon('heart')}</button></div>${gameImageControls(post,imageBusy)}</div></article>`;
 }
 
 export function gamePost(state, post, app, saved, detail = false, clock = '', imageBusy = false) {
@@ -91,7 +91,7 @@ export function gamePost(state, post, app, saved, detail = false, clock = '', im
   const title = post.title ? (isWeibo ? `<div class="echo-wb-topic"># ${esc(post.title)}</div>` : `<h3>${esc(post.title)}</h3>`) : '';
   const meta = isWeibo ? `${esc(clock)} · 来自 Echo 手机` : `${esc(clock)}${post.mood ? ` · ${esc(post.mood)}` : ''}`;
   const media = src ? `<div class="wpg-post-media"><img src="${esc(src)}" alt="${esc(post.title || '动态配图')}" loading="lazy" decoding="async"></div>` : '';
-  const tools = detail ? gameImageControls(post, imageBusy) : '';
+  const tools = gameImageControls(post, imageBusy);
   const footer = isWeibo
     ? `<footer class="echo-wb-actions"><span class="echo-wb-passive-action">${gameIcon('repost')}<span>转发</span></span>${detail ? '' : `<button type="button" data-pg-post="${esc(post.id)}">${gameIcon('comment')}<span>${comments || '评论'}</span></button>`}<button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}">${gameIcon('heart')}<span>${post.liked ? '已赞' : '赞'}</span></button></footer>`
     : `<footer>${canMessage ? `<button type="button" data-pg-chat="${esc(post.actorId)}">${gameIcon('chat')}<span>私信</span></button>` : ''}${detail ? '' : `<button type="button" data-pg-post="${esc(post.id)}">${gameIcon('comment')}<span>${comments || '评论'}</span></button>`}<button type="button" data-pg-like="${esc(post.id)}" aria-pressed="${post.liked}">${gameIcon('heart')}<span>${post.liked ? '已赞' : '赞'}</span></button>${app === 'rednote' ? `<button type="button" data-pg-save="${esc(post.id)}" aria-pressed="${saved}">${gameIcon('save')}<span>${saved ? '已收藏' : '收藏'}</span></button>` : ''}</footer>`;
