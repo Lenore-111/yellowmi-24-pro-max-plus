@@ -17,6 +17,13 @@ export class PhoneNode {
   getAttribute(name) { return name.startsWith('data-') ? this.dataset[dataKey(name)] ?? null : this.attributes.get(name) ?? null; }
   removeAttribute(name) { this.attributes.delete(name); if (name.startsWith('data-')) delete this.dataset[dataKey(name)]; if (['disabled', 'checked', 'hidden', 'open'].includes(name)) this[name] = false; }
   append(...nodes) { for (const node of nodes) { node.remove(); node.parentElement = this; this.children.push(node); } }
+  after(node) {
+    const parent = this.parentElement; if (!parent) return;
+    node.remove(); node.parentElement = parent; parent.children.splice(parent.children.indexOf(this) + 1, 0, node);
+  }
+  get isConnected() { let node = this; while (node.parentElement) node = node.parentElement; return node.tagName === 'DOCUMENT'; }
+  setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
+  replaceChildren(...nodes) { this.children.forEach(node => { node.parentElement = null; }); this.children = []; this._text = ''; this.append(...nodes); }
   remove() { if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(node => node !== this); this.parentElement = null; }
   contains(node) { return node === this || this.children.some(child => child.contains(node)); }
   get innerHTML() { return this.html || ''; }
@@ -40,6 +47,8 @@ export class PhoneNode {
       const tokens = part.trim().replace(/\s*>\s*/g, ' > ').split(/\s+/); let node = this;
       const matchSimple = (node, simple) => {
         if (!node) return false;
+        if (simple.includes(':focus') && globalThis.document?.activeElement !== node) return false;
+        simple = simple.replace(':focus', '');
         if (simple.endsWith(':checked') && !node.checked) return false;
         simple = simple.replace(/:checked$/, '');
         const tag = simple.match(/^[\w-]+/); if (tag && node.tagName !== tag[0].toUpperCase()) return false;
@@ -91,7 +100,7 @@ export class PhoneNode {
 export function phoneDom(t) {
   const originals = new Map(); const cleanup = [];
   const set = (name, value) => { if (!originals.has(name)) originals.set(name, Object.getOwnPropertyDescriptor(globalThis, name)); Object.defineProperty(globalThis, name, { configurable: true, writable: true, value }); };
-  const doc = new PhoneNode('document'); doc.createElement = tag => new PhoneNode(tag); doc.documentElement = new PhoneNode('html'); doc.activeElement = null;
+  const doc = new PhoneNode('document'); doc.createElement = tag => new PhoneNode(tag); doc.createTextNode = text => { const node = new PhoneNode('text'); node.nodeType = 3; node.textContent = text; return node; }; doc.documentElement = new PhoneNode('html'); doc.activeElement = null;
   doc.body = new PhoneNode('body');doc.head=new PhoneNode('head');doc.append(doc.head,doc.body);doc.getElementById=id=>doc.querySelector(`#${id}`);
   const stage = new PhoneNode(); stage.setAttribute('id', 'world-phone-stage');
   const glass = new PhoneNode(); glass.className = 'wp-screen-glass'; const screen = new PhoneNode(); screen.setAttribute('data-screen', '');

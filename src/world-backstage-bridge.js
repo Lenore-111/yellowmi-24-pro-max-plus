@@ -196,6 +196,7 @@ function normalizeNews(publicOpinion) {
     scope: text(item?.scope ?? item?.area),
     heat: Math.max(0, Number(item?.heat) || 0),
     relatedEventId: text(item?.relatedEventId ?? item?.related_event_id),
+    publishedWorldMinute: Number(item?.publishedWorldMinute ?? item?.published_world_minute ?? item?.worldMinute ?? item?.world_minute ?? -1),
     publishedAt: text(item?.publishedAt ?? item?.published_at),
     updatedAt: text(item?.updatedAt ?? item?.updated_at),
     createdAt: text(item?.createdAt ?? item?.created_at),
@@ -219,6 +220,7 @@ function normalizeForums(publicOpinion) {
       .map((reply) => ({ author: text(reply?.author, '匿名'), text: text(reply?.text) }))
       .filter((reply) => reply.text)
       .slice(0, 8),
+    publishedWorldMinute: Number(item?.publishedWorldMinute ?? item?.published_world_minute ?? item?.worldMinute ?? item?.world_minute ?? -1),
     publishedAt: text(item?.publishedAt ?? item?.published_at),
     updatedAt: text(item?.updatedAt ?? item?.updated_at),
     worldMinute: Number(item?.worldMinute ?? item?.world_minute) || 0,

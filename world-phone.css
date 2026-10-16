@@ -817,3 +817,7 @@
   .wp-stage { align-items:center; }
   .wp-device-wrap { min-width: 220px; }
 }
+
+.wp-settings-feed-toggle i { flex-shrink:0; font-size:11px; font-weight:600; }
+.wp-settings-feed-toggle[aria-checked="true"] i { color:#27a55a; }
+.wp-settings-feed-toggle:focus-visible { outline:2px solid #6788bd; outline-offset:2px; }

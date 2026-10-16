@@ -1,7 +1,11 @@
 import { readSocialBucket, writeSocialBucket, socialScope } from './social-storage.js';
 import { buildCommunicationRegistry } from './communication-registry.js';
 import { readWorldBackstage, subscribeWorldBackstage, refreshWorldBackstagePublicOpinion } from './world-backstage-bridge.js';
-import { readPhoneGameMode, capturePhoneGameScope, isPhoneGameScopeCurrent } from './phone-game.js?v=0.3.0-alpha.28';
+import { readPhoneGameMode, capturePhoneGameScope, isPhoneGameScopeCurrent, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.28';
+
+import { readPhoneFeedStatus, setPhoneFeedStatus, paintPhoneFeedStatus, PHONE_FEED_STATUS_EVENT } from './world-phone-feed-status.js';
+
+import { createSocialFeedReader } from './social-feed-reader.js';
 
 const STORAGE_KEY = 'world_phone_social_realism_v1';
 const APPS = {
@@ -68,6 +72,8 @@ export function sanitizeSocialRealismState(value) {
       tab: allowedTabs.includes(raw.tab) ? raw.tab : fallbackTab,
       query: text(raw.query).slice(0, 80),
       detailId: text(raw.detailId).slice(0, 180),
+      feedFilter: raw.feedFilter === 'following' ? 'following' : 'all',
+      category: ['food', 'travel', 'daily'].includes(raw.category) ? raw.category : 'all',
     };
   };
   return {
@@ -92,7 +98,8 @@ function itemSortValue(item) {
 
 export function socialTimeLabel(item, snapshot = {}) {
   const nowMinute = Number(snapshot?.clock?.absoluteMinute) || 0;
-  const worldMinute = Number(item?.worldMinute) || 0;
+  const publishedMinute = Number(item?.publishedWorldMinute);
+  const worldMinute = Number.isFinite(publishedMinute) && publishedMinute >= 0 ? publishedMinute : Number(item?.worldMinute) || 0;
   if (nowMinute > 0 && worldMinute > 0 && nowMinute >= worldMinute) {
     const delta = nowMinute - worldMinute;
     if (delta < 1) return '刚刚';
@@ -100,11 +107,18 @@ export function socialTimeLabel(item, snapshot = {}) {
     if (delta < 24 * 60) return `${Math.floor(delta / 60)}小时前`;
     if (delta < 7 * 24 * 60) return `${Math.floor(delta / (24 * 60))}天前`;
   }
-  const value = stamp(item);
-  if (!value) return '刚刚';
+  const value = text(item?.publishedAt || item?.createdAt) || stamp(item);
+  if (!value) return '时间未记录';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value.slice(0, 16);
   return date.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function updatedLabel(item) {
+  const published = Number(item.publishedWorldMinute);
+  const minuteChanged = Number.isFinite(published) && published >= 0 && Number(item.worldMinute) > published;
+  const stampChanged = Date.parse(item.updatedAt) > Date.parse(item.publishedAt);
+  return minuteChanged || stampChanged ? ' · 有更新' : '';
 }
 
 function relatedForumReplies(snapshot, eventId) {
@@ -130,6 +144,7 @@ export function buildWeiboItems(snapshot = {}) {
     replies: relatedForumReplies(snapshot, item.relatedEventId),
     relatedEventId: item.relatedEventId || '',
     worldMinute: Number(item.worldMinute) || 0,
+    publishedWorldMinute: item.publishedWorldMinute ?? item.worldMinute,
     publishedAt: item.publishedAt || item.createdAt || '',
     updatedAt: item.updatedAt || '',
     imageUrl: firstImage(item.raw),
@@ -143,11 +158,12 @@ export function buildWeiboItems(snapshot = {}) {
     verified: false,
     title: item.title,
     body: item.summary,
-    scope: item.scope || item.claimStatus || '公开讨论',
+    scope: item.scope || ({ fact: '公开记录', mixed: '网友讨论', rumor: '坊间传闻' }[item.claimStatus]) || '网友讨论',
     heat: Math.max(0, Number(item.heat) || 0),
     replies: item.replies || [],
     relatedEventId: item.relatedEventId || '',
     worldMinute: Number(item.worldMinute) || 0,
+    publishedWorldMinute: item.publishedWorldMinute ?? item.worldMinute,
     publishedAt: item.publishedAt || '',
     updatedAt: item.updatedAt || '',
     imageUrl: firstImage(item.raw),
@@ -217,8 +233,9 @@ export function buildWeiboHotItems(items = []) {
 export function buildRedNoteItems(snapshot = {}) {
   const forums = (snapshot.forums || []).filter(redNoteFriendlyForum).map((item) => ({
     id: `forum:${item.id}`, sourceId: item.id, kind: 'forum', author: item.board || '公开记录', verified: false,
-    title: item.title, body: item.summary, scope: item.scope || item.claimStatus || '公开讨论', heat: Math.max(0, Number(item.heat) || 0),
+    title: item.title, body: item.summary, scope: item.scope || ({ fact: '公开记录', mixed: '网友讨论', rumor: '坊间传闻' }[item.claimStatus]) || '网友讨论', heat: Math.max(0, Number(item.heat) || 0),
     replies: item.replies || [], relatedEventId: item.relatedEventId || '', worldMinute: Number(item.worldMinute) || 0,
+    publishedWorldMinute: item.publishedWorldMinute ?? item.worldMinute,
     publishedAt: item.publishedAt || '', updatedAt: item.updatedAt || '', imageUrl: firstImage(item.raw), imageUrls: imageList(item.raw), raw: item.raw,
   }));
   const news = (snapshot.news || []).filter(redNoteFriendlyNews).map((item) => ({
@@ -226,12 +243,13 @@ export function buildRedNoteItems(snapshot = {}) {
     verified: item.sourceType === 'official', title: item.headline, body: item.summary,
     scope: item.scope || item.area || item.category || '', heat: Math.max(0, Number(item.heat) || 0),
     replies: relatedForumReplies(snapshot, item.relatedEventId), relatedEventId: item.relatedEventId || '', worldMinute: Number(item.worldMinute) || 0,
+    publishedWorldMinute: item.publishedWorldMinute ?? item.worldMinute,
     publishedAt: item.publishedAt || item.createdAt || '', updatedAt: item.updatedAt || '', imageUrl: firstImage(item.raw), imageUrls: imageList(item.raw), raw: item.raw,
   }));
   return [...forums, ...news].filter((item) => text(item.title) || text(item.body))
-    .sort((x, y) => itemSortValue(y) - itemSortValue(x)).map((item, index) => ({
+    .sort((x, y) => itemSortValue(y) - itemSortValue(x)).map((item) => ({
       ...item, noteId: `note:${item.id}`, tags: noteTags(item),
-      coverSeed: Math.abs([...item.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) + index) % 6,
+      coverSeed: Math.abs([...item.id].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % 6,
     }));
 }
 
@@ -298,7 +316,7 @@ function weiboCard(item, snapshot, state, detail = false) {
   const liked = Boolean(state.liked[item.id]);
   const saved = Boolean(state.saved[item.id]);
   return `<article class="wp-wb-card" data-social-item="${esc(item.id)}">
-    <div class="wp-wb-author"><span>${avatarLetter(item.author)}</span><div><b>${esc(item.author)}${item.verified ? '<i>✓</i>' : ''}</b><small>${esc(socialTimeLabel(item, snapshot))}${item.scope ? ` · ${esc(item.scope)}` : ''}</small></div></div>
+    <div class="wp-wb-author"><span>${avatarLetter(item.author)}</span><div><b>${esc(item.author)}${item.verified ? '<i>✓</i>' : ''}</b><small>${esc(socialTimeLabel(item, snapshot))}${updatedLabel(item)}${item.scope ? ` · ${esc(item.scope)}` : ''}</small></div></div>
     <button type="button" class="wp-wb-main" data-social-detail="${esc(item.id)}">
       ${item.title ? `<h3>${esc(item.title)}</h3>` : ''}
       ${item.body ? `<p>${esc(item.body)}</p>` : ''}
@@ -329,7 +347,7 @@ function weiboDetail(item, snapshot, state) {
 function weiboHotMarkup(items, snapshot) {
   const ranked = buildWeiboHotItems(items);
   if (!ranked.length) return emptyMarkup('暂时没有热搜', '世界里出现带热度的公开话题后会排到这里。');
-  return `<section class="wp-wb-hot-section"><header class="wp-wb-hot-head"><b>微博热搜</b><small>来自已公开的世界话题</small></header><div class="wp-wb-hot-list">${ranked.map((item, index) => `<button type="button" class="wp-wb-hot-row" data-social-detail="${esc(item.id)}"><strong>${index + 1}</strong><span><b>${esc(item.title || item.body || '公开话题')}</b><small>${esc(item.author)} · ${esc(socialTimeLabel(item, snapshot))} · ${item.sourceCount} 个公开来源</small></span><i>${item.heat}</i></button>`).join('')}</div></section>`;
+  return `<section class="wp-wb-hot-section"><header class="wp-wb-hot-head"><b>微博热搜</b><small>来自已公开的世界话题</small></header><div class="wp-wb-hot-list">${ranked.map((item, index) => `<button type="button" class="wp-wb-hot-row" data-social-detail="${esc(item.id)}"><strong>${index + 1}</strong><span><b>${esc(item.title || item.body || '公开话题')}</b><small>${esc(item.author)} · ${esc(socialTimeLabel(item, snapshot))}${updatedLabel(item)} · ${item.sourceCount} 个公开来源</small></span><i>${item.heat}</i></button>`).join('')}</div></section>`;
 }
 
 function weiboIcon(name) {
@@ -366,24 +384,25 @@ function renderWeiboMarkup(snapshot, state) {
   const items = buildWeiboItems(snapshot);
   const detail = items.find((item) => item.id === state.detailId);
   if (detail) return weiboDetail(detail, snapshot, state);
-  const filtered = items.filter((item) => includesQuery(item, state.query));
+  const filtered = items.filter((item) => includesQuery(item, state.query))
+    .filter(item => state.tab !== 'home' || state.feedFilter !== 'following' || item.raw?.sourceKind === 'moment');
   const body = state.tab === 'me' ? weiboProfile(snapshot, state, items)
     : !snapshot.connected ? emptyMarkup('暂时无法连接微博', '请在手机设置中连接世界背面 SIM。')
     : state.tab === 'hot' ? weiboHotMarkup(filtered, snapshot)
     : filtered.length ? filtered.map((item) => weiboCard(item, snapshot, state)).join('')
-    : emptyMarkup(state.query ? '没有搜到' : '暂时没有公开内容', state.query ? '换个关键词试试。' : '世界里的公开动态会显示在这里。');
+    : emptyMarkup(state.query ? '没有搜到' : state.feedFilter === 'following' ? '好友还没有新动态' : '暂时没有公开内容', state.query ? '换个关键词试试。' : '世界里的公开动态会显示在这里。');
   const hasHotTopics = snapshot.connected && state.tab === 'home' && buildWeiboHotItems(items).length > 0;
-  return `<div class="wp-weibo-shell" data-social-view="${esc(state.tab)}">${state.tab === 'home' ? '<div class="wp-wb-tabs"><b class="is-active">推荐</b><span>公开动态</span></div>' : ''}${state.tab === 'me' ? '' : searchMarkup('weibo', state, state.tab === 'hot' ? '搜索热搜、话题' : '搜索微博')}<main class="wp-wb-feed ${state.tab === 'hot' ? 'is-hot' : ''}">${hasHotTopics ? '<button type="button" class="wp-wb-hot-entry" data-social-tab="hot"><b>微博热搜</b><span>查看榜单 ›</span></button>' : ''}${body}</main>${weiboBottomNav(state.tab)}</div>`;
+  return `<div class="wp-weibo-shell" data-social-view="${esc(state.tab)}">${state.tab === 'home' ? `<div class="wp-wb-tabs" aria-label="微博信息流"><button type="button" data-social-filter="all" aria-pressed="${state.feedFilter !== 'following'}" class="${state.feedFilter !== 'following' ? 'is-active' : ''}">推荐</button><button type="button" data-social-filter="following" aria-pressed="${state.feedFilter === 'following'}" class="${state.feedFilter === 'following' ? 'is-active' : ''}">好友</button></div>` : ''}${state.tab === 'me' ? '' : searchMarkup('weibo', state, state.tab === 'hot' ? '搜索热搜、话题' : '搜索微博')}<main class="wp-wb-feed ${state.tab === 'hot' ? 'is-hot' : ''}">${hasHotTopics ? '<button type="button" class="wp-wb-hot-entry" data-social-tab="hot"><b>微博热搜</b><span>查看榜单 ›</span></button>' : ''}${body}</main>${weiboBottomNav(state.tab)}</div>`;
 }
 
 function noteCover(item) {
   if (item.imageUrl) return `<div class="wp-rn-cover is-image-note is-seed-${item.coverSeed}"><img src="${esc(item.imageUrl)}" alt="${esc(item.title || '笔记配图')}" loading="lazy" decoding="async"></div>`;
-  return `<div class="wp-rn-cover is-text-note is-seed-${item.coverSeed}"><span>文字笔记</span><b>${esc(item.title || item.body || '一条公开记录')}</b></div>`;
+  return `<div class="wp-rn-cover is-text-note is-seed-${item.coverSeed}"><span>生活手记</span><b>${esc(item.title || '随手记下')}</b><p>${esc(text(item.body).slice(0, 90))}</p></div>`;
 }
 
 function redNoteCard(item, snapshot, state) {
   const liked = Boolean(state.liked[item.id]);
-  return `<article class="wp-rn-card"><button type="button" data-social-detail="${esc(item.id)}">${noteCover(item)}<div class="wp-rn-copy"><b>${esc(item.title || item.body || '公开记录')}</b></div></button><div class="wp-rn-foot"><span>${avatarLetter(item.author)}</span><b>${esc(item.author)}</b><button type="button" data-social-like="${esc(item.id)}" class="${liked ? 'is-active' : ''}" aria-label="${liked ? '取消点赞' : '点赞'}" aria-pressed="${liked}">${liked ? '♥' : '♡'}</button></div></article>`;
+  return `<article class="wp-rn-card" data-social-item="${esc(item.id)}"><button type="button" data-social-detail="${esc(item.id)}">${noteCover(item)}<div class="wp-rn-copy">${item.imageUrl ? `<b>${esc(item.title || item.body || '公开记录')}</b>` : ''}<small>${esc(socialTimeLabel(item, snapshot))}${updatedLabel(item)}${item.imageUrls?.length > 1 ? ` · ${item.imageUrls.length} 张图` : ''}</small></div></button><div class="wp-rn-foot"><span>${avatarLetter(item.author)}</span><b>${esc(item.author)}</b><button type="button" data-social-like="${esc(item.id)}" class="${liked ? 'is-active' : ''}" aria-label="${liked ? '取消点赞' : '点赞'}" aria-pressed="${liked}">${liked ? '♥' : '♡'}</button></div></article>`;
 }
 
 function redNoteDetail(item, snapshot, state) {
@@ -397,7 +416,7 @@ function redNoteDetail(item, snapshot, state) {
     <header class="wp-rn-detail-top">
       <button type="button" data-social-detail-back aria-label="返回笔记列表">‹</button>
       <span class="wp-rn-detail-avatar">${avatarLetter(item.author)}</span>
-      <div><b>${esc(item.author)}</b><small>${esc(socialTimeLabel(item, snapshot))}</small></div>
+      <div><b>${esc(item.author)}</b><small>${esc(socialTimeLabel(item, snapshot))}${updatedLabel(item)}</small></div>
       <button type="button" data-social-share="${esc(item.id)}" aria-label="分享笔记">↗</button>
     </header>
     <div class="wp-rn-detail-scroll">
@@ -424,7 +443,10 @@ function renderRedNoteMarkup(snapshot, state) {
   const items = buildRedNoteItems(snapshot);
   const detail = items.find((item) => item.id === state.detailId);
   if (detail) return redNoteDetail(detail, snapshot, state);
-  const filtered = items.filter((item) => includesQuery(item, state.query));
+  const categoryPatterns = { food: /美食|餐厅|咖啡|探店|烤饼|吃喝|饮品/, travel: /旅行|游玩|景点|住宿|出行|公园|散步/, daily: /日常|生活|宠物|猫|狗|手作|校园|阅读/ };
+  const filtered = items.filter((item) => includesQuery(item, state.query))
+    .filter(item => state.tab !== 'discover' || !categoryPatterns[state.category] || categoryPatterns[state.category].test([item.title, item.body, item.scope, item.author].join(' ')));
+  const categories = state.tab === 'discover' ? `<nav class="wp-rn-categories" aria-label="笔记分类">${[['all','全部'],['food','美食'],['travel','出行'],['daily','日常']].map(([id,label]) => `<button type="button" data-note-category="${id}" aria-pressed="${(state.category || 'all') === id}" class="${(state.category || 'all') === id ? 'is-active' : ''}">${label}</button>`).join('')}</nav>` : '';
   const profileView = state.profileView === 'liked' ? 'liked' : 'saved';
   const visible = state.tab === 'saved'
     ? filtered.filter((item) => state.saved[item.id])
@@ -447,7 +469,7 @@ function renderRedNoteMarkup(snapshot, state) {
     : state.tab === 'saved' ? '收藏夹还是空的'
     : state.tab === 'me' ? (profileView === 'liked' ? '还没有赞过的笔记' : '还没有收藏的笔记')
     : '暂时没有公开内容';
-  return `<div class="wp-rednote-shell" data-social-view="${esc(state.tab)}"><div class="wp-rn-topbar"><div class="wp-rn-heading"><b>${esc(title)}</b>${state.tab === 'discover' ? '<small>世界里的公开生活笔记</small>' : ''}</div>${searchMarkup('rednote', state, '搜索笔记')}</div>${state.tab === 'me' ? `<div class="wp-rn-profile"><span>${avatarLetter(snapshot.user || '你')}</span><div><b>${esc(snapshot.user || '你')}</b><small>收藏 ${Object.keys(state.saved).length} · 点赞 ${Object.keys(state.liked).length}</small></div></div>${profileTabs}` : ''}<main class="wp-rn-grid">${!snapshot.connected ? emptyMarkup('未插入世界背面 SIM', '发现页需要世界背面 SIM 提供公开世界素材。') : visible.length ? noteGrid : emptyMarkup(emptyTitle, state.query ? '换个关键词试试。' : '有真实公开内容后才会出现在这里。')}</main><nav class="wp-rn-bottom-nav" aria-label="小红书导航">${nav}</nav></div>`;
+  return `<div class="wp-rednote-shell" data-social-view="${esc(state.tab)}"><div class="wp-rn-topbar"><div class="wp-rn-heading"><b>${esc(title)}</b>${state.tab === 'discover' ? '<small>逛逛大家的生活</small>' : ''}</div>${searchMarkup('rednote', state, '搜索笔记')}${categories}</div>${state.tab === 'me' ? `<div class="wp-rn-profile"><span>${avatarLetter(snapshot.user || '你')}</span><div><b>${esc(snapshot.user || '你')}</b><small>收藏 ${Object.keys(state.saved).length} · 点赞 ${Object.keys(state.liked).length}</small></div></div>${profileTabs}` : ''}<main class="wp-rn-grid">${!snapshot.connected ? emptyMarkup('未插入世界背面 SIM', '发现页需要世界背面 SIM 提供公开世界素材。') : visible.length ? noteGrid : emptyMarkup(emptyTitle, state.query ? '换个关键词试试。' : '有真实公开内容后才会出现在这里。')}</main><nav class="wp-rn-bottom-nav" aria-label="小红书导航">${nav}</nav></div>`;
 }
 
 function enhanceWeChat(snapshot) {
@@ -511,10 +533,22 @@ export function mountSocialRealism({ phone } = {}) {
   let paintedShell = null;
   let renderedMarkup = '';
   let opinionRefresh = null;
+  let awaitingInitialSync = '';
   let snapshot = readWorldBackstage();
   let state = loadState();
   let scope = socialScope();
-  const syncScope = () => { if (scope !== socialScope()) { scope = socialScope(); state = loadState(); tabScroll.weibo = {}; tabScroll.rednote = {}; } };
+  let scopeKey = '';
+  const itemsFor = (app, value) => app === 'weibo' ? buildWeiboItems(value) : buildRedNoteItems(value);
+  const reader = createSocialFeedReader(itemsFor);
+  let displaySnapshot = snapshot;
+  const syncScope = () => {
+    const gameScope = capturePhoneGameScope();
+    const nextKey = JSON.stringify([gameScope.key, gameScope.modeEpoch, readWorldBackstage().branchKey]);
+    if (scope !== socialScope() || scopeKey !== nextKey) {
+      scope = socialScope(); scopeKey = nextKey; state = loadState(); reader.clear();
+      tabScroll.weibo = {}; tabScroll.rednote = {}; paintedShell = null;
+    }
+  };
   const tabScroll = { weibo: {}, rednote: {} };
 
   function syncHome() {
@@ -558,7 +592,14 @@ export function mountSocialRealism({ phone } = {}) {
 
   function paint(preserveScroll = false, options = {}) {
   if (destroyed) return;
-  if (readPhoneGameMode() === 'game') { active = ''; return; }
+  if (readPhoneGameMode() === 'game') {
+    const oldWorld = document.querySelector('#world-phone-stage .wp-social-realism-app');
+    const oldFeed = oldWorld?.querySelector('.wp-social-shell');
+    if (oldFeed) oldFeed.innerHTML = '';
+    oldWorld?.querySelector('[data-social-incoming]')?.remove();
+    oldWorld?.querySelector('[data-phone-feed-status]')?.remove();
+    reader.clear(); active = ''; paintedShell = null; return;
+  }
   enhanceWeChat(snapshot);
   if (typeof phone?.current === 'function') {
     const appId = phone.current().replace(/^app:/, '');
@@ -569,9 +610,18 @@ export function mountSocialRealism({ phone } = {}) {
   if (!section) return;
   const old = section.querySelector('.wp-placeholder-card, .wp-social-shell');
   if (!old) return;
-  const markup = active === 'weibo' ? renderWeiboMarkup(snapshot, state.weibo) : renderRedNoteMarkup(snapshot, state.rednote);
+  const newView = old !== paintedShell;
+  if (newView) awaitingInitialSync = active;
+  const view = reader.select(active, snapshot, { newView, accept: options.acceptIncoming });
+  displaySnapshot = view.snapshot;
+  if (state[active].detailId && !itemsFor(active, displaySnapshot).some(item => item.id === state[active].detailId)) {
+    state[active].detailId = ''; saveState(state);
+  }
+  const markup = active === 'weibo' ? renderWeiboMarkup(displaySnapshot, state.weibo) : renderRedNoteMarkup(displaySnapshot, state.rednote);
+  paintIncomingNotice(section, view);
+  if (options.background && old === paintedShell && !view.displayChanged) { bindOpinionRefresh(section); return; }
   section.classList.add('wp-social-realism-app', `is-${active}`);
-  headerCopy(section, active === 'weibo' ? (state.weibo.detailId ? '微博正文' : { home: '微博', hot: '发现', me: '我' }[state.weibo.tab]) : '小红书', active === 'weibo' ? '' : snapshot.connected ? 'SIM 已插入 · 世界公开网络' : '未插入世界背面 SIM');
+  headerCopy(section, active === 'weibo' ? (state.weibo.detailId ? '微博正文' : { home: '微博', hot: '发现', me: '我' }[state.weibo.tab]) : '小红书', active === 'weibo' ? '' : snapshot.connected ? '世界里的日常' : '暂未连接');
   if (preserveScroll && old === paintedShell && markup === renderedMarkup) { bindOpinionRefresh(section); return; }
   const focused = old.querySelector('[data-social-search] input:focus');
   const selection = focused ? [focused.selectionStart, focused.selectionEnd] : null;
@@ -602,6 +652,19 @@ function mutate(mutator, options = {}) {
   paint(options.preserveScroll ?? true, options);
 }
 
+  function paintIncomingNotice(section, view) {
+    let notice = section.querySelector('[data-social-incoming]');
+    if (!view.added && !view.updated) { notice?.remove(); return; }
+    if (!notice) {
+      notice = document.createElement('button'); notice.type = 'button';
+      notice.dataset.socialIncoming = '1'; notice.className = 'wp-feed-incoming';
+      notice.setAttribute('aria-live', 'polite'); section.append(notice);
+    }
+    const label = [view.added ? `有 ${view.added} 条新动态` : '', view.updated ? `${view.updated} 条内容有更新` : ''].filter(Boolean).join(' · ');
+    if (notice.textContent !== label) notice.textContent = label;
+    notice.onclick = () => paint(true, { acceptIncoming: true, scrollTop: state[active]?.detailId ? undefined : 0 });
+  }
+
   function bindOpinionRefresh(section) {
     const header = section.querySelector('.wp-app-header');
     if (header) {
@@ -610,7 +673,7 @@ function mutate(mutator, options = {}) {
         refreshButton = document.createElement('button');
         refreshButton.type = 'button';
         refreshButton.dataset.socialOpinionRefresh = '1';
-        header.append(refreshButton);
+        (header.querySelector('span') || header).append(refreshButton);
       }
       const opened = capturePhoneGameScope(), openedSocialScope = socialScope(), openedApp = active;
       const current = () => !destroyed && readPhoneGameMode() === 'world'
@@ -619,25 +682,24 @@ function mutate(mutator, options = {}) {
         && document.querySelector('#world-phone-stage .wp-native-app') === section;
       const busy = opinionRefresh && isPhoneGameScopeCurrent(opinionRefresh.scope)
         && opinionRefresh.socialScope === openedSocialScope;
-      refreshButton.disabled = Boolean(busy || !snapshot.connected);
-      refreshButton.textContent = busy ? '正在刷新…' : '刷新舆情';
+      const feedStatus = readPhoneFeedStatus(active);
+      refreshButton.disabled = Boolean(busy || feedStatus.phase === 'loading' || !snapshot.connected);
+      refreshButton.textContent = busy || feedStatus.phase === 'loading' ? '正在更新…' : '刷新动态';
+      paintPhoneFeedStatus(section, active, { connected: snapshot.connected, onRetry: () => refreshButton.click() });
       refreshButton.onclick = async () => {
         if (!current() || refreshButton.disabled) return;
         const task = { scope: opened, socialScope: openedSocialScope };
         opinionRefresh = task;
+        setPhoneFeedStatus(openedApp, 'loading');
         refreshButton.disabled = true;
         refreshButton.textContent = '正在刷新…';
         section.querySelector('[data-social-opinion-error]')?.remove();
         try {
           const next = await refreshWorldBackstagePublicOpinion();
-          if (current()) { snapshot = next; paint(true); }
+          if (current()) { snapshot = next; setPhoneFeedStatus(openedApp, 'synced'); paint(true); }
         } catch (error) {
           if (current()) {
-            const message = document.createElement('p');
-            message.dataset.socialOpinionError = '1';
-            message.setAttribute('role', 'alert');
-            message.textContent = error.message;
-            header.after(message);
+            setPhoneFeedStatus(openedApp, 'error', error.message);
           }
         } finally {
           if (opinionRefresh === task) opinionRefresh = null;
@@ -650,6 +712,12 @@ function mutate(mutator, options = {}) {
 
   function bind(section) {
     bindOpinionRefresh(section);
+    section.querySelectorAll('[data-social-filter]').forEach(button => button.addEventListener('click', () => {
+      mutate(bucket => { bucket.feedFilter = button.dataset.socialFilter; }, { preserveScroll: false });
+    }));
+    section.querySelectorAll('[data-note-category]').forEach(button => button.addEventListener('click', () => {
+      mutate(bucket => { bucket.category = button.dataset.noteCategory; }, { preserveScroll: false });
+    }));
     section.querySelectorAll('[data-social-profile]').forEach((button) => button.addEventListener('click', () => {
       mutate((bucket) => { bucket.profileView = button.dataset.socialProfile; }, { preserveScroll: false });
     }));
@@ -688,7 +756,7 @@ function mutate(mutator, options = {}) {
         return;
       }
       button.addEventListener('click', () => {
-        const items = active === 'weibo' ? buildWeiboItems(snapshot) : buildRedNoteItems(snapshot);
+        const items = itemsFor(active, displaySnapshot);
         const item = items.find(item => item.id === button.dataset.socialShare);
         if (item) phone.shareContent({ headline: item.title, summary: item.body, source: item.author });
       });
@@ -734,7 +802,7 @@ function mutate(mutator, options = {}) {
       syncScope();
       snapshot = readWorldBackstage();
       syncHome();
-      paint(true);
+      paint(true, { background: true });
     });
   }
 
@@ -780,7 +848,22 @@ function mutate(mutator, options = {}) {
   });
   const observerRoot = document.querySelector('#world-phone-stage [data-screen]') || document.querySelector('#world-phone-stage');
   if (observerRoot) observer.observe(observerRoot, { childList: true, subtree: true });
+  const onFeedStatus = () => {
+    const section = document.querySelector('#world-phone-stage .wp-social-realism-app');
+    if (section && active) {
+      if (awaitingInitialSync === active && readPhoneFeedStatus(active).phase === 'synced') {
+        awaitingInitialSync = '';
+        const scroller = feedScroller(section.querySelector('.wp-social-shell'));
+        const reading = state[active].detailId || state[active].query || (scroller?.scrollTop || 0) > 1
+          || section.contains(document.activeElement);
+        if (!reading) { snapshot = readWorldBackstage(); paint(true, { acceptIncoming: true }); return; }
+      }
+      bindOpinionRefresh(section);
+    }
+  };
+  globalThis.addEventListener?.(PHONE_FEED_STATUS_EVENT, onFeedStatus);
   const unsubscribe = subscribeWorldBackstage((next) => { snapshot = next; window.setTimeout(queueRefresh, 0); });
+  const unsubscribeMode = subscribePhoneGameModeChange(queueRefresh);
   const poll = window.setInterval(() => {
     if (!active) queueRefresh();
   }, 3500);
@@ -791,7 +874,9 @@ function mutate(mutator, options = {}) {
     document.removeEventListener('click', clickHandler, true);
     document.removeEventListener('keydown', keydownHandler, true);
     observer.disconnect();
+    globalThis.removeEventListener?.(PHONE_FEED_STATUS_EVENT, onFeedStatus);
     unsubscribe?.();
+    unsubscribeMode?.();
     window.clearInterval(poll);
   };
 }
