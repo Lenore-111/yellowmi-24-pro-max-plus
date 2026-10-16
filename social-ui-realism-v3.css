@@ -1,0 +1,6 @@
+/* Final feed-shape correction after real SillyTavern browser validation.
+   The legacy restoration stylesheet gives every RedNote cover a fixed 4/5 aspect ratio;
+   text-only notes must opt out so the two-column feed can keep natural varied heights. */
+#world-phone-stage .echo-note-card.is-text-note .echo-note-cover {
+  aspect-ratio:auto!important;
+}

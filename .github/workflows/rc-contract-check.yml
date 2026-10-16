@@ -28,6 +28,7 @@ jobs:
           node --check src/phone-game-communication-view.js
           node --check src/phone-game.js
           node --check src/phone-game-ai.js
+          node --check src/phone-game-response.js
           node --check src/phone-acceptance-guards.js
           node --check src/native-communication-apps.js
           node --check src/phone-image-provider.js

@@ -1,0 +1,201 @@
+/* Realism pass for the independent RedNote / Weibo surfaces.
+   This file intentionally overrides app-ui-restoration.css without changing data semantics. */
+#world-phone-stage .is-game-rednote,
+#world-phone-stage .is-game-weibo { background:#fff; }
+
+/* On feed screens the generic Echo app title bar collapses into a small back affordance.
+   Detail/profile screens keep their own explicit navigation. */
+#world-phone-stage .is-game-rednote:has(.echo-note-grid) > .wp-app-header,
+#world-phone-stage .is-game-weibo:has(.echo-weibo-feed) > .wp-app-header {
+  position:absolute; inset:0 auto auto 0; z-index:18; width:44px; min-height:46px;
+  padding:0; border:0; background:transparent; pointer-events:none;
+}
+#world-phone-stage .is-game-rednote:has(.echo-note-grid) > .wp-app-header > div,
+#world-phone-stage .is-game-rednote:has(.echo-note-grid) > .wp-app-header > span,
+#world-phone-stage .is-game-weibo:has(.echo-weibo-feed) > .wp-app-header > div,
+#world-phone-stage .is-game-weibo:has(.echo-weibo-feed) > .wp-app-header > span { display:none; }
+#world-phone-stage .is-game-rednote:has(.echo-note-grid) > .wp-app-header > button,
+#world-phone-stage .is-game-weibo:has(.echo-weibo-feed) > .wp-app-header > button {
+  pointer-events:auto; width:44px; min-height:44px; padding:0; border:0!important; background:transparent!important;
+  color:#222; font-size:25px; line-height:1;
+}
+
+/* Bottom navigation: flatter, denser and closer to native social apps. */
+#world-phone-stage .echo-real-social-nav {
+  grid-auto-columns:1fr; min-height:58px; padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid #f0f0f0; box-shadow:0 -8px 20px rgba(0,0,0,.025);
+}
+#world-phone-stage .echo-real-social-nav button { min-height:54px; gap:3px; color:#7d7d7d; font-size:10px; }
+#world-phone-stage .echo-real-social-nav svg { width:22px; height:22px; stroke-width:1.75; }
+#world-phone-stage .echo-real-social-nav button[aria-current="page"] { color:#151515; font-weight:650; }
+#world-phone-stage .echo-real-social-nav.is-rednote button[aria-current="page"] { color:#111; }
+#world-phone-stage .echo-real-social-nav.is-weibo button[aria-current="page"] { color:#ff8200; }
+
+/* Shared top search */
+#world-phone-stage .echo-social-search {
+  margin:4px 10px 9px; min-height:34px; padding:0 10px; border-radius:18px; background:#f5f5f5;
+}
+#world-phone-stage .echo-social-search input { min-height:34px; padding:5px 0; font-size:12px; }
+#world-phone-stage .echo-social-search button { min-height:32px; font-size:10px; color:#999; }
+#world-phone-stage .echo-social-search svg { width:15px; height:15px; }
+
+/* Hidden generation controls live behind the overflow menu instead of pretending to be part of the real app UI. */
+#world-phone-stage .echo-feed-tools { position:relative; margin-left:auto; }
+#world-phone-stage .echo-feed-tools > summary {
+  list-style:none; display:grid; place-items:center; width:36px; height:36px; cursor:pointer;
+  color:#555; font-size:17px; letter-spacing:1px; user-select:none;
+}
+#world-phone-stage .echo-feed-tools > summary::-webkit-details-marker { display:none; }
+#world-phone-stage .echo-feed-tools[open] > summary { background:#f6f6f6; border-radius:50%; }
+#world-phone-stage .echo-feed-tools > div {
+  position:absolute; top:39px; right:0; z-index:30; display:grid; gap:9px; min-width:150px;
+  padding:11px; border:1px solid #ececec; border-radius:12px; background:#fff;
+  box-shadow:0 12px 28px rgba(0,0,0,.13);
+}
+#world-phone-stage .echo-feed-count { display:flex; align-items:center; justify-content:space-between; gap:6px; color:#777; font-size:11px; }
+#world-phone-stage .echo-feed-count input {
+  width:48px!important; min-height:30px!important; padding:3px 5px!important; border:1px solid #ddd!important;
+  border-radius:8px!important; background:#fafafa!important; text-align:center; color:#333!important;
+}
+#world-phone-stage .echo-feed-tools .echo-refresh { width:100%; min-height:34px; border-radius:8px!important; border:0!important; background:#f5f5f5!important; }
+#world-phone-stage .echo-empty-actions { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+
+/* ---------------- RedNote ---------------- */
+#world-phone-stage .is-game-rednote { --echo-app-accent:#ff2442; }
+#world-phone-stage .echo-rn-homebar {
+  display:grid; grid-template-columns:44px 1fr 44px; align-items:center; min-height:48px; padding:0 5px;
+  background:#fff; border-bottom:0;
+}
+#world-phone-stage .echo-rn-homebar.is-collection { grid-template-columns:44px 1fr 44px; }
+#world-phone-stage .echo-rn-homebar.is-collection > b { grid-column:2; justify-self:center; font-size:16px; }
+#world-phone-stage .echo-rn-homebar.is-collection .echo-feed-tools { grid-column:3; }
+#world-phone-stage .echo-rn-channel { grid-column:2; display:flex; justify-content:center; align-items:center; gap:18px; height:48px; }
+#world-phone-stage .echo-rn-channel button {
+  position:relative; min-height:44px; padding:0 2px!important; color:#8d8d8d!important; font-size:14.5px!important; font-weight:500;
+}
+#world-phone-stage .echo-rn-channel button.is-active { color:#151515!important; font-weight:700; }
+#world-phone-stage .echo-rn-channel button.is-active::after {
+  content:""; position:absolute; left:50%; bottom:3px; width:20px; height:3px; transform:translateX(-50%);
+  border-radius:99px; background:#ff2442;
+}
+#world-phone-stage .echo-rn-homebar .echo-feed-tools { grid-column:3; }
+#world-phone-stage .is-game-rednote .echo-social-search { margin-top:1px; }
+#world-phone-stage .echo-rn-subchannels {
+  display:flex; align-items:center; gap:22px; min-height:34px; padding:0 11px 4px; overflow-x:auto;
+  background:#fff; color:#7c7c7c; font-size:11px; white-space:nowrap; scrollbar-width:none;
+}
+#world-phone-stage .echo-rn-subchannels::-webkit-scrollbar { display:none; }
+#world-phone-stage .echo-rn-subchannels span { flex:0 0 auto; }
+#world-phone-stage .echo-rn-subchannels .is-active { color:#222; font-weight:700; }
+#world-phone-stage .echo-note-grid {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:12px 6px;
+  padding:0 6px 16px; background:#fff;
+}
+#world-phone-stage .echo-note-card {
+  min-width:0; overflow:visible; border:0; border-radius:0; background:#fff; box-shadow:none;
+}
+#world-phone-stage .echo-note-card .echo-note-cover {
+  display:block; width:100%; min-height:0; padding:0; overflow:hidden; border-radius:8px!important;
+  background:#f6f3f1; color:#222; text-align:left;
+}
+#world-phone-stage .echo-note-card.has-image .echo-note-cover img {
+  display:block; width:100%; height:auto; min-height:138px; max-height:280px; object-fit:cover; background:#f2f2f2;
+}
+#world-phone-stage .echo-note-card:nth-child(4n+2).has-image .echo-note-cover img { max-height:230px; }
+#world-phone-stage .echo-note-card:nth-child(4n+3).has-image .echo-note-cover img { max-height:255px; }
+#world-phone-stage .echo-note-card.is-text-note .echo-note-cover {
+  min-height:134px; display:flex; flex-direction:column; justify-content:center; gap:7px; padding:14px 13px;
+  background:linear-gradient(165deg,#fffaf8,#f7f1ee); border:1px solid #f1ebe8;
+}
+#world-phone-stage .echo-note-card.is-text-note:nth-child(3n+2) .echo-note-cover { min-height:146px; background:linear-gradient(165deg,#f9fbf8,#eef4ef); border-color:#e8efe9; }
+#world-phone-stage .echo-note-card.is-text-note:nth-child(3n) .echo-note-cover { min-height:126px; background:linear-gradient(165deg,#fafaff,#f0f1f8); border-color:#e9eaf2; }
+#world-phone-stage .echo-note-text-kicker { font-size:9px; color:#a5a5a5; letter-spacing:.08em; }
+#world-phone-stage .echo-note-card .echo-note-cover b { font-size:15px; line-height:1.45; color:#242424; font-weight:700; }
+#world-phone-stage .echo-note-card .echo-note-cover small { font-size:10px; line-height:1.5; color:#8b8b8b; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+#world-phone-stage .echo-note-copy { padding:7px 2px 1px; }
+#world-phone-stage .echo-note-copy > b {
+  min-height:36px; font-size:12px; line-height:1.5; color:#222; font-weight:600;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+#world-phone-stage .echo-note-copy > div { margin-top:6px; gap:5px; }
+#world-phone-stage .echo-note-copy .wpg-avatar { width:18px; height:18px; flex-basis:18px; font-size:9px; }
+#world-phone-stage .echo-note-copy > div > span:not(.wpg-avatar) { font-size:9.5px; color:#888; }
+#world-phone-stage .echo-note-copy button { min-height:25px; padding:2px; }
+#world-phone-stage .echo-note-copy svg { width:15px; height:15px; }
+#world-phone-stage .echo-note-copy .wpg-image-actions { display:none!important; }
+
+/* ---------------- Weibo ---------------- */
+#world-phone-stage .is-game-weibo { --echo-app-accent:#ff8200; background:#f2f2f5; }
+#world-phone-stage .echo-wb-homebar {
+  display:grid; grid-template-columns:44px 1fr 44px; align-items:center; min-height:48px; gap:0;
+  padding:0 5px; background:#fff; border-bottom:1px solid #f3f3f3;
+}
+#world-phone-stage .echo-wb-channel { grid-column:2; display:flex; justify-content:center; align-items:center; gap:26px; height:48px; }
+#world-phone-stage .echo-wb-channel button {
+  position:relative; min-height:44px; padding:0 1px 5px!important; color:#8e8e8e!important; font-size:15px!important;
+}
+#world-phone-stage .echo-wb-channel button.is-active { color:#171717!important; font-weight:700; }
+#world-phone-stage .echo-wb-channel button.is-active::after {
+  content:""; position:absolute; left:50%; bottom:2px; width:20px; height:3px; transform:translateX(-50%);
+  border-radius:99px; background:#ff8200;
+}
+#world-phone-stage .echo-wb-homebar .echo-feed-tools { grid-column:3; }
+#world-phone-stage .echo-wb-subchannels {
+  display:flex; align-items:center; gap:22px; min-height:35px; padding:0 12px; overflow-x:auto;
+  border-bottom:1px solid #f2f2f2; background:#fff; color:#737373; font-size:11px; white-space:nowrap; scrollbar-width:none;
+}
+#world-phone-stage .echo-wb-subchannels::-webkit-scrollbar { display:none; }
+#world-phone-stage .echo-wb-subchannels span { flex:0 0 auto; }
+#world-phone-stage .echo-wb-subchannels .is-active { color:#ff8200; font-weight:700; }
+#world-phone-stage .is-game-weibo .echo-social-search { margin-top:8px; background:#f6f6f6; }
+#world-phone-stage .echo-wb-hot-head {
+  display:flex; align-items:flex-end; justify-content:space-between; gap:10px; padding:10px 13px 8px; background:#fff;
+  border-bottom:1px solid #f0f0f0;
+}
+#world-phone-stage .echo-wb-hot-head b { font-size:17px; }
+#world-phone-stage .echo-wb-hot-head span { color:#aaa; font-size:10px; }
+#world-phone-stage .echo-weibo-feed { display:grid; gap:8px; background:#f2f2f5; }
+#world-phone-stage .echo-post.is-weibo {
+  margin:0; padding:12px 13px 0; border:0; border-radius:0; background:#fff; box-shadow:none;
+}
+#world-phone-stage .echo-post.is-weibo > header { gap:9px; }
+#world-phone-stage .echo-post.is-weibo .wpg-avatar { width:40px; height:40px; flex-basis:40px; }
+#world-phone-stage .echo-post.is-weibo header b { color:#222; font-size:14px; font-weight:700; }
+#world-phone-stage .echo-post.is-weibo header small { color:#a0a0a0; font-size:9.5px; }
+#world-phone-stage .echo-post-more { width:31px; min-height:31px!important; padding:0!important; color:#aaa!important; font-size:15px; letter-spacing:1px; }
+#world-phone-stage .echo-post-more.is-static { display:grid; place-items:center; width:31px; color:#aaa; }
+#world-phone-stage .echo-wb-topic { margin:9px 0 -2px; color:#507daf; font-size:13px; line-height:1.5; }
+#world-phone-stage .echo-post.is-weibo > p { margin:8px 0 10px; color:#222; font-size:14px; line-height:1.65; }
+#world-phone-stage .echo-post.is-weibo .wpg-post-media { margin:0 0 10px; overflow:hidden; border-radius:4px; background:#f2f2f2; }
+#world-phone-stage .echo-post.is-weibo .wpg-post-media img { display:block; width:100%; max-height:360px; object-fit:cover; }
+#world-phone-stage .echo-post.is-weibo:not(.is-detail) > .wpg-image-actions { display:none!important; }
+#world-phone-stage .echo-wb-actions { display:grid!important; grid-template-columns:repeat(3,1fr); border-top:1px solid #f0f0f0!important; }
+#world-phone-stage .echo-wb-actions > button,
+#world-phone-stage .echo-wb-passive-action {
+  min-height:39px; display:flex; align-items:center; justify-content:center; gap:6px; color:#8e8e8e; font-size:10.5px;
+}
+#world-phone-stage .echo-wb-actions svg { width:17px!important; height:17px!important; }
+#world-phone-stage .echo-wb-actions > * + * { border-left:1px solid #f3f3f3; }
+#world-phone-stage .echo-wb-actions button[aria-pressed="true"] { color:#ff8200; }
+#world-phone-stage .echo-weibo-feed.is-hot .echo-post.is-weibo { border-bottom:1px solid #f0f0f0; }
+
+/* Feed/profile notices should not look like developer banners. */
+#world-phone-stage .is-game-rednote .wpg-generating,
+#world-phone-stage .is-game-weibo .wpg-generating,
+#world-phone-stage .is-game-rednote .wpg-info,
+#world-phone-stage .is-game-weibo .wpg-info {
+  margin:4px 10px!important; border-radius:8px; font-size:10px;
+}
+
+@container phone-screen (max-width:330px) {
+  #world-phone-stage .echo-rn-channel { gap:12px; }
+  #world-phone-stage .echo-wb-channel { gap:20px; }
+  #world-phone-stage .echo-rn-subchannels,
+  #world-phone-stage .echo-wb-subchannels { gap:18px; padding-inline:9px; }
+  #world-phone-stage .echo-note-grid { gap:10px 5px; padding-inline:5px; }
+  #world-phone-stage .echo-note-card.is-text-note .echo-note-cover { min-height:124px; padding-inline:11px; }
+  #world-phone-stage .echo-note-card.is-text-note:nth-child(3n+2) .echo-note-cover { min-height:134px; }
+  #world-phone-stage .echo-note-card.is-text-note:nth-child(3n) .echo-note-cover { min-height:118px; }
+  #world-phone-stage .echo-post.is-weibo { padding-inline:11px; }
+  #world-phone-stage .echo-feed-tools > div { min-width:138px; }
+}
