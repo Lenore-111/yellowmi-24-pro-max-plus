@@ -2,6 +2,8 @@ import { readPhoneGameMode, capturePhoneGameScope, isPhoneGameScopeCurrent, subs
 import { subscribeWorldBackstage } from './world-backstage-bridge.js';
 import { readWorldPhoneFeedAutoUpdate, PHONE_FEED_SETTINGS_EVENT } from './world-phone-feed-settings.js';
 
+import { setPhoneFeedStatus } from './world-phone-feed-status.js';
+
 const SUPPORTED = new Set(['weibo', 'rednote']);
 
 function host() {
@@ -19,18 +21,6 @@ function activePlatform() {
 function bridgeReady() {
   const value = host();
   return Boolean(value && typeof value.requestPhoneFeed === 'function');
-}
-
-function showRefreshError(button, message) {
-  const section = button?.closest?.('#world-phone-stage .wp-native-app');
-  if (!section) return;
-  section.querySelector('[data-phone-feed-error]')?.remove();
-  const paragraph = document.createElement('p');
-  paragraph.dataset.phoneFeedError = '1';
-  paragraph.setAttribute('role', 'alert');
-  paragraph.textContent = String(message || '世界信息流刷新失败');
-  const header = section.querySelector('.wp-app-header');
-  header?.after(paragraph);
 }
 
 export function mountWorldPhoneFeedIntegration({ phone } = {}) {
@@ -107,7 +97,7 @@ export function mountWorldPhoneFeedIntegration({ phone } = {}) {
     const existing = flights.get(key);
     if (existing) return existing;
 
-    const originalText = button?.textContent || '';
+    setPhoneFeedStatus(platform, 'loading');
     if (button) {
       button.disabled = true;
       button.textContent = '正在刷新…';
@@ -115,11 +105,17 @@ export function mountWorldPhoneFeedIntegration({ phone } = {}) {
     }
 
     const task = Promise.resolve().then(() => {
-      if (!current() || (!force && (!readWorldPhoneFeedAutoUpdate() || visiblePlatform() !== platform))) return null;
-      return wb.requestPhoneFeed({ platform, force });
+      if (!current() || (!force && (!readWorldPhoneFeedAutoUpdate() || visiblePlatform() !== platform))) {
+        if (current()) setPhoneFeedStatus(platform, 'idle');
+        return null;
+      }
+      return Promise.resolve(wb.requestPhoneFeed({ platform, force })).then(result => {
+        if (current()) setPhoneFeedStatus(platform, 'synced');
+        return result;
+      });
     })
       .catch((error) => {
-        if (current() && button?.isConnected) showRefreshError(button, error?.message || error);
+        if (current()) setPhoneFeedStatus(platform, 'error', error?.message || error);
         throw error;
       })
       .finally(() => {
@@ -127,7 +123,7 @@ export function mountWorldPhoneFeedIntegration({ phone } = {}) {
         scheduleCheck();
         if (current() && button?.isConnected) {
           button.disabled = false;
-          button.textContent = originalText || '刷新舆情';
+          button.textContent = '刷新动态';
         }
       });
     flights.set(key, task);
@@ -151,7 +147,7 @@ export function mountWorldPhoneFeedIntegration({ phone } = {}) {
   const onClickCapture = (event) => {
     if (destroyed || readPhoneGameMode() !== 'world' || !bridgeReady()) return;
 
-    const refresh = event.target?.closest?.('#world-phone-stage [data-social-opinion-refresh]');
+    const refresh = event.target?.closest?.('#world-phone-stage [data-social-opinion-refresh], #world-phone-stage [data-phone-feed-retry]');
     if (refresh) {
       const platform = activePlatform();
       if (!SUPPORTED.has(platform)) return;
@@ -164,7 +160,10 @@ export function mountWorldPhoneFeedIntegration({ phone } = {}) {
 
     const app = event.target?.closest?.('#world-phone-stage [data-app="weibo"], #world-phone-stage [data-app="rednote"]');
     const platform = app?.dataset?.app;
-    if (SUPPORTED.has(platform) && document.querySelector('#world-phone-stage [data-screen]')?.dataset.homeEditing !== '1') scheduleOpenRequest(platform);
+    if (SUPPORTED.has(platform) && document.querySelector('#world-phone-stage [data-screen]')?.dataset.homeEditing !== '1') {
+      host()?.activatePhoneFeed?.(platform);
+      scheduleOpenRequest(platform);
+    }
   };
 
   document.addEventListener('click', onClickCapture, true);

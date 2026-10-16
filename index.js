@@ -1,12 +1,12 @@
 import { mountSocialTools } from './src/social-tools.js';
-import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.28-feed-auto-v1';
+import { mountWorldPhone } from './src/world-phone.js?v=0.3.0-alpha.28-feed-reader-v1';
 import { mountPhoneInteractions } from './src/phone-interactions.js?v=0.3.0-alpha.28';
 import { mountNativeCommunicationApps } from './src/native-communication-apps.js?v=0.3.0-alpha.28';
 import { mountWorldPhoneUpdateManager } from './src/update-manager.js';
 import { mountAppStoreIntegration } from './src/app-store-integration.js?v=0.3.0-alpha.28';
 import { mountLocalWerewolfIntegration } from './src/werewolf-local-integration.js?v=0.3.0-alpha.28';
-import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.28';
-import { mountWorldPhoneFeedIntegration } from './src/world-phone-feed-integration.js?v=2';
+import { mountSocialRealism } from './src/social-realism.js?v=0.3.0-alpha.28-feed-reader-v1';
+import { mountWorldPhoneFeedIntegration } from './src/world-phone-feed-integration.js?v=3';
 import { mountUtilityRealism } from './src/utility-realism.js?v=0.3.0-alpha.28';
 import { mountDeviceRealism } from './src/device-realism.js?v=0.3.0-alpha.28';
 import { mountSystemRealism } from './src/system-realism.js';
@@ -87,6 +87,7 @@ function initWorldPhone() {
   ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
   ensureExternalStyle('echo-social-ui-realism-v2-style', './social-ui-realism-v2.css?build=echo-social-ui-v2');
   ensureExternalStyle('echo-social-ui-realism-v3-style', './social-ui-realism-v3.css?build=echo-social-ui-v3');
+  ensureExternalStyle('echo-social-feed-updates-style', './social-feed-updates.css?v=1');
   phone = mountWorldPhone();
   unmountAcceptanceGuards = mountPhoneAcceptanceGuards({ phone });
   unmountShellLayout = mountShellLayout({ phone });

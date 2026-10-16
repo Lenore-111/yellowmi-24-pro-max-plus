@@ -1,0 +1,21 @@
+{
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "counts": {
+    "sandbox": 0,
+    "refresh": 2
+  },
+  "metrics": {
+    "screenWidth": 390,
+    "stageWidth": 390,
+    "gridWidth": 390,
+    "gridScrollWidth": 390,
+    "documentScrollWidth": 390
+  },
+  "pageErrors": [],
+  "passed": true,
+  "browser": "153.0.8010.0",
+  "scope": "Full phone extension in Chromium with fixture world/model APIs; not real SillyTavern or physical Android"
+}

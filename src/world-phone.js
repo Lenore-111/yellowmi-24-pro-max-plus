@@ -579,32 +579,24 @@ function renderWeChat(screen, snapshot, route, repaint, goHome, toggleMomentLike
 }
 
 function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
+  const detailsOpen = screen.querySelector('[data-connection-details]')?.open;
+  const scrollTop = screen.querySelector('[data-settings-scroll]')?.scrollTop || 0;
   screen.innerHTML = `
     <section class="wp-view wp-native-app wp-settings-app">
       ${renderAppHeader('设置', 'Echo 手机')}
       <div class="wp-settings-content" data-settings-scroll>
-      <div class="wp-settings-hero"><div class="wp-settings-device">Echo 手机</div><p>REAL PHONE SHELL · WORLD BACKSTAGE SIM</p></div>
+      <div class="wp-settings-hero"><div class="wp-settings-device">Echo 手机</div><p>随手翻翻，看看世界里发生了什么</p></div>
       <div class="wpg-mode-settings">
         <b>手机玩法</b>
         <button type="button" data-game-mode="game" aria-pressed="${readPhoneGameMode() === 'game'}">独立游戏 · 仅在手机里</button>
-        <button type="button" data-game-mode="world" aria-pressed="${readPhoneGameMode() === 'world'}">世界背面 · 原有联动模式</button>
+        <button type="button" data-game-mode="world" aria-pressed="${readPhoneGameMode() === 'world'}">世界联动 · 跟随当前剧情</button>
         <p>独立游戏有自己的帖子、私聊、钱包和关系存档。只有你选中“带入正文”的行动才会进入正文输入框。</p>
-      </div>
-      <div class="wp-settings-list">
-        <div><span>SIM 卡</span><b class="${snapshot.connected ? 'is-good' : ''}">${snapshot.connected ? '已插入' : '未插入'}</b></div>
-        <div><span>世界人物</span><b>${snapshot.people.length}</b></div>
-        <div><span>微信联系人</span><b>${snapshot.contacts.length}</b></div>
-        <div><span>通讯会话</span><b>${snapshot.conversations.length}</b></div>
-        <div><span>朋友圈内容</span><b>${snapshot.moments.length}</b></div>
-        <div><span>世界新闻</span><b>${snapshot.news.length}</b></div>
-        <div><span>论坛讨论</span><b>${snapshot.forums.length}</b></div>
-        <div><span>当前会话消息</span><b>${snapshot.chatMessages}</b></div>
       </div>
       <div class="wp-settings-section">
         <span class="wp-settings-section-label">社交平台 · 当前聊天</span>
-        <button type="button" class="wp-settings-reset-home wp-settings-feed-toggle" role="switch" aria-checked="true" aria-label="跟随世界内容自动更新" data-world-feed-auto>
-          <span><b>跟随世界内容自动更新</b><small>世界模式下，浏览微博或小红书时同步世界公开内容。关闭后仍可手动刷新。</small></span>
-          <i data-world-feed-auto-state>开启</i>
+        <button type="button" class="wp-settings-reset-home wp-settings-feed-toggle" role="switch" aria-checked="true" aria-label="自动同步世界动态" data-world-feed-auto>
+          <span><b>自动同步世界动态</b><small>世界模式下，浏览微博或小红书时同步世界公开内容。关闭后仍可手动刷新。</small></span>
+          <i class="wp-settings-switch" data-world-feed-auto-state aria-hidden="true">开启</i>
         </button>
       </div>
       <div class="wp-settings-section">
@@ -618,6 +610,19 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
           <i>›</i>
         </button>
       </div>
+      <details class="wp-settings-connection" data-connection-details>
+        <summary>连接详情 <span>${snapshot.connected ? '已连接世界背面' : '暂未连接'}⌄</span></summary>
+      <div class="wp-settings-list">
+        <div><span>SIM 卡</span><b class="${snapshot.connected ? 'is-good' : ''}">${snapshot.connected ? '已插入' : '未插入'}</b></div>
+        <div><span>世界人物</span><b>${snapshot.people.length}</b></div>
+        <div><span>微信联系人</span><b>${snapshot.contacts.length}</b></div>
+        <div><span>通讯会话</span><b>${snapshot.conversations.length}</b></div>
+        <div><span>朋友圈内容</span><b>${snapshot.moments.length}</b></div>
+        <div><span>世界新闻</span><b>${snapshot.news.length}</b></div>
+        <div><span>论坛讨论</span><b>${snapshot.forums.length}</b></div>
+        <div><span>当前会话消息</span><b>${snapshot.chatMessages}</b></div>
+      </div>
+      </details>
       <div class="wp-settings-foot">World Phone · Alpha</div>
       </div>
     </section>
@@ -627,6 +632,10 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
     setPhoneGameMode(button.dataset.gameMode);
     renderSettings(screen, snapshot, goHome, onResetHome, openImages);
   }));
+  const details = screen.querySelector('[data-connection-details]');
+  if (details) details.open = Boolean(detailsOpen);
+  const scroll = screen.querySelector('[data-settings-scroll]');
+  if (scroll) scroll.scrollTop = scrollTop;
   mountWorldPhoneFeedSettings(screen);
   screen.querySelector('[data-image-settings-open]')?.addEventListener('click', openImages);
   screen.querySelector('[data-reset-home]')?.addEventListener('click', (event) => {

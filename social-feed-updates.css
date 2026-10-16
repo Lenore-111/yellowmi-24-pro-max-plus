@@ -1,0 +1,33 @@
+/* World social feeds: stable reading, visible loading, and distinct discovery. */
+#world-phone-stage .wp-social-realism-app .wp-feed-status { flex:0 0 30px; min-height:30px; display:flex; align-items:center; gap:8px; padding:0 14px; background:#fff; border-bottom:1px solid #eee; font-size:10px; color:#83868e; min-width:0; }
+#world-phone-stage .wp-feed-status > span { flex-shrink:0; }
+#world-phone-stage .wp-feed-status small { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:10px; }
+#world-phone-stage .wp-feed-status[data-phase="synced"] > span { color:#54816b; }
+#world-phone-stage .wp-feed-status[data-phase="error"] > span { color:#b54f46; }
+#world-phone-stage .wp-feed-status button { flex-shrink:0; margin-left:auto; padding:5px 9px; border:0; border-radius:12px; background:#f7eeeb; color:#9e493e; font:inherit; cursor:pointer; }
+#world-phone-stage .wp-feed-status button[hidden] { display:none; }
+#world-phone-stage .wp-feed-incoming { position:absolute; z-index:12; top:94px; left:50%; transform:translateX(-50%); max-width:90%; min-height:34px; padding:7px 15px; border:1px solid #f0d2b8; border-radius:18px; box-shadow:0 3px 12px #60361718; background:#fff6e8; color:#a55c22; font-size:11px; cursor:pointer; }
+#world-phone-stage .is-rednote .wp-feed-incoming { border-color:#f1c9d1; background:#fff0f2; color:#c23c56; }
+#world-phone-stage .wp-social-realism-app .wp-app-header [data-social-opinion-refresh] { width:auto; min-width:64px; padding:0 5px; font-size:11px; white-space:nowrap; }
+#world-phone-stage .wp-social-realism-app .wp-app-header { grid-template-columns:42px minmax(0,1fr) auto; }
+#world-phone-stage .is-weibo .wp-wb-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }
+#world-phone-stage .wp-rn-categories { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 7px; scrollbar-width:none; }
+#world-phone-stage .wp-rn-categories button { flex:0 0 auto; min-height:32px; padding:5px 14px; border:0; border-radius:18px; background:#f6f6f6; color:#777; font-size:11px; }
+#world-phone-stage .wp-rn-categories button.is-active { background:#ffedef; color:#d43f55; font-weight:650; }
+#world-phone-stage .wp-rn-copy small { display:block; margin-top:5px; font-size:9px; color:#999; }
+#world-phone-stage .wp-settings-connection { margin:18px 14px 0; border-radius:16px; background:white; }
+#world-phone-stage .wp-settings-connection summary { display:flex; justify-content:space-between; gap:8px; padding:16px 14px; list-style:none; cursor:pointer; font-size:12px; }
+#world-phone-stage .wp-settings-connection summary::-webkit-details-marker { display:none; }
+#world-phone-stage .wp-settings-connection summary span { font-size:10px; color:#898e98; }
+#world-phone-stage .wp-settings-connection .wp-settings-list { margin:0; box-shadow:none; }
+#world-phone-stage .wp-settings-feed-toggle .wp-settings-switch { position:relative; width:40px; height:24px; border-radius:20px; background:#c7cbd0; text-indent:-9999px; overflow:hidden; transition:background .15s ease; }
+#world-phone-stage .wp-settings-switch::after { content:""; position:absolute; left:3px; top:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .15s ease; box-shadow:0 1px 3px #0002; }
+#world-phone-stage .wp-settings-feed-toggle[aria-checked="true"] .wp-settings-switch { background:#5b9e7d; }
+#world-phone-stage .wp-settings-feed-toggle[aria-checked="true"] .wp-settings-switch::after { transform:translateX(16px); }
+#world-phone-stage .wp-feed-incoming:focus-visible, #world-phone-stage .wp-rn-categories button:focus-visible { outline:2px solid #b16d40; outline-offset:2px; }
+@media(prefers-reduced-motion:reduce) { #world-phone-stage .wp-settings-switch, #world-phone-stage .wp-settings-switch::after { transition:none; } }
+
+#world-phone-stage .is-rednote .wp-rn-cover.is-text-note { aspect-ratio:auto; min-height:180px; padding:16px 13px; display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start; text-align:left; }
+#world-phone-stage .is-rednote .wp-rn-cover.is-text-note > span { font-size:9px; letter-spacing:.12em; color:#7c8884; }
+#world-phone-stage .is-rednote .wp-rn-cover.is-text-note > b { margin-top:15px; font-size:19px; line-height:1.4; color:#3e5350; }
+#world-phone-stage .is-rednote .wp-rn-cover.is-text-note > p { margin:10px 0 0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; font-size:11px; line-height:1.8; color:#6c7a76; }
