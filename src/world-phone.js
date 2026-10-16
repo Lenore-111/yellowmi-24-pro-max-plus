@@ -1,4 +1,5 @@
 import { readSocialBucket, writeSocialBucket } from './social-storage.js';
+import { mountWorldPhoneFeedSettings } from './world-phone-feed-settings.js';
 import {
   readWorldBackstage,
   setWorldBackstageMomentLiked,
@@ -600,6 +601,13 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
         <div><span>当前会话消息</span><b>${snapshot.chatMessages}</b></div>
       </div>
       <div class="wp-settings-section">
+        <span class="wp-settings-section-label">社交平台 · 当前聊天</span>
+        <button type="button" class="wp-settings-reset-home wp-settings-feed-toggle" role="switch" aria-checked="true" aria-label="跟随世界内容自动更新" data-world-feed-auto>
+          <span><b>跟随世界内容自动更新</b><small>世界模式下，浏览微博或小红书时同步世界公开内容。关闭后仍可手动刷新。</small></span>
+          <i data-world-feed-auto-state>开启</i>
+        </button>
+      </div>
+      <div class="wp-settings-section">
         <span class="wp-settings-section-label">动态配图</span>
         <button type="button" class="wp-settings-reset-home" data-image-settings-open><span><b>连接自己的生图站点</b><small>填写接口、密钥，选择生图模型</small></span><i>›</i></button>
       </div>
@@ -619,6 +627,7 @@ function renderSettings(screen, snapshot, goHome, onResetHome, openImages) {
     setPhoneGameMode(button.dataset.gameMode);
     renderSettings(screen, snapshot, goHome, onResetHome, openImages);
   }));
+  mountWorldPhoneFeedSettings(screen);
   screen.querySelector('[data-image-settings-open]')?.addEventListener('click', openImages);
   screen.querySelector('[data-reset-home]')?.addEventListener('click', (event) => {
     onResetHome?.();
