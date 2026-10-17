@@ -1,4 +1,5 @@
-import { gameNav, gamePost, gameFeed, gameWechatMe } from './phone-game-app-ui.js';
+import { renderIndependentSocialView, independentSocialHeader } from './phone-game-social-ui.js';
+import { gameNav, gamePost, gameFeed, gameWechatMe, gameImageControls } from './phone-game-app-ui.js';
 import { installPhoneGameUiClosureStyles, renderRedNoteGameDetail, renderWechatContacts, renderWechatDiscovery, wrapWechatMoments, renderDeliveryGame } from './phone-game-ui-closure.js';
 import { DELIVERY_COLA } from './delivery-data.js';
 import { dCatQuote } from './delivery-view.js';
@@ -6,6 +7,7 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameState, readPhoneGameMode,
   queuePhoneGameInteraction, togglePhoneGameLike, startPhoneGameShift, servePhoneGameCoffee,
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
+  phoneGameContactGroups, resolvePhoneGameContactIdentity,
 } from './phone-game.js?v=0.3.0-alpha.28';
 import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 import { phonePostImageStatus, subscribePhonePostImages, generatePhonePostImage, cancelPhonePostImage } from './phone-post-images.js';
@@ -41,16 +43,19 @@ function exportSheet(screen, state, eventId, scope) {
   sheet.querySelector('[data-export-close]').focus();
 }
 
-export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' }) {
+export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '', draft: initialDraft = '' }) {
   installPhoneGameUiClosureStyles();
   installPhoneImageStyles();
   const scope = capturePhoneGameScope();
   const viewId = Math.random().toString(36).slice(2);
   let paintedRoute = '';
+  const scrollPositions = new Map();
+  const socialApp = app === 'weibo' || app === 'rednote';
   let requestPending = false;
   const ui = {
     tab: app === 'weibo' ? 'home' : app === 'rednote' ? 'discover' : 'chats',
-    query: '', savedIds: [], actorId, postId: '', draft: '', note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
+    query: '', savedIds: [], actorId, postId: '', draft: initialDraft, note: '', filter: '', busy: false, error: '', info: '', ingredients: [],
+    category: 'all', profileView: 'saved', feedFilter: 'all',
     contactId: '', discoveryView: '', deliveryView: 'home', deliveryMerchantId: '', deliveryGiftId: '', deliveryOrderId: '', deliveryAddress: '', imageBusy: false, imageFeedback: '', imageFailed: false,
     canGenerateWeibo:Boolean(scope.ctx?.characters?.[scope.ctx.characterId]),
   };
@@ -79,6 +84,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     } catch (error) { ui.error = String(error.message || error); paint(); return ''; }
   }
   const nav = () => {
+    if (socialApp) return '';
     const wechatNested = app === 'wechat' && (ui.actorId || ui.contactId || ui.discoveryView === 'moments');
     const deliveryNested = app === 'delivery' && !['home', 'orders'].includes(ui.deliveryView);
     return wechatNested || ui.postId || deliveryNested ? '' : gameNav(app, ui.tab);
@@ -95,6 +101,7 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     return gamePost(state, post, app, ui.savedIds.includes(post.id), detail, phoneGameClock({ tick: post.tick }), ui.imageBusy);
   }
   function feed(state, platform) {
+    if (socialApp) return renderIndependentSocialView(state, platform, ui, { timeLabel: post => phoneGameClock({ tick: post.tick }), replyMarkup, imageControls: gameImageControls });
     const selected = state.posts.find(post => post.id === ui.postId && post.platform === platform);
     if (selected) return postDetail(state, selected);
     let posts = state.posts.filter(post => post.platform === platform && (!ui.filter || post.actorId === ui.filter)
@@ -114,9 +121,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     }
     if (ui.tab === 'moments') return ui.discoveryView === 'moments' ? wrapWechatMoments(feed(state, 'moments')) : renderWechatDiscovery();
     if (ui.tab === 'relations') return renderWechatContacts(state, ui);
-    return `<form class="echo-wx-search" data-pg-search><input data-pg-query aria-label="搜索联系人" placeholder="搜索" value="${esc(ui.query)}"><button type="submit">搜索</button></form><div class="wpg-chat-list">${state.actors.filter(actor=>!ui.query || actor.name.includes(ui.query)).map(actor => {
-      const last = state.events.filter(event => event.actorId === actor.id && !['sms', 'call'].includes(event.kind)).at(-1);
-      return `<button type="button" data-pg-chat="${esc(actor.id)}">${avatar(actor.name)}<span><b>${esc(actor.name)}</b><small>${esc(last ? last.status === 'pending' ? '等待回应 · 可重试' : last.reply : `开始聊聊${phoneGameActorPronoun(actor)}的生活`)}</small></span><i>›</i></button>`;
+    return `<form class="echo-wx-search" data-pg-search><input data-pg-query aria-label="搜索联系人" placeholder="搜索" value="${esc(ui.query)}"><button type="submit">搜索</button></form><div class="wpg-chat-list">${phoneGameContactGroups(state).filter(({actor})=>!ui.query || actor.name.includes(ui.query)).map(({actor, members}) => {
+      const last = state.events.filter(event => members.some(item => item.id === event.actorId) && !['sms', 'call'].includes(event.kind)).at(-1);
+      return `<button type="button" ${members.length === 2 ? 'data-pg-contact-identity' : 'data-pg-chat'}="${esc(actor.id)}">${avatar(actor.name)}<span><b>${esc(actor.name)}</b><small>${esc(members.length === 2 ? '同名来源 · 点击确认身份' : last ? last.status === 'pending' ? '等待回应 · 可重试' : last.reply : `开始聊聊${phoneGameActorPronoun(actor)}的生活`)}</small></span><i>›</i></button>`;
     }).join('') || '<div class="echo-feed-empty"><b>还没有聊天</b><p>打开一位人物的聊天后，对方会出现在这里。</p></div>'}</div>`;
   }
   function giftShop(state) {
@@ -146,15 +153,21 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
       : app === 'delivery' ? renderDeliveryGame(state, ui, deliveryGifts, replyMarkup)
       : app === 'wechat' ? chats(state)
       : feed(state, app);
-    const route = [app, ui.tab, app === 'wechat' ? ui.actorId : '', ui.postId, ui.filter, ui.contactId, ui.discoveryView, ui.deliveryView, ui.deliveryMerchantId, ui.deliveryGiftId, ui.deliveryOrderId].join('|');
+    const route = [app, ui.tab, app === 'wechat' ? ui.actorId : '', ui.postId, ui.filter, ui.category, ui.profileView, ui.feedFilter, ui.contactId, ui.discoveryView, ui.deliveryView, ui.deliveryMerchantId, ui.deliveryGiftId, ui.deliveryOrderId].join('|');
     const keepPosition = route === paintedRoute;
-    const scrollTop = keepPosition ? screen.querySelector('.wpg-main')?.scrollTop || 0 : 0;
+    const scroller = () => socialApp ? screen.querySelector('.wp-rn-grid') || screen.querySelector('.wp-wb-feed') || screen.querySelector('.wp-rn-detail-scroll') || screen.querySelector('.wp-social-shell') : screen.querySelector('.wpg-main');
+    if (paintedRoute) scrollPositions.set(paintedRoute, scroller()?.scrollTop || 0);
+    const scrollTop = scrollPositions.get(route) || 0;
+    const focused = keepPosition && screen.querySelector('[data-pg-query]:focus');
+    const selection = focused ? [focused.selectionStart, focused.selectionEnd] : null;
+    const feedSettingsOpen = keepPosition && Boolean(screen.querySelector('.wp-independent-feed-settings')?.open);
     const recipeOpen = keepPosition && Boolean(screen.querySelector('.wpg-coffee details')?.open);
     paintedRoute = route;
     const picture = phonePostImageStatus();
     const pictureHere = picture.busy && picture.scope.key === scope.key && picture.scope.metadata === scope.metadata && picture.scope.modeEpoch === scope.modeEpoch;
     const imageNotice = pictureHere || ui.imageFeedback ? `<div class="wpg-image-status${!pictureHere && ui.imageFailed ? ' is-error' : ''}" data-pg-image-status role="${!pictureHere && ui.imageFailed ? 'alert' : 'status'}" aria-live="polite"><span>${pictureHere ? '配图生成中…' : esc(ui.imageFeedback)}</span>${pictureHere ? '<button type="button" data-pg-image-cancel>取消配图</button>' : '<button type="button" data-pg-image-dismiss aria-label="关闭配图提示">关闭</button>'}</div>` : '';
-    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : ''}</small></div><span>${ui.busy ? '•••' : '◌'}</span></header>${imageNotice}<main class="wpg-main${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
+    const headerTools = socialApp ? independentSocialHeader(app, ui, Boolean(state.actors.length || app === 'weibo' && ui.canGenerateWeibo)) : `<span>${ui.busy ? '•••' : '◌'}</span>`;
+    screen.innerHTML = `<section class="wp-view wp-native-app wp-game-app echo-restored-app is-game-${app}${socialApp ? ` wp-social-realism-app is-${app} wp-independent-social` : ''}" data-phone-game-app="${app}" data-phone-game-view="${viewId}"><header class="wp-app-header"><button type="button" data-app-back aria-label="返回桌面">‹</button><div><b>${labels[app]}</b><small>${ui.busy ? '正在更新…' : socialApp ? '角色的日常' : ''}</small></div>${headerTools}</header>${imageNotice}<main class="${socialApp ? 'wp-independent-main' : 'wpg-main'}${app === 'wechat' && ui.actorId ? ' is-thread' : ''}">${ui.error ? `<p class="wpg-error" role="alert">${esc(ui.error)}</p>` : ''}${ui.info && app !== 'wallet' ? `<p class="wpg-info" role="status">${esc(ui.info)}</p>` : ''}${ui.busy ? '<p class="wpg-generating" role="status">角色正在回应… <button type="button" data-pg-cancel>停止等待</button></p>' : ''}${content}</main>${nav()}</section>`;
     screen.querySelector('[data-app-back]').onclick = goHome;
     const root = screen.querySelector('[data-phone-game-app]');
     for (const type of ['click', 'input', 'change', 'submit']) root?.addEventListener?.(type, event => {
@@ -186,6 +199,29 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
       paint();
     });
     screen.querySelector('[data-pg-search]')?.addEventListener('submit', event => { event.preventDefault(); ui.query = screen.querySelector('[data-pg-query]')?.value.trim() || ''; paint(); });
+    screen.querySelector('[data-pg-query]')?.addEventListener('input', event => { ui.query = event.target.value; });
+    screen.querySelector('[data-pg-search-clear]')?.addEventListener('click', () => { ui.query = ''; paint(); });
+    screen.querySelectorAll('[data-pg-category]').forEach(button => button.onclick = () => { ui.category = button.dataset.pgCategory; paint(); });
+    screen.querySelectorAll('[data-pg-profile]').forEach(button => button.onclick = () => { ui.profileView = button.dataset.pgProfile; paint(); });
+    screen.querySelectorAll('[data-pg-feed-filter]').forEach(button => button.onclick = () => { ui.feedFilter = button.dataset.pgFeedFilter; paint(); });
+    screen.querySelectorAll('[data-pg-feed-count]').forEach(input => input.addEventListener('input', () => {
+      const value = Number(input.value);
+      if (Number.isSafeInteger(value) && value > 0) try { globalThis.localStorage?.setItem('echo_phone_feed_count:' + input.dataset.pgFeedCount, String(value)); } catch {}
+    }));
+    screen.querySelectorAll('[data-pg-share]').forEach(button => button.onclick = () => {
+      const post = state.posts.find(item => item.id === button.dataset.pgShare);
+      if (!post || !current()) return;
+      screen.querySelector('.wp-share-sheet')?.remove();
+      const sheet = document.createElement('section'); sheet.className = 'wp-share-sheet'; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-label', '分享内容');
+      sheet.innerHTML = `<header><b>分享给朋友</b><button type="button" data-share-cancel aria-label="取消分享">×</button></header><p>选择联系人，编辑后再发送。</p><div>${state.actors.map(actor => `<button type="button" data-pg-share-to="${esc(actor.id)}">${esc(actor.name)}<span>↗</span></button>`).join('') || '<p>还没有可分享的联系人。</p>'}</div>`;
+      sheet.querySelector('[data-share-cancel]').onclick = () => sheet.remove();
+      sheet.querySelectorAll('[data-pg-share-to]').forEach(target => target.onclick = () => {
+        if (!current()) return;
+        const draft = `分享：${post.title || ''}\n${post.text}\n${weiboAuthorName(state, post)}`.slice(0, 1200);
+        sheet.remove(); openApp('wechat', { actorId: target.dataset.pgShareTo, draft });
+      });
+      screen.append(sheet); sheet.querySelector('button')?.focus();
+    });
     screen.querySelectorAll('[data-pg-save]').forEach(button=>button.onclick=()=>{ const id=button.dataset.pgSave; ui.savedIds=ui.savedIds.includes(id)?ui.savedIds.filter(x=>x!==id):[...ui.savedIds,id];try { globalThis.localStorage?.setItem('echo_phone_saved:'+scope.key,JSON.stringify(ui.savedIds)); } catch {} paint(); });
     screen.querySelectorAll('[data-pg-app]').forEach(button => button.onclick = () => openApp(button.dataset.pgApp));
     screen.querySelectorAll('[data-pg-tab]').forEach(button => button.onclick = () => { ui.tab = button.dataset.pgTab; ui.postId = ''; ui.contactId = ''; ui.discoveryView = ''; ui.draft = ''; paint(); });
@@ -200,6 +236,15 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
       : openApp('wechat', { actorId: button.dataset.pgChat }));
     screen.querySelector('[data-pg-chats]')?.addEventListener('click', () => { ui.actorId = ''; ui.draft = ''; paint(); });
     screen.querySelectorAll('[data-pg-contact]').forEach(button => button.onclick = () => { ui.contactId = button.dataset.pgContact; paint(); });
+    screen.querySelectorAll('[data-pg-contact-identity]').forEach(button => button.onclick = () => { ui.tab = 'relations'; ui.actorId = ''; ui.contactId = button.dataset.pgContactIdentity; paint(); });
+    screen.querySelectorAll('[data-pg-identity-choice]').forEach(button => button.onclick = () => {
+      if (ui.busy) return;
+      action(() => {
+        const same = button.dataset.pgIdentityChoice === 'same';
+        resolvePhoneGameContactIdentity(button.dataset.pgIdentityActor, same, scope);
+        ui.contactId = same ? button.dataset.pgIdentityActor : '';
+      });
+    });
     screen.querySelector('[data-pg-contact-back]')?.addEventListener('click', () => { ui.contactId = ''; paint(); });
     screen.querySelector('[data-pg-open-moments]')?.addEventListener('click', () => { ui.discoveryView = 'moments'; paint(); });
     screen.querySelector('[data-pg-discovery-back]')?.addEventListener('click', () => { ui.discoveryView = ''; ui.postId = ''; paint(); });
@@ -252,8 +297,15 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '' 
     });
     const recipeDetails = screen.querySelector('.wpg-coffee details');
     if (recipeDetails) recipeDetails.open = recipeOpen;
-    const main = screen.querySelector('.wpg-main');
+    const main = scroller();
     if (main) main.scrollTop = scrollTop;
+    const settings = screen.querySelector('.wp-independent-feed-settings');
+    if (settings) settings.open = feedSettingsOpen;
+    if (focused) {
+      const input = screen.querySelector('[data-pg-query]');
+      input?.focus();
+      if (selection) input?.setSelectionRange?.(...selection);
+    }
     if (app === 'wechat' && ui.actorId) {
       const thread = screen.querySelector('.wpg-thread');
       thread?.scrollTo(0, thread.scrollHeight);

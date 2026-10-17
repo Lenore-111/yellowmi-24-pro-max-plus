@@ -8,7 +8,7 @@ import { parsePhoneGameResponse } from '../src/phone-game-response.js';
 
 // Run the actual module bodies with an isolated SillyTavern host, controllable
 // model promises and virtual time. No browser or model credentials are needed.
-const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js","src/phone-game-app-ui.js","src/world-backstage-bridge.js"];
+const paths = ["src/phone-game-actors.js","src/phone-game.js","src/phone-game-ai.js","src/phone-game-view.js","src/phone-game-app-ui.js","src/social-feed-ui.js","src/phone-game-social-ui.js","src/world-backstage-bridge.js"];
 const sources = Object.fromEntries(await Promise.all(paths.map(async path =>
   [path, await readFile(new URL('../' + path, import.meta.url), 'utf8')])));
 
@@ -51,14 +51,16 @@ function createHarness(sources) {
     ...clock, console:{warn(){},info(){},error(){}}, SillyTavern:{getContext:()=>ctx},crypto:{randomUUID:()=> 'id-' + ++nextId},
     localStorage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)},
   };
-  const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
+  const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor','phoneGameContactGroups']);
   const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,phoneImagePath,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors,...weiboOpinion},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
-     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft']);
+     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft','resolvePhoneGameContactIdentity','phoneGameContactGroups']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,parsePhoneGameResponse,readPhoneImageSettings:()=>({}),readWeiboWorldbook:async()=>({entries:[],unavailableBooks:[],signature:'test'}),weiboWorldbookSignature:()=> 'test',...game,...weiboContext},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
-  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {phoneImagePath,...weiboOpinion}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery']);
+  const appUi = moduleFrom(sources['src/phone-game-app-ui.js'], {phoneImagePath,...weiboOpinion}, ['gameNav','gamePost','gameFeed','gameWechatMe','gameDelivery','gameImageControls']);
+  const sharedUi = moduleFrom(sources['src/social-feed-ui.js'], {}, ['renderWeiboMarkup','renderRedNoteMarkup']);
+  const independentUi = moduleFrom(sources['src/phone-game-social-ui.js'], {globalThis:globals,phoneImagePath,...weiboOpinion,...sharedUi}, ['renderIndependentSocialView','independentSocialHeader']);
   // The regression harness strips ESM imports. UI-closure views are covered by real-browser QA;
   // these shims keep this existing lifecycle suite focused on the phone-game engine and renderer lifecycle.
   const uiClosure = {
@@ -70,7 +72,7 @@ function createHarness(sources) {
     renderDeliveryGame(){ return ''; },
   };
   const imageUi = { installPhoneImageStyles(){}, phonePostImageStatus:()=>({busy:false}), subscribePhonePostImages:()=>()=>{}, openPhoneImageSheet(){}, cancelPhonePostImage(){} };
-  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...imageUi,...appUi,...uiClosure,...game,...ai,...weiboOpinion}, ['renderPhoneGameApp']);
+  const view = moduleFrom(sources['src/phone-game-view.js'], {globalThis:globals,DELIVERY_COLA:{id:'cola'},dCatQuote:()=>'',...imageUi,...appUi,...independentUi,...uiClosure,...game,...ai,...weiboOpinion}, ['renderPhoneGameApp']);
   const deferred = () => { let resolve,reject; const promise = new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject}; };
   function model(cooperative = true) {
     const task = deferred();

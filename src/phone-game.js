@@ -2,9 +2,9 @@ import { DELIVERY_COLA } from './delivery-data.js';
 import { phoneImagePath } from './phone-image-paths.js';
 import { normalizeWeiboAuthor, normalizeWeiboDiscussion } from './phone-weibo-opinion.js';
 import { readWorldBackstage } from './world-backstage-bridge.js';
-import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor } from './phone-game-actors.js?v=0.3.0-alpha.28';
+import { collectPhoneGameActors, inferPhoneGamePronoun, phoneGameActorPronoun, isPhoneGameScenarioActor, phoneGameContactGroups } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
-export { phoneGameActorPronoun } from './phone-game-actors.js?v=0.3.0-alpha.28';
+export { phoneGameActorPronoun, phoneGameContactGroups } from './phone-game-actors.js?v=0.3.0-alpha.28';
 
 export const PHONE_GAME_KEY = 'world_phone_game_v1';
 export const PHONE_GAME_GIFTS = Object.freeze([
@@ -140,6 +140,7 @@ function createState(scope) {
   };
 }
 export const phoneGameDialNumber = value => String(value ?? '').replace(/[^0-9+*#]/g, '').slice(0, 24);
+export const phoneGameContactMatchesNumber = (contact, number) => [contact.number, ...(contact.otherNumbers || [])].includes(phoneGameDialNumber(number));
 function normalizeCommunications(raw, actors) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const actorIds = new Set(actors.map(actor => actor.id));
@@ -153,7 +154,8 @@ function normalizeCommunications(raw, actors) {
     let number = phoneGameDialNumber(supplied || old?.number) || `800${String(hash % 100000000).padStart(8, '0')}`;
     while (virtual && usedNumbers.has(number)) number = `800${String(++hash % 100000000).padStart(8, '0')}`;
     usedNumbers.add(number);
-    return { actorId: actor.id, number, virtual, favorite: Boolean(old?.favorite) };
+    return { actorId: actor.id, number, virtual, favorite: Boolean(old?.favorite),
+      otherNumbers: [...new Set((Array.isArray(old?.otherNumbers) ? old.otherNumbers : []).map(phoneGameDialNumber).filter(value => value && value !== number))].slice(0, 24) };
   });
   const calls = (Array.isArray(source.calls) ? source.calls : []).filter(call => call && (!call.actorId || actorIds.has(call.actorId))).slice(-80)
     .map(call => ({ id: clean(call.id, 100), actorId: clean(call.actorId, 180), number: phoneGameDialNumber(call.number),
@@ -192,7 +194,11 @@ export function normalizePhoneGameState(raw) {
     origin: clean(source.origin, 7000), tick: integer(source.tick), balance: integer(source.balance), startingFunds: integer(source.startingFunds), earned: integer(source.earned), spent: integer(source.spent),
     ledger: (Array.isArray(source.ledger) ? source.ledger : []).slice(-50).map(item => ({ id: clean(item.id, 100), text: clean(item.text, 160), amount: integer(item.amount, -1000000, 1000000), tick: integer(item.tick) })),
     posts, events, relations, shift, communications: normalizeCommunications(source.communications, actors),
-    actorArchive: Array.isArray(source.actorArchive) ? clone(source.actorArchive) : [] };
+    actorArchive: Array.isArray(source.actorArchive) ? clone(source.actorArchive) : [],
+    contactIdentity: {
+      links: Object.fromEntries(Object.entries(source.contactIdentity?.links || {}).filter(([from, to]) => from.startsWith('world:') && from.length <= 180 && typeof to === 'string' && to.startsWith('card:') && actorIds.has(to)).slice(0, 24)),
+      separate: [...new Set((Array.isArray(source.contactIdentity?.separate) ? source.contactIdentity.separate : []).filter(value => typeof value === 'string' && value.length <= 400))].slice(0, 24),
+    } };
 }
 function reconcileActors(raw, ctx) {
   const source = clone(raw);
@@ -214,6 +220,8 @@ function reconcileActors(raw, ctx) {
   });
   for (const actor of known) {
     if (active.length >= 12) break;
+    const linkedTo = source.contactIdentity?.links?.[actor.id];
+    if (linkedTo && active.some(item => item.id === linkedTo)) continue;
     if (!active.some(item => item.id === actor.id)) active.push(actor);
   }
   return { ...source, actors: active, actorArchive };
@@ -282,6 +290,44 @@ function actorIn(state, actorId) {
   if (!actor) throw new Error('这个角色不在当前手机存档里');
   return actor;
 }
+export function resolvePhoneGameContactIdentity(actorId, samePerson, scope = capturePhoneGameScope()) {
+  requireScope(scope);
+  if (readPhoneGameMode() !== 'game') throw new Error('请回到独立模式后确认联系人。');
+  if (typeof samePerson !== 'boolean') throw new Error('请选择是否为同一位人物。');
+  return commit(scope, state => {
+    const group = phoneGameContactGroups(state).find(item => item.actor.id === actorId && item.members.length === 2);
+    if (!group) throw new Error('联系人已经变化，请返回通讯录重新查看。');
+    const [keep, other] = group.members;
+    if (!samePerson) {
+      state.contactIdentity.separate.push(JSON.stringify([keep.id, other.id]));
+      return;
+    }
+    const left = state.relations[keep.id], right = state.relations[other.id];
+    const contacts = state.communications.contacts;
+    const keptContact = contacts.find(contact => contact.actorId === keep.id);
+    const otherContact = contacts.find(contact => contact.actorId === other.id);
+    const keptDraft = state.communications.drafts[keep.id] || '', otherDraft = state.communications.drafts[other.id] || '';
+    state.actorArchive.push({ reason: 'contact-identity', mergedInto: keep.id, actor: clone(other),
+      events: clone(state.events.filter(event => event.actorId === other.id)), posts: clone(state.posts.filter(post => post.actorId === other.id)),
+      relation: clone(right), contact: clone(otherContact), draft: otherDraft, keptDraft });
+    for (const event of state.events) if (event.actorId === other.id) event.actorId = keep.id;
+    for (const post of state.posts) if (post.actorId === other.id) post.actorId = keep.id;
+    for (const call of state.communications.calls) if (call.actorId === other.id) call.actorId = keep.id;
+    left.affinity = Math.max(left.affinity, right.affinity);
+    left.memory = [...new Set([left.memory, right.memory].filter(Boolean))].join('\n\n');
+    left.preferences = [...new Set([...left.preferences, ...right.preferences])];
+    for (const gift of PHONE_GAME_GIFTS) left.giftCounts[gift.id] += right.giftCounts[gift.id];
+    keptContact.favorite ||= otherContact.favorite;
+    keptContact.otherNumbers = [...new Set([...(keptContact.otherNumbers || []), otherContact.number, ...(otherContact.otherNumbers || [])])];
+    const combinedDraft = [...new Set([keptDraft, otherDraft].filter(Boolean))].join('\n\n');
+    state.communications.drafts[keep.id] = combinedDraft.length <= 1200 ? combinedDraft : keptDraft || otherDraft;
+    delete state.communications.drafts[other.id];
+    state.communications.contacts = contacts.filter(contact => contact.actorId !== other.id);
+    state.actors = state.actors.filter(actor => actor.id !== other.id);
+    delete state.relations[other.id];
+    state.contactIdentity.links[other.id] = keep.id;
+  });
+}
 export function togglePhoneGameContactFavorite(actorId, scope = capturePhoneGameScope()) {
   return commit(scope, state => {
     actorIn(state, actorId);
@@ -302,7 +348,7 @@ export function startPhoneGameCall(number, scope = capturePhoneGameScope()) {
     const dialed = phoneGameDialNumber(number);
     if (!dialed) throw new Error('先输入号码，或选择联系人');
     if (state.communications.calls.some(call => ['dialing', 'connected'].includes(call.outcome))) throw new Error('先挂断当前通话');
-    const matches = state.communications.contacts.filter(contact => contact.number === dialed);
+    const matches = state.communications.contacts.filter(contact => phoneGameContactMatchesNumber(contact, dialed));
     if (matches.length > 1) throw new Error('这个号码对应多个联系人，请检查角色资料里的号码');
     const contact = matches[0];
     const actor = contact ? actorIn(state, contact.actorId) : null;
@@ -389,7 +435,7 @@ export function applyPhoneGameReply(eventId, response, scope = capturePhoneGameS
 export function applyPhoneGamePosts(platform, responses, scope = capturePhoneGameScope()) {
   if (!platforms.includes(platform)) throw new Error('未知平台');
   return commit(scope, state => {
-    const posts = (Array.isArray(responses) ? responses : []).filter(item => item && typeof item.text === 'string' && clean(item.text)
+    const posts = (Array.isArray(responses) ? responses : []).map(item => item && ({ ...item, actorId: state.contactIdentity.links[item.actorId] || item.actorId })).filter(item => item && typeof item.text === 'string' && clean(item.text)
       && (platform === 'weibo' ? normalizeWeiboAuthor(item, state.actors) : state.actors.some(actor => actor.id === item.actorId)));
     if (platform === 'weibo') posts.splice(6);
     if (!posts.length) throw new Error('没有收到有效动态，请重试');
