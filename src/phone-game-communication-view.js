@@ -2,7 +2,7 @@ import { gameIcon } from './phone-game-app-ui.js';
 import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameMode, readPhoneGameState,
   phoneGameDialNumber, phoneGameClock, queuePhoneGameInteraction, startPhoneGameCall, endPhoneGameCall,
-  togglePhoneGameContactFavorite, savePhoneGameSmsDraft,
+  togglePhoneGameContactFavorite, savePhoneGameSmsDraft, phoneGameContactMatchesNumber,
 } from './phone-game.js?v=0.3.0-alpha.28';
 import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 
@@ -61,7 +61,7 @@ export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, 
   function sendSms() {
     action(() => {
       if (ui.busy || isPhoneGameGenerating()) throw new Error('还有一次手机回应进行中，稍等一下。');
-      const state = readPhoneGameState(scope), matches = state.communications.contacts.filter(contact => contact.number === phoneGameDialNumber(ui.number));
+      const state = readPhoneGameState(scope), matches = state.communications.contacts.filter(contact => phoneGameContactMatchesNumber(contact, ui.number));
       if (matches.length > 1) throw new Error('这个号码对应多个联系人，请检查角色资料里的号码；短信未发送，草稿已保留。');
       const contact = matches[0];
       if (!contact) { savePhoneGameSmsDraft('new', ui.draft, scope); throw new Error('这个号码不在当前通讯录中，短信未发送；草稿已保留。'); }
@@ -139,7 +139,7 @@ export function renderPhoneGameCommunicationApp(screen, { app, goHome, openApp, 
     };
     screen.querySelectorAll('[data-gpc-tab]').forEach(button => button.onclick=()=>{ui.tab=button.dataset.gpcTab;ui.error='';paint();});
     screen.querySelector('[data-gpc-keypad]')?.addEventListener('click',()=>{ui.tab='keypad';paint();});
-    screen.querySelector('[data-gpc-number]')?.addEventListener('input',event=>{ui.number=phoneGameDialNumber(event.target.value);if(app==='messages') ui.actorId=state.communications.contacts.find(contact=>contact.number===ui.number)?.actorId || '';});
+    screen.querySelector('[data-gpc-number]')?.addEventListener('input',event=>{ui.number=phoneGameDialNumber(event.target.value);if(app==='messages') ui.actorId=state.communications.contacts.find(contact=>phoneGameContactMatchesNumber(contact,ui.number))?.actorId || '';});
     screen.querySelectorAll('[data-gpc-digit]').forEach(button=>button.onclick=()=>{ui.number=phoneGameDialNumber(ui.number+button.dataset.gpcDigit);paint();});
     screen.querySelector('[data-gpc-erase]')?.addEventListener('click',()=>{ui.number=ui.number.slice(0,-1);paint();});
     screen.querySelector('[data-gpc-clear]')?.addEventListener('click',()=>{ui.number='';paint();});

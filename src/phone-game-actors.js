@@ -118,3 +118,28 @@ export function isPhoneGameScenarioActor(actor, ctx) {
   const card = cards.find((candidate, index) => cardActorId(candidate, ctx, index) === actor.id);
   return card ? isPhoneGameScenarioCard(card) : isPhoneGameScenarioCard({ name: actor.name, description: actor.profile });
 }
+
+// A name proposes a choice; it never establishes identity or moves records.
+export function phoneGameContactGroups(state) {
+  const actors = state.actors || [], separated = new Set(state.contactIdentity?.separate || []);
+  const byName = new Map(), paired = new Map();
+  for (const actor of actors) {
+    const name = clean(actor.name).toLocaleLowerCase();
+    if (!byName.has(name)) byName.set(name, []);
+    byName.get(name).push(actor);
+  }
+  for (const sameName of byName.values()) {
+    if (sameName.length !== 2) continue;
+    const card = sameName.find(actor => actor.id.startsWith('card:'));
+    const world = sameName.find(actor => actor.id.startsWith('world:'));
+    if (!card || !world || separated.has(JSON.stringify([card.id, world.id]))) continue;
+    paired.set(card.id, { actor: card, members: [card, world] });
+    paired.set(world.id, paired.get(card.id));
+  }
+  const seen = new Set();
+  return actors.flatMap(actor => {
+    const group = paired.get(actor.id) || { actor, members: [actor] };
+    if (seen.has(group.actor.id)) return [];
+    seen.add(group.actor.id); return [group];
+  });
+}

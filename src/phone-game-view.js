@@ -7,6 +7,7 @@ import {
   capturePhoneGameScope, isPhoneGameScopeCurrent, readPhoneGameState, readPhoneGameMode,
   queuePhoneGameInteraction, togglePhoneGameLike, startPhoneGameShift, servePhoneGameCoffee,
   phoneGameClock, phoneGameRelationLabel, phoneGameEventExport, phoneGameActorPronoun, phoneGameEventDisplayText, PHONE_GAME_GIFTS, PHONE_GAME_RECIPES,
+  phoneGameContactGroups, resolvePhoneGameContactIdentity,
 } from './phone-game.js?v=0.3.0-alpha.28';
 import { generatePhoneGameContent, isPhoneGameGenerating, phoneGameGenerationStatus, subscribePhoneGameGeneration, cancelPhoneGameGeneration } from './phone-game-ai.js?v=0.3.0-alpha.28';
 import { phonePostImageStatus, subscribePhonePostImages, generatePhonePostImage, cancelPhonePostImage } from './phone-post-images.js';
@@ -120,9 +121,9 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '',
     }
     if (ui.tab === 'moments') return ui.discoveryView === 'moments' ? wrapWechatMoments(feed(state, 'moments')) : renderWechatDiscovery();
     if (ui.tab === 'relations') return renderWechatContacts(state, ui);
-    return `<form class="echo-wx-search" data-pg-search><input data-pg-query aria-label="搜索联系人" placeholder="搜索" value="${esc(ui.query)}"><button type="submit">搜索</button></form><div class="wpg-chat-list">${state.actors.filter(actor=>!ui.query || actor.name.includes(ui.query)).map(actor => {
-      const last = state.events.filter(event => event.actorId === actor.id && !['sms', 'call'].includes(event.kind)).at(-1);
-      return `<button type="button" data-pg-chat="${esc(actor.id)}">${avatar(actor.name)}<span><b>${esc(actor.name)}</b><small>${esc(last ? last.status === 'pending' ? '等待回应 · 可重试' : last.reply : `开始聊聊${phoneGameActorPronoun(actor)}的生活`)}</small></span><i>›</i></button>`;
+    return `<form class="echo-wx-search" data-pg-search><input data-pg-query aria-label="搜索联系人" placeholder="搜索" value="${esc(ui.query)}"><button type="submit">搜索</button></form><div class="wpg-chat-list">${phoneGameContactGroups(state).filter(({actor})=>!ui.query || actor.name.includes(ui.query)).map(({actor, members}) => {
+      const last = state.events.filter(event => members.some(item => item.id === event.actorId) && !['sms', 'call'].includes(event.kind)).at(-1);
+      return `<button type="button" ${members.length === 2 ? 'data-pg-contact-identity' : 'data-pg-chat'}="${esc(actor.id)}">${avatar(actor.name)}<span><b>${esc(actor.name)}</b><small>${esc(members.length === 2 ? '同名来源 · 点击确认身份' : last ? last.status === 'pending' ? '等待回应 · 可重试' : last.reply : `开始聊聊${phoneGameActorPronoun(actor)}的生活`)}</small></span><i>›</i></button>`;
     }).join('') || '<div class="echo-feed-empty"><b>还没有聊天</b><p>打开一位人物的聊天后，对方会出现在这里。</p></div>'}</div>`;
   }
   function giftShop(state) {
@@ -235,6 +236,15 @@ export function renderPhoneGameApp(screen, { app, goHome, openApp, actorId = '',
       : openApp('wechat', { actorId: button.dataset.pgChat }));
     screen.querySelector('[data-pg-chats]')?.addEventListener('click', () => { ui.actorId = ''; ui.draft = ''; paint(); });
     screen.querySelectorAll('[data-pg-contact]').forEach(button => button.onclick = () => { ui.contactId = button.dataset.pgContact; paint(); });
+    screen.querySelectorAll('[data-pg-contact-identity]').forEach(button => button.onclick = () => { ui.tab = 'relations'; ui.actorId = ''; ui.contactId = button.dataset.pgContactIdentity; paint(); });
+    screen.querySelectorAll('[data-pg-identity-choice]').forEach(button => button.onclick = () => {
+      if (ui.busy) return;
+      action(() => {
+        const same = button.dataset.pgIdentityChoice === 'same';
+        resolvePhoneGameContactIdentity(button.dataset.pgIdentityActor, same, scope);
+        ui.contactId = same ? button.dataset.pgIdentityActor : '';
+      });
+    });
     screen.querySelector('[data-pg-contact-back]')?.addEventListener('click', () => { ui.contactId = ''; paint(); });
     screen.querySelector('[data-pg-open-moments]')?.addEventListener('click', () => { ui.discoveryView = 'moments'; paint(); });
     screen.querySelector('[data-pg-discovery-back]')?.addEventListener('click', () => { ui.discoveryView = ''; ui.postId = ''; paint(); });

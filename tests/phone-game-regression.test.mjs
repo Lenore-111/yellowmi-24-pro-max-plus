@@ -51,10 +51,10 @@ function createHarness(sources) {
     ...clock, console:{warn(){},info(){},error(){}}, SillyTavern:{getContext:()=>ctx},crypto:{randomUUID:()=> 'id-' + ++nextId},
     localStorage:{getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)},
   };
-  const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor']);
+  const actors = moduleFrom(sources['src/phone-game-actors.js'], {}, ['collectPhoneGameActors','inferPhoneGamePronoun','phoneGameActorPronoun','isPhoneGameScenarioActor','phoneGameContactGroups']);
   const game = moduleFrom(sources['src/phone-game.js'], {globalThis:globals,phoneImagePath,DELIVERY_COLA:{id:'cola',name:'可乐',price:18},readWorldBackstage:()=>({contacts:[]}),...actors,...weiboOpinion},
     ['PHONE_GAME_KEY','capturePhoneGameScope','isPhoneGameScopeCurrent','readPhoneGameMode','setPhoneGameMode','readPhoneGameState','applyPhoneGameReply','applyPhoneGamePosts','PHONE_GAME_GIFTS',
-     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft']);
+     'queuePhoneGameInteraction','togglePhoneGameLike','startPhoneGameShift','servePhoneGameCoffee','phoneGameClock','phoneGameRelationLabel','phoneGameEventExport','phoneGameActorPronoun','phoneGameEventDisplayText','PHONE_GAME_RECIPES','subscribePhoneGameModeChange','startPhoneGameCall','endPhoneGameCall','flushPhoneGameMetadata','savePhoneGameSmsDraft','resolvePhoneGameContactIdentity','phoneGameContactGroups']);
   const tavern = {is_send_press:false}, groupChats = {is_group_generating:false};
   const ai = moduleFrom(sources['src/phone-game-ai.js'], {globalThis:globals,console:globals.console,tavern,groupChats,parsePhoneGameResponse,readPhoneImageSettings:()=>({}),readWeiboWorldbook:async()=>({entries:[],unavailableBooks:[],signature:'test'}),weiboWorldbookSignature:()=> 'test',...game,...weiboContext},
     ['generatePhoneGameContent','isPhoneGameGenerating','phoneGameGenerationStatus','subscribePhoneGameGeneration','cancelPhoneGameGeneration','PHONE_GAME_GENERATION_TIMEOUT_MS','isMainGenerationActive']);
