@@ -87,7 +87,7 @@ function initWorldPhone() {
   ensureExternalStyle('echo-app-ui-restoration-style', './app-ui-restoration.css?build=echo-ui-1');
   ensureExternalStyle('echo-social-ui-realism-v2-style', './social-ui-realism-v2.css?build=echo-social-ui-v2');
   ensureExternalStyle('echo-social-ui-realism-v3-style', './social-ui-realism-v3.css?build=echo-social-ui-v3');
-  ensureExternalStyle('echo-social-feed-updates-style', './social-feed-updates.css?v=1');
+  ensureExternalStyle('echo-social-feed-updates-style', './social-feed-updates.css?v=shared-ui-2');
   phone = mountWorldPhone();
   unmountAcceptanceGuards = mountPhoneAcceptanceGuards({ phone });
   unmountShellLayout = mountShellLayout({ phone });

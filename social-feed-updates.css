@@ -31,3 +31,23 @@
 #world-phone-stage .is-rednote .wp-rn-cover.is-text-note > span { font-size:9px; letter-spacing:.12em; color:#7c8884; }
 #world-phone-stage .is-rednote .wp-rn-cover.is-text-note > b { margin-top:15px; font-size:19px; line-height:1.4; color:#3e5350; }
 #world-phone-stage .is-rednote .wp-rn-cover.is-text-note > p { margin:10px 0 0; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; font-size:11px; line-height:1.8; color:#6c7a76; }
+
+/* Independent feeds share the linked feed layout, with their own controls/state. */
+#world-phone-stage .wp-independent-social > .wp-app-header { position:relative; inset:auto; width:auto; z-index:18; display:grid; grid-template-columns:42px minmax(0,1fr) auto; min-height:56px; padding:0 10px; pointer-events:auto; }
+#world-phone-stage .wp-independent-social > .wp-independent-main { display:flex; flex:1 1 auto; flex-direction:column; min-height:0; padding:0; overflow:hidden; background:#fff; }
+#world-phone-stage .wp-independent-social > .wp-independent-main > .wp-social-shell { min-height:0; flex:1 1 auto; }
+#world-phone-stage .wp-independent-social > .wp-independent-main > .wpg-error,
+#world-phone-stage .wp-independent-social > .wp-independent-main > .wpg-info,
+#world-phone-stage .wp-independent-social > .wp-independent-main > .wpg-generating { flex:0 0 auto; margin:0; max-height:100px; overflow-y:auto; }
+#world-phone-stage .wp-independent-feed-tools { display:flex; align-items:center; gap:5px; min-width:0; }
+#world-phone-stage .wp-independent-social > .wp-app-header .wp-independent-feed-tools > button { width:auto; flex:0 0 auto; min-width:64px; min-height:36px; padding:0 5px; border:0; background:transparent; color:#e46e32; white-space:nowrap; font-size:11px; }
+#world-phone-stage .wp-independent-feed-settings { position:relative; }
+#world-phone-stage .wp-independent-feed-settings summary { list-style:none; padding:9px 4px; font-size:14px; cursor:pointer; }
+#world-phone-stage .wp-independent-feed-settings summary::-webkit-details-marker { display:none; }
+#world-phone-stage .wp-independent-feed-settings > label { position:absolute; top:100%; right:0; z-index:25; display:flex; align-items:center; gap:6px; width:196px; padding:12px; border:1px solid #eee; border-radius:12px; box-shadow:0 5px 18px #0001; background:#fff; color:#555; white-space:nowrap; font-size:12px; }
+#world-phone-stage .wp-independent-feed-settings input { width:62px; min-width:0; min-height:34px; padding:5px; border:1px solid #ddd; border-radius:5px; background:#fff; color:#333; font-size:12px; }
+#world-phone-stage .wp-independent-social .wp-independent-comments { margin-top:10px; }
+#world-phone-stage .wp-independent-social .echo-rn-comment-compose { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:10px; }
+#world-phone-stage .wp-independent-social .echo-rn-comment-compose textarea { min-height:42px; min-width:0; width:100%; border:1px solid #eee; border-radius:18px; padding:10px 12px; background:#fafafa; color:#333; }
+#world-phone-stage .wp-independent-social .echo-rn-comment-compose button { border:0; border-radius:18px; padding:8px 14px; background:#ff2442; color:#fff; }
+#world-phone-stage .wp-independent-social .wp-wb-main img { max-width:100%; }
