@@ -9,6 +9,8 @@ import { renderCasinoApp } from './casino-app.js';
 import { renderWalletApp } from './wallet-app.js';
 import { renderMusicApp } from './music-app.js';
 import { renderPocketGame } from './pocket-game.js?v=0.3.0-alpha.28';
+import { renderEchoFarm } from './echo-farm-app.js?v=farm-map-1';
+import { FARM_APP_ICON } from './echo-farm-art.js';
 import { renderDeliveryApp } from './lingqi-delivery.js';
 import { readPhoneGameMode, setPhoneGameMode, capturePhoneGameScope, subscribePhoneGameModeChange } from './phone-game.js?v=0.3.0-alpha.28';
 import { renderPhoneGameApp } from './phone-game-view.js?v=0.3.0-alpha.28';
@@ -35,6 +37,7 @@ const HOME_APP_DEFS = {
   music: ['♫', '音乐', 'is-music'],
   casino: ['♠', 'Echo 赌场', 'is-casino'],
   puzzle: ['2048', '数字花园', 'is-puzzle'],
+  farm: ['苗', 'Echo 农场', 'is-farm'],
   settings: ['⚙', '设置', 'is-settings'],
   phone: ['☎', '电话', 'is-phone'],
   messages: ['●', '短信', 'is-messages'],
@@ -110,7 +113,9 @@ function makeApp(id, icon, label, tone = '') {
 
 function makeHomeApp(id) {
   const def = HOME_APP_DEFS[id];
-  return def ? makeApp(id, def[0], def[1], def[2]) : null;
+  const app = def ? makeApp(id, def[0], def[1], def[2]) : null;
+  if (id === 'farm' && app) app.querySelector('.wp-app-icon').innerHTML = FARM_APP_ICON;
+  return app;
 }
 
 function renderLock(screen, snapshot, unlock) {
@@ -807,6 +812,7 @@ export function mountWorldPhone() {
     else if (app === 'wechat') repaintWechat();
     else if (app === 'news') renderNews(screen, snapshot, showHome, shareNews);
     else if (app === 'puzzle') renderPocketGame(screen, { goHome: showHome });
+    else if (app === 'farm') disposeApp = renderEchoFarm(screen, { goHome: showHome });
     else if (app === 'wallet') renderWalletApp(screen, { goHome: showHome });
     else if (app === 'delivery') renderDeliveryApp(screen, { goHome: showHome });
     else if (app === 'casino') renderCasinoApp(screen, { goHome: showHome });

@@ -1,0 +1,164 @@
+{
+  "checks": [
+    "酒馆自身加载扩展入口",
+    "实际角色聊天已打开",
+    "服务文件与固定候选一致：manifest.json",
+    "服务文件与固定候选一致：index.js",
+    "服务文件与固定候选一致：src/world-phone.js",
+    "服务文件与固定候选一致：src/home-layout.js",
+    "服务文件与固定候选一致：src/custom-phone-themes.js",
+    "服务文件与固定候选一致：src/echo-farm.js",
+    "服务文件与固定候选一致：src/echo-farm-app.js",
+    "服务文件与固定候选一致：src/echo-farm-art.js",
+    "服务文件与固定候选一致：src/echo-farm-map-art.js",
+    "服务文件与固定候选一致：echo-farm.css",
+    "旧入口打开新版地图和16块田地",
+    "390像素底栏按钮没有被手机手势区域遮挡",
+    "鼠标拖动地图不误播种",
+    "回到田地可用",
+    "原生触屏拖动有效且不播种",
+    "一键播种保留原来的16颗种子",
+    "商店扣款后补充16袋肥料",
+    "施肥和倒计时使地图作物成熟",
+    "旧收获按钮不重复发钱",
+    "鸡羊牛均已到家，喂养只消耗3份饲料",
+    "先只收鸡蛋",
+    "再收羊毛牛奶，总收入不多算",
+    "种植养殖不改世界记录或手机钱包",
+    "缩放保留地图中心",
+    "320像素根界面无横向溢出",
+    "320像素底栏按钮没有被手机手势区域遮挡",
+    "商店关闭按钮可见",
+    "Esc可退出商店且不会同时关闭手机",
+    "离开农场后旧控件不写存档",
+    "离线生长恢复16块成熟南瓜",
+    "切换手机模式仍使用同一农场存档",
+    "酒馆自身加载扩展入口",
+    "整页刷新恢复金币、动物和旧农田进度",
+    "保存失败提示错误并保留原账目",
+    "没有页面脚本错误或丢失资源",
+    "没有发起模型生成请求",
+    "停用扩展清理手机入口"
+  ],
+  "pageErrors": [],
+  "missing": [],
+  "apiRequests": [],
+  "apiRequestsScope": "Model generation endpoints; all host API paths are recorded separately in hostRequests",
+  "hostRequests": [
+    "/api/secrets/read",
+    "/api/settings/get",
+    "/api/extensions/discover",
+    "/api/sd/comfy/workflows",
+    "/api/settings/get",
+    "/api/quick-replies/save",
+    "/api/avatars/get",
+    "/api/characters/all",
+    "/api/settings/save",
+    "/api/groups/all",
+    "/api/backgrounds/all",
+    "/api/backgrounds/folders",
+    "/api/image-metadata/all",
+    "/api/chats/recent",
+    "/api/chats/get",
+    "/api/worldinfo/get",
+    "/api/sprites/get",
+    "/api/avatars/get",
+    "/api/tokenizers/openai/count",
+    "/api/quick-replies/save",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/settings/save",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/tokenizers/openai/count",
+    "/api/settings/save",
+    "/api/chats/save",
+    "/api/secrets/read",
+    "/api/settings/get",
+    "/api/extensions/discover",
+    "/api/sd/comfy/workflows",
+    "/api/settings/get",
+    "/api/quick-replies/save",
+    "/api/avatars/get",
+    "/api/characters/all",
+    "/api/groups/all",
+    "/api/backgrounds/all",
+    "/api/backgrounds/folders",
+    "/api/image-metadata/all",
+    "/api/chats/recent",
+    "/api/settings/save"
+  ],
+  "servedFiles": [
+    {
+      "path": "manifest.json",
+      "sha256": "e615b9210f5a264eab56f69c429c7a8ba8951df8c369dcd15dec5ae502609758"
+    },
+    {
+      "path": "index.js",
+      "sha256": "28e98721a16278a78457fc1cfd13a7e85b07069b2bd0c7b1ba2b6b5d56ceb51b"
+    },
+    {
+      "path": "src/world-phone.js",
+      "sha256": "b698a7e2d837948a0ee7d50a2f634c958592a1a58b04dea63369584272c4e264"
+    },
+    {
+      "path": "src/home-layout.js",
+      "sha256": "52faea7ff22e49041a70f8621761231a986d0becfc059ce344fc293be803c4c6"
+    },
+    {
+      "path": "src/custom-phone-themes.js",
+      "sha256": "dd9b4ea78d90a9bfb508bdc4a52e733f41789a5b08b3f6f1bf0d5e568d617592"
+    },
+    {
+      "path": "src/echo-farm.js",
+      "sha256": "a7e5250ad984309635e4f79d867ff51b45c4b597e7111ff7a9a87a846a126f65"
+    },
+    {
+      "path": "src/echo-farm-app.js",
+      "sha256": "f55ee0644196659548cf23297a7327de93334e5cabbe555501203bee0e27b66c"
+    },
+    {
+      "path": "src/echo-farm-art.js",
+      "sha256": "0379d04a58358c82119d6c1ea885baef63c119bc25eaff3bbe633166cb25823e"
+    },
+    {
+      "path": "src/echo-farm-map-art.js",
+      "sha256": "1c9fea3af90600436e0cfa50e84b1f8b7ccc362fe6c621d7a1c8fb9ab8548d3e"
+    },
+    {
+      "path": "echo-farm.css",
+      "sha256": "7cb191fc3116ce803e4689fe5c86077602ea5346a4926795bce67575f7041907"
+    }
+  ],
+  "scope": "Real local SillyTavern service and its extension loader",
+  "passed": true,
+  "candidateAppCommit": "5e57e28cd45c7caedf915f8a4419b1a8d685a543",
+  "sillytavern": {
+    "version": "1.18.0",
+    "commit": "51ad27fb86d39a3daca3adaa970375c9670c12df"
+  },
+  "browser": "Chromium 153.0.8010.0",
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 320,
+      "height": 700
+    }
+  ],
+  "test_script_sha256": "c8d685a01265c7b42653ed8f2aafb1887e5c55d5e942b55e0477f5b030305993",
+  "testData": "Isolated default-user data and fresh browser session; built-in test character, no user chats or secrets",
+  "limitations": [
+    "No physical Android device",
+    "World Backstage not installed; its internal phoneAction integration was not tested",
+    "No online model generation"
+  ]
+}
