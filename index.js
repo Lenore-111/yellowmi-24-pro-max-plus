@@ -61,6 +61,7 @@ function initWorldPhone() {
   ensureExternalStyle('world-phone-casino-motion-style', './casino-motion.css?build=casino-motion-v3');
   ensureExternalStyle('world-phone-wallet-style', './wallet.css?build=wallet-v1');
   ensureExternalStyle('world-phone-game-style', './phone-game.css?build=phone-game-v5');
+  ensureExternalStyle('echo-farm-style', './echo-farm.css?v=farm-map-1');
   ensureExternalStyle('world-phone-weibo-opinion-style', './weibo-opinion.css?build=weibo-opinion-v1');
   ensureExternalStyle('world-phone-music-style', './music.css?build=music-v1');
   ensureExternalStyle('world-phone-app-store-style', './app-store.css?build=store-v1');

@@ -20,6 +20,10 @@ jobs:
         run: node --import ./scripts/test-host-register.mjs --test tests/*.test.mjs
       - name: Syntax checks for changed integration paths
         run: |
+          node --check src/echo-farm.js
+          node --check src/echo-farm-app.js
+          node --check src/echo-farm-art.js
+          node --check src/echo-farm-map-art.js
           node --check src/world-backstage-bridge.js
           node --check src/social-tools.js
           node --check src/social-realism.js

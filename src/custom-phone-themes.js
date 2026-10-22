@@ -7,7 +7,7 @@ const IMAGE_LIMIT = 20 * 1024 * 1024;
 export const SKIN_APPS = [
  ['wechat','微信'],['news','世界新闻'],['wallet','钱包'],['delivery','Echo快送'],
  ['gallery','相册'],['music','音乐'],['casino','Echo 赌场'],['puzzle','数字花园'],
- ['settings','设置'],['appstore','应用商店'],['werewolf-local','狼人杀'],
+ ['settings','设置'],['farm','Echo 农场'],['appstore','应用商店'],['werewolf-local','狼人杀'],
  ['weibo','微博'],['rednote','小红书'],['phone','电话'],['messages','短信'],
  ['browser','浏览器'],['backstage','世界背面'],
 ];

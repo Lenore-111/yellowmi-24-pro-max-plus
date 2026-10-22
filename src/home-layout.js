@@ -11,6 +11,7 @@ export const DEFAULT_HOME_LAYOUT = Object.freeze({
     'music',
     'casino',
     'puzzle',
+    'farm',
     'settings',
   ]),
   dock: Object.freeze([
